@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-asphalte text-blanc font-sans antialiased;
+}
+
+::selection { @apply bg-ambre text-asphalte; }
+
+.h-display { @apply font-condensed font-bold uppercase leading-none tracking-tight; }
+.eyebrow { @apply inline-block font-mono text-xs uppercase tracking-[0.14em] bg-ambre text-asphalte font-semibold px-2.5 py-1 rounded-sm; }
+.card { @apply bg-asphalte-2 border border-ligne rounded p-6; }
+.btn { @apply inline-flex items-center justify-center gap-2 text-sm font-semibold px-6 py-3 rounded-sm transition; }
+.btn-primary { @apply btn bg-ambre text-asphalte hover:-translate-y-px; }
+.btn-ghost { @apply btn border border-ligne-strong text-blanc hover:border-blanc-dim; }
+.input { @apply w-full bg-asphalte border border-ligne-strong rounded-sm px-3.5 py-3 text-sm text-blanc placeholder:text-blanc-faint focus:outline-none focus:border-ambre; }
+.label { @apply block font-mono text-[11px] uppercase tracking-wider text-blanc-faint mb-2; }
+.tag { @apply font-mono text-[10.5px] uppercase tracking-wide font-semibold px-2 py-1 rounded-sm; }
+.tag-devis { @apply tag bg-bleunuit text-[#9DB3DE]; }
+.tag-enchere { @apply tag bg-vert-dim text-vert; }
