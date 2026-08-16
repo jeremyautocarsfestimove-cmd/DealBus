@@ -3,6 +3,7 @@
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Nav } from "@/components/Nav";
+import { AddressInput } from "@/components/AddressInput";
 import { createClient } from "@/lib/supabase/client";
 import type { DemandeMode } from "@/lib/types";
 
@@ -22,11 +23,12 @@ function DemandeWizard() {
   const [authMode, setAuthMode] = useState<"signup" | "login">("signup");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [nomClient, setNomClient] = useState("");
 
   const [form, setForm] = useState({
     type_trajet: params.get("type") ?? "aller_retour",
     depart_adresse: params.get("de") ?? "",
-    depart_departement: "",
+    depart_departement: params.get("dept") ?? "",
     arrivee_adresse: params.get("vers") ?? "",
     date_aller: params.get("date_aller") ?? "",
     heure_aller: params.get("heure_aller") ?? "",
@@ -48,7 +50,11 @@ function DemandeWizard() {
 
   async function insertDemande(userId: string) {
     // Le profil doit exister (FK demandes.client_id → profiles.id)
-    await supabase.from("profiles").upsert({ id: userId, role: "client" });
+    await supabase.from("profiles").upsert({
+      id: userId,
+      role: "client",
+      ...(nomClient.trim() && { nom: nomClient.trim() }),
+    });
 
     const { error: err } = await supabase.from("demandes").insert({
       client_id: userId,
@@ -159,22 +165,29 @@ function DemandeWizard() {
                   </button>
                 ))}
               </div>
-              <div className="grid sm:grid-cols-2 gap-4">
+              <div className="grid sm:grid-cols-[1fr_120px] gap-4">
                 <div>
                   <label className="label">De</label>
-                  <input className="input" placeholder="Adresse, ville ou lieu"
-                    value={form.depart_adresse} onChange={(e) => set("depart_adresse", e.target.value)} />
+                  <AddressInput
+                    value={form.depart_adresse}
+                    onChange={(v) => set("depart_adresse", v)}
+                    onSelect={(s) => { set("depart_adresse", s.label); set("depart_departement", s.dept); }}
+                  />
                 </div>
                 <div>
-                  <label className="label">Département de départ</label>
-                  <input className="input" placeholder="Ex. 78" maxLength={3}
+                  <label className="label">Dépt. (auto)</label>
+                  <input className="input font-mono" placeholder="—" maxLength={3}
                     value={form.depart_departement} onChange={(e) => set("depart_departement", e.target.value)} />
                 </div>
               </div>
               <div>
                 <label className="label">Vers</label>
-                <input className="input" placeholder="Destination"
-                  value={form.arrivee_adresse} onChange={(e) => set("arrivee_adresse", e.target.value)} />
+                <AddressInput
+                  value={form.arrivee_adresse}
+                  onChange={(v) => set("arrivee_adresse", v)}
+                  placeholder="Destination (France ou étranger)"
+                  mode="international"
+                />
               </div>
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
@@ -296,6 +309,13 @@ function DemandeWizard() {
               Votre demande est prête — il ne manque qu&apos;un accès pour suivre vos offres.
               Votre email n&apos;est jamais transmis aux transporteurs.
             </p>
+            {authMode === "signup" && (
+              <div className="mb-4">
+                <label className="label">Prénom et nom</label>
+                <input className="input" placeholder="Ex. Jeremy Peloso"
+                  value={nomClient} onChange={(e) => setNomClient(e.target.value)} />
+              </div>
+            )}
             <div className="grid sm:grid-cols-2 gap-4 mb-4">
               <div>
                 <label className="label">Email</label>

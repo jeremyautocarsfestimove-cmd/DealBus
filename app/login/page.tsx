@@ -12,6 +12,7 @@ function LoginForm() {
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [nom, setNom] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -39,7 +40,11 @@ function LoginForm() {
         setSaving(false);
         return;
       }
-      await supabase.from("profiles").upsert({ id: data.session.user.id, role: "client" });
+      await supabase.from("profiles").upsert({
+        id: data.session.user.id,
+        role: "client",
+        ...(nom.trim() && { nom: nom.trim() }),
+      });
       router.push(next);
       return;
     }
@@ -51,6 +56,13 @@ function LoginForm() {
 
   return (
     <div className="card max-w-md mx-auto">
+      {mode === "signup" && (
+        <div>
+          <label className="label">Prénom et nom</label>
+          <input className="input mb-4" placeholder="Ex. Jeremy Peloso"
+            value={nom} onChange={(e) => setNom(e.target.value)} />
+        </div>
+      )}
       <div>
         <label className="label">Email</label>
         <input className="input mb-4" type="email" placeholder="vous@exemple.fr"

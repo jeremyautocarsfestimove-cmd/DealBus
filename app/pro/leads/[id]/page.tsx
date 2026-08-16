@@ -35,7 +35,7 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
     <>
       <Nav />
       <main className="max-w-2xl mx-auto px-7 py-14">
-        <p className="eyebrow mb-4" style={{ color: "#34B37A" }}>
+        <p className="eyebrow mb-4">
           Demande #{d.numero} · Client anonyme
         </p>
         <h1 className="h-display text-4xl mb-2">

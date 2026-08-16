@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { AddressInput } from "./AddressInput";
 
 const TYPES = [
   { id: "aller_retour", label: "Aller-retour" },
@@ -21,6 +22,7 @@ export function QuickDemandeForm() {
     heure_retour: "",
     passagers: "",
     message: "",
+    dept: "",
   });
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
@@ -49,13 +51,20 @@ export function QuickDemandeForm() {
       <div className="grid sm:grid-cols-2 gap-4 mb-4">
         <div>
           <label className="label">De</label>
-          <input className="input" placeholder="Adresse, ville ou lieu"
-            value={form.de} onChange={(e) => set("de", e.target.value)} />
+          <AddressInput
+            value={form.de}
+            onChange={(v) => set("de", v)}
+            onSelect={(s) => { set("de", s.label); set("dept", s.dept); }}
+          />
         </div>
         <div>
           <label className="label">Vers</label>
-          <input className="input" placeholder="Destination"
-            value={form.vers} onChange={(e) => set("vers", e.target.value)} />
+          <AddressInput
+            value={form.vers}
+            onChange={(v) => set("vers", v)}
+            placeholder="Destination (France ou étranger)"
+            mode="international"
+          />
         </div>
       </div>
 

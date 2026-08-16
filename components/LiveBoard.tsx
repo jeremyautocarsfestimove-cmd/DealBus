@@ -1,18 +1,27 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 type PoolItem = {
   route: string;
   pax: number;
   mode: "devis" | "enchere";
-  depart?: number;    // prix de départ d'enchère
-  plancher?: number;  // prix minimum
+  depart?: number;
+  plancher?: number;
 };
 
-type Row = PoolItem & { key: string; prix?: number; offres?: number };
+type Row = {
+  key: string;
+  mode: "devis" | "enchere" | "retour";
+  route: string;
+  pax: number;
+  valeur: string;
+  reel: boolean;
+};
 
-// Pool de trajets factices — remplacé par les vraies demandes (Supabase realtime) dès qu'il y en aura
+// Pool de complément — utilisé uniquement pour remplir les lignes
+// restantes tant qu'il n'y a pas assez d'activité réelle.
 const POOL: PoolItem[] = [
   { route: "Paris → Lyon", pax: 50, mode: "enchere", depart: 1980, plancher: 1740 },
   { route: "Nantes → La Rochelle", pax: 22, mode: "devis" },
@@ -32,10 +41,11 @@ const POOL: PoolItem[] = [
 ];
 
 const MAX_ROWS = 5;
-const FENETRE_MS = 2 * 3600 * 1000; // fenêtre d'enchère : 2h, alignée sur l'horloge
-const BUCKET_MS = 10 * 1000;        // granularité des baisses : 10 s
+const FENETRE_MS = 2 * 3600 * 1000;
+const BUCKET_MS = 10 * 1000;
+const REFRESH_REEL_MS = 45 * 1000; // refetch des vraies données
 
-// --- PRNG déterministe (seed → suite pseudo-aléatoire reproductible) ---
+// --- PRNG déterministe (lignes de complément refresh-proof) ---
 function hash(s: string): number {
   let h = 1779033703 ^ s.length;
   for (let i = 0; i < s.length; i++) {
@@ -53,25 +63,17 @@ function mulberry32(a: number) {
   };
 }
 
-function pickRows(now: number): (PoolItem & { key: string })[] {
+function pickFake(now: number, exclude: number): PoolItem[] {
   const block = Math.floor(now / FENETRE_MS);
   const rng = mulberry32(hash(`bloc-${block}`));
   const indices = POOL.map((_, i) => i)
     .map((i) => ({ i, k: rng() }))
     .sort((a, b) => a.k - b.k)
     .map(({ i }) => i);
-
-  const chosen = indices.slice(0, MAX_ROWS);
-  const quart = Math.floor((now % FENETRE_MS) / (30 * 60 * 1000)); // 0..3
-  for (let q = 1; q <= quart; q++) {
-    const rngQ = mulberry32(hash(`bloc-${block}-q${q}`));
-    const remplacant = indices[MAX_ROWS + ((q - 1) % (indices.length - MAX_ROWS))];
-    chosen[Math.floor(rngQ() * MAX_ROWS)] = remplacant;
-  }
-  return chosen.map((i) => ({ ...POOL[i], key: `${block}-${POOL[i].route}` }));
+  return indices.slice(0, Math.max(0, MAX_ROWS - exclude)).map((i) => POOL[i]);
 }
 
-function prixEnchere(item: PoolItem, now: number): number {
+function prixEnchereFake(item: PoolItem, now: number): number {
   const block = Math.floor(now / FENETRE_MS);
   const debut = block * FENETRE_MS;
   const buckets = Math.floor((now - debut) / BUCKET_MS);
@@ -79,14 +81,14 @@ function prixEnchere(item: PoolItem, now: number): number {
   let prix = item.depart!;
   for (let b = 0; b < buckets; b++) {
     const p = rng();
-    const montant = 3 + Math.floor(rng() * 10); // 3–12 €
+    const montant = 3 + Math.floor(rng() * 10);
     if (p < 0.05) prix = Math.max(item.plancher!, prix - montant);
     if (prix <= item.plancher!) break;
   }
   return prix;
 }
 
-function nbOffres(item: PoolItem, now: number): number {
+function nbOffresFake(item: PoolItem, now: number): number {
   const block = Math.floor(now / FENETRE_MS);
   const debut = block * FENETRE_MS;
   const rng = mulberry32(hash(`offres-${item.route}-${block}`));
@@ -100,24 +102,91 @@ function nbOffres(item: PoolItem, now: number): number {
   return Math.min(count, 6);
 }
 
-export function LiveBoard() {
-  const [rows, setRows] = useState<Row[] | null>(null);
+// Adresse → ville (protège l'adresse précise du client sur cet affichage public)
+function ville(adresse: string): string {
+  const m = adresse.match(/\d{5}\s+(.+)$/);          // "8 Rue X 78270 Limetz-Villez" → "Limetz-Villez"
+  if (m) return m[1];
+  return adresse.length > 26 ? adresse.slice(0, 24) + "…" : adresse;
+}
 
+const eur = (n: number) => Number(n).toLocaleString("fr-FR") + " €";
+
+export function LiveBoard() {
+  const [reelles, setReelles] = useState<Row[]>([]);
+  const [tick, setTick] = useState(0);
+  const [loaded, setLoaded] = useState(false);
+
+  // Vraies données : demandes ouvertes + retours à vide publiés
   useEffect(() => {
-    function compute() {
-      const now = Date.now();
-      setRows(
-        pickRows(now).map((r) => ({
-          ...r,
-          prix: r.mode === "enchere" ? prixEnchere(r, now) : undefined,
-          offres: r.mode === "devis" ? nbOffres(r, now) : undefined,
-        }))
-      );
+    const supabase = createClient();
+    let active = true;
+
+    async function fetchReel() {
+      const [{ data: demandes }, { data: retours }] = await Promise.all([
+        supabase.from("demandes_en_direct")
+          .select("*").order("created_at", { ascending: false }).limit(MAX_ROWS),
+        supabase.from("retours_vide")
+          .select("id, depart_adresse, arrivee_adresse, places, prix_fixe, created_at")
+          .in("statut", ["publie", "demande_recue"])
+          .order("created_at", { ascending: false }).limit(MAX_ROWS),
+      ]);
+      if (!active) return;
+
+      /* eslint-disable @typescript-eslint/no-explicit-any */
+      const rows: (Row & { created_at: string })[] = [
+        ...(retours ?? []).map((r: any) => ({
+          key: `retour-${r.id}`,
+          mode: "retour" as const,
+          route: `${ville(r.depart_adresse)} → ${ville(r.arrivee_adresse)}`,
+          pax: r.places,
+          valeur: eur(r.prix_fixe),
+          reel: true,
+          created_at: r.created_at,
+        })),
+        ...(demandes ?? []).map((d: any) => ({
+          key: `demande-${d.id}`,
+          mode: d.mode as "devis" | "enchere",
+          route: `${ville(d.depart_adresse)} → ${ville(d.arrivee_adresse)}`,
+          pax: d.passagers,
+          valeur: d.mode === "enchere"
+            ? eur(d.meilleure_enchere ?? d.prix_estime ?? 0)
+            : `${d.nb_offres} offre${d.nb_offres > 1 ? "s" : ""}`,
+          reel: true,
+          created_at: d.created_at,
+        })),
+      ];
+      rows.sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at));
+      setReelles(rows.slice(0, MAX_ROWS));
+      setLoaded(true);
     }
-    compute(); // premier rendu après montage (pas d'écart SSR/client)
-    const t = setInterval(compute, 3000);
+
+    fetchReel();
+    const t = setInterval(fetchReel, REFRESH_REEL_MS);
+    return () => { active = false; clearInterval(t); };
+  }, []);
+
+  // Tick d'animation des lignes de complément
+  useEffect(() => {
+    const t = setInterval(() => setTick((x) => x + 1), 3000);
     return () => clearInterval(t);
   }, []);
+
+  const now = Date.now();
+  const fakes: Row[] = loaded
+    ? pickFake(now, reelles.length).map((f) => ({
+        key: `fake-${f.route}`,
+        mode: f.mode,
+        route: f.route,
+        pax: f.pax,
+        valeur: f.mode === "enchere"
+          ? eur(prixEnchereFake(f, now))
+          : `${nbOffresFake(f, now)} offre${nbOffresFake(f, now) > 1 ? "s" : ""}`,
+        reel: false,
+      }))
+    : [];
+  void tick; // le tick force le recalcul des lignes de complément
+
+  const rows = [...reelles, ...fakes].slice(0, MAX_ROWS);
 
   return (
     <div className="rounded border border-ligne overflow-hidden bg-asphalte-2/30 backdrop-blur-[2px]">
@@ -127,29 +196,29 @@ export function LiveBoard() {
           Demandes en direct
         </span>
         <span className="font-mono text-xs text-blanc-faint">
-          {rows ? `${rows.length} en cours` : "…"}
+          {loaded ? `${rows.length} en cours` : "…"}
         </span>
       </div>
 
-      {rows === null && (
+      {!loaded && (
         <div className="px-5 py-8 font-mono text-sm text-blanc-faint">Chargement…</div>
       )}
 
-      {rows?.map((r) => (
+      {rows.map((r) => (
         <div
           key={r.key}
           className="grid grid-cols-[90px_1fr_80px_90px] gap-3.5 items-center px-5 py-4 border-b border-ligne last:border-0 font-mono text-sm"
         >
-          <span className={r.mode === "enchere" ? "tag-enchere" : "tag-devis"}>
-            {r.mode === "enchere" ? "Enchère" : "Devis"}
+          <span className={
+            r.mode === "enchere" ? "tag-enchere"
+            : r.mode === "retour" ? "tag bg-ambre-dim text-ambre"
+            : "tag-devis"
+          }>
+            {r.mode === "enchere" ? "Enchère" : r.mode === "retour" ? "Retour" : "Devis"}
           </span>
-          <span className="font-medium">{r.route}</span>
+          <span className="font-medium truncate">{r.route}</span>
           <span className="text-blanc-dim hidden sm:block text-center">{r.pax} pax</span>
-          <span className="text-right font-semibold tabular-nums">
-            {r.mode === "enchere"
-              ? `${r.prix!.toLocaleString("fr-FR")} €`
-              : `${r.offres} offre${(r.offres ?? 0) > 1 ? "s" : ""}`}
-          </span>
+          <span className="text-right font-semibold tabular-nums">{r.valeur}</span>
         </div>
       ))}
 
