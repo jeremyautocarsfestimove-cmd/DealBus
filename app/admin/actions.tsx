@@ -79,7 +79,7 @@ export function PilotageAction({
   async function run() {
     setBusy(true);
     setError(null);
-    const res = await fetch("/api/admin/pilotage", {
+    const res = await fetch("/admin/pilotage", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ entity, id, action }),

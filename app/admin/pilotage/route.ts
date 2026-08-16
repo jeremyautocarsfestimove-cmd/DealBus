@@ -35,6 +35,41 @@ export async function POST(req: Request) {
         .update({ facturation: action === "facturer" ? "facturee" : "payee" })
         .eq("id", id);
       if (error) throw error;
+    } else if (entity === "mission" && action === "valider_annulation") {
+      // Annulation considérée comme légitime par l'administration.
+      // La mission reste annulée et n'est plus traitée comme une commission à facturer.
+      const { error } = await admin.from("missions")
+        .update({
+          statut: "annulee",
+          client_confirmation: "bien_annule",
+        })
+        .eq("id", id);
+      if (error) throw error;
+    } else if (entity === "mission" && action === "mettre_litige") {
+      // L'annulation est contestée / nécessite un contrôle manuel.
+      const { error } = await admin.from("missions")
+        .update({ statut: "litige" })
+        .eq("id", id);
+      if (error) throw error;
+    } else if (entity === "mission" && action === "resoudre_annulation") {
+      // Résolution d'un litige en faveur de l'annulation.
+      const { error } = await admin.from("missions")
+        .update({
+          statut: "annulee",
+          client_confirmation: "bien_annule",
+        })
+        .eq("id", id);
+      if (error) throw error;
+    } else if (entity === "mission" && action === "resoudre_realisee") {
+      // Le trajet a finalement eu lieu : la commission redevient facturable.
+      const { error } = await admin.from("missions")
+        .update({
+          statut: "terminee_declaree",
+          client_confirmation: "a_eu_lieu",
+          facturation: "a_facturer",
+        })
+        .eq("id", id);
+      if (error) throw error;
     } else if (entity === "avis" && action === "supprimer") {
       // Suppression + recalcul de la note du transporteur (le trigger ne couvre que l'insert)
       const { data: avis, error: e1 } = await admin

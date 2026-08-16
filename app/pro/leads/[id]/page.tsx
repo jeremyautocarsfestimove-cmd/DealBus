@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Nav } from "@/components/Nav";
+import { BackButton } from "@/components/BackButton";
 import { createClient } from "@/lib/supabase/server";
 import type { Demande } from "@/lib/types";
 import { DevisForm } from "./devis-form";
@@ -36,15 +36,15 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
     <>
       <Nav />
       <main className="max-w-2xl mx-auto px-7 py-14">
-        <Link
-          href="/pro"
-          className="inline-flex mb-8 font-mono text-[11px] uppercase tracking-[0.14em] text-blanc-dim hover:text-blanc transition"
-        >
-          Retour
-        </Link>
-        <p className="eyebrow mb-4">
-          Demande #{d.numero} · Client anonyme
-        </p>
+        <div className="w-full mb-8">
+          <BackButton href="/pro" />
+        </div>
+
+        <div className="w-full mb-4">
+          <p className="eyebrow">
+            Demande #{d.numero} · Client anonyme
+          </p>
+        </div>
         <h1 className="h-display text-4xl mb-2">
           {d.depart_adresse} → {d.arrivee_adresse}
         </h1>

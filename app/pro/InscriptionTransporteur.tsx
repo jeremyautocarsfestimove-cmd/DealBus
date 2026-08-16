@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { BackButton } from "@/components/BackButton";
 
 const DEPARTEMENTS_HINT = "Ex. 76, 27, 14";
 
@@ -175,7 +176,7 @@ export function InscriptionTransporteur() {
           </label>
 
           <div className="flex gap-3">
-            <button className="btn-ghost" onClick={() => setStep(1)}>← Retour</button>
+            <BackButton onClick={() => setStep(1)} />
             <button className="btn-primary flex-1 disabled:opacity-40" disabled={!accepted} onClick={() => setStep(3)}>
               Continuer →
             </button>
@@ -261,7 +262,7 @@ export function InscriptionTransporteur() {
           {error && <p className="font-mono text-sm text-[#E8735D]">{error}</p>}
 
           <div className="flex gap-3">
-            <button className="btn-ghost" onClick={() => setStep(2)}>← Retour</button>
+            <BackButton onClick={() => setStep(2)} />
             <button className="btn-primary flex-1 disabled:opacity-50" disabled={saving} onClick={submit}>
               {saving ? "Création…" : "Créer mon compte →"}
             </button>

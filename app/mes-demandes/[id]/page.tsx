@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { Nav } from "@/components/Nav";
+import { BackButton } from "@/components/BackButton";
 import { createClient } from "@/lib/supabase/server";
 import type { Demande, Offre, TransporteurAnonyme } from "@/lib/types";
 import { RetenirOffre, EnchereCliente, AvisForm } from "./client-actions";
@@ -15,7 +16,6 @@ export default async function DemandeDetailPage({ params }: { params: Promise<{ 
   if (!demande) notFound();
   const d = demande as Demande & { statut: string; client_id: string };
 
-  // Mission éventuelle (identités révélées par RLS une fois la mission créée)
   /* eslint-disable @typescript-eslint/no-explicit-any */
   const { data: mission } = await supabase
     .from("missions")
@@ -26,7 +26,10 @@ export default async function DemandeDetailPage({ params }: { params: Promise<{ 
   let transporteurProfile: { nom: string | null; telephone: string | null; email: string | null } | null = null;
   if (mission) {
     const { data } = await supabase
-      .from("profiles").select("nom, telephone, email").eq("id", mission.transporteur_id).maybeSingle();
+      .from("profiles")
+      .select("nom, telephone, email")
+      .eq("id", mission.transporteur_id)
+      .maybeSingle();
     transporteurProfile = data;
   }
 
@@ -34,61 +37,130 @@ export default async function DemandeDetailPage({ params }: { params: Promise<{ 
     ? await supabase.from("avis").select("note").eq("mission_id", mission.id).maybeSingle()
     : { data: null };
 
+  const annulationSignalee =
+    !!mission &&
+    !!mission.annulation_motif &&
+    (mission.statut === "annulee" || mission.statut === "litige");
+
+  const annulationConfirmee = mission?.statut === "annulee";
+
   return (
     <>
       <Nav />
       <main className="max-w-5xl mx-auto px-7 py-14">
+        <div className="mb-8">
+          <BackButton href="/mes-demandes" />
+        </div>
+
         <p className="eyebrow mb-4">
           Demande #{d.numero} · {d.depart_adresse} → {d.arrivee_adresse}
         </p>
 
-        {/* ---------- MISSION CONFIRMÉE ---------- */}
         {mission ? (
           <>
-            <h1 className="h-display text-4xl mb-3">Transporteur sélectionné.</h1>
-            <div className="card max-w-xl border-vert/30">
+            {annulationSignalee ? (
+              <div className="mb-6 max-w-2xl rounded-lg border border-[#E8735D]/45 bg-[#E8735D]/10 px-5 py-5">
+                <div className="flex items-start gap-3">
+                  <span className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#E8735D]/15 text-lg font-bold text-[#E8735D]">
+                    !
+                  </span>
+                  <div>
+                    <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-[#E8735D]">
+                      {annulationConfirmee
+                        ? "Mission annulée"
+                        : "Annulation signalée par le transporteur"}
+                    </p>
+
+                    <h1 className="h-display mt-1 text-3xl">
+                      {annulationConfirmee
+                        ? "Votre réservation a été annulée."
+                        : "Le transporteur a demandé l’annulation de votre réservation."}
+                    </h1>
+
+                    <p className="mt-2 text-sm text-blanc-dim">
+                      {annulationConfirmee
+                        ? "Cette annulation a été enregistrée sur votre demande."
+                        : "DealBus a été informé et l’annulation est actuellement en cours de traitement par l’administration."}
+                    </p>
+
+                    <div className="mt-4 rounded-md border border-[#E8735D]/25 bg-asphalte/40 px-4 py-3">
+                      <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-blanc-faint">
+                        Motif communiqué par le transporteur
+                      </p>
+                      <p className="mt-1 text-sm text-blanc">{mission.annulation_motif}</p>
+                    </div>
+
+                    {!annulationConfirmee && (
+                      <p className="mt-3 font-mono text-[11px] text-[#E8735D]">
+                        Statut : en attente de traitement DealBus
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <h1 className="h-display text-4xl mb-3">Transporteur sélectionné.</h1>
+            )}
+
+            <div className={`card max-w-xl ${annulationSignalee ? "border-[#E8735D]/35" : "border-vert/30"}`}>
               <p className="font-semibold text-lg mb-1">{mission.transporteur?.raison_sociale}</p>
+
               <p className="font-mono text-sm text-blanc-dim mb-4">
                 Contact : {transporteurProfile?.nom ?? "—"}
                 {transporteurProfile?.telephone ? ` · ${transporteurProfile.telephone}` : ""}
                 {transporteurProfile?.email ? ` · ${transporteurProfile.email}` : ""}
               </p>
+
               <p className="font-mono text-3xl font-semibold border-t border-ligne pt-4 mb-1">
                 {eur(mission.prix_final)}
                 <span className="text-xs text-blanc-faint font-normal ml-1.5">TTC</span>
               </p>
+
               <p className="font-mono text-xs text-blanc-faint">
-                Sélectionné via {mission.source === "enchere" ? "enchère" : "devis"} ·
-                {" "}{mission.statut === "a_venir" ? "trajet à venir"
-                  : mission.statut === "terminee_declaree" ? "trajet effectué"
-                  : mission.statut === "annulee" ? "mission annulée"
-                  : mission.statut}
-              </p>
-              <p className="text-[13px] text-blanc-dim mt-4 bg-vert-dim border border-vert/30 rounded-sm px-4 py-3">
-                Vous payez le transporteur directement — DealBus ne prélève rien côté client.
+                Sélectionné via {mission.source === "enchere" ? "enchère" : "devis"} ·{" "}
+                {annulationSignalee
+                  ? annulationConfirmee
+                    ? "annulée"
+                    : "annulation en cours de traitement"
+                  : mission.statut === "a_venir"
+                    ? "trajet à venir"
+                    : mission.statut === "terminee_declaree"
+                      ? "trajet effectué"
+                      : mission.statut}
               </p>
 
-              {mission.statut === "terminee_declaree" && !monAvis && user && (
-                <AvisForm missionId={mission.id} clientId={user.id} transporteurId={mission.transporteur_id} />
+              {!annulationSignalee && (
+                <p className="text-[13px] text-blanc-dim mt-4 bg-vert-dim border border-vert/30 rounded-sm px-4 py-3">
+                  Vous payez le transporteur directement — DealBus ne prélève rien côté client.
+                </p>
               )}
+
+              {mission.statut === "terminee_declaree" && !monAvis && user && (
+                <AvisForm
+                  missionId={mission.id}
+                  clientId={user.id}
+                  transporteurId={mission.transporteur_id}
+                />
+              )}
+
               {monAvis && (
                 <p className="border-t border-ligne pt-4 mt-5 font-mono text-sm text-blanc-dim">
-                  Merci pour votre avis ! <span className="text-ambre">{"★".repeat(monAvis.note)}</span>
+                  Merci pour votre avis !{" "}
+                  <span className="text-ambre">{"★".repeat(monAvis.note)}</span>
                 </p>
               )}
             </div>
           </>
         ) : d.statut !== "ouverte" ? (
-          /* ---------- DEMANDE CLOSE SANS SÉLECTION ---------- */
           <>
             <h1 className="h-display text-4xl mb-3">Demande close.</h1>
-            <p className="text-blanc-dim">Cette demande a été {d.statut === "annulee" ? "annulée" : "close sans sélection"}.</p>
+            <p className="text-blanc-dim">
+              Cette demande a été {d.statut === "annulee" ? "annulée" : "close sans sélection"}.
+            </p>
           </>
         ) : d.mode === "devis" ? (
-          /* ---------- DEVIS : COMPARAISON ---------- */
           <DevisView demandeId={id} />
         ) : (
-          /* ---------- ENCHÈRE ---------- */
           <>
             <h1 className="h-display text-4xl mb-3">Enchère en direct.</h1>
             <EnchereClienteWrapper demandeId={id} enchereFin={d.enchere_fin} />
@@ -99,7 +171,6 @@ export default async function DemandeDetailPage({ params }: { params: Promise<{ 
   );
 }
 
-/* ---------- Sous-vue devis (serveur) ---------- */
 async function DevisView({ demandeId }: { demandeId: string }) {
   const supabase = await createClient();
   const { data: offres } = await supabase
@@ -118,30 +189,45 @@ async function DevisView({ demandeId }: { demandeId: string }) {
       <p className="text-blanc-dim mb-10 max-w-xl">
         Profils anonymisés, un seul prix chacun — les transporteurs répondent en tir unique.
       </p>
+
       <div className="grid md:grid-cols-3 gap-4">
         {list.map((o) => (
           <div key={o.id} className="card relative">
             {o.prix_ttc === minPrix && (
-              <span className="absolute -top-px right-5 bg-ambre text-asphalte font-mono text-[10.5px] uppercase font-semibold px-2.5 py-1 rounded-b-sm">Prix le plus bas</span>
+              <span className="absolute -top-px right-5 bg-ambre text-asphalte font-mono text-[10.5px] uppercase font-semibold px-2.5 py-1 rounded-b-sm">
+                Prix le plus bas
+              </span>
             )}
-            {(o.transporteur?.note_moyenne ?? 0) === maxNote && maxNote > 0 && o.prix_ttc !== minPrix && (
-              <span className="absolute -top-px right-5 bg-vert text-asphalte font-mono text-[10.5px] uppercase font-semibold px-2.5 py-1 rounded-b-sm">Mieux noté</span>
-            )}
+
+            {(o.transporteur?.note_moyenne ?? 0) === maxNote &&
+              maxNote > 0 &&
+              o.prix_ttc !== minPrix && (
+                <span className="absolute -top-px right-5 bg-vert text-asphalte font-mono text-[10.5px] uppercase font-semibold px-2.5 py-1 rounded-b-sm">
+                  Mieux noté
+                </span>
+              )}
+
             <p className="font-semibold text-sm mb-1">
               Transporteur #{o.transporteur?.numero_anonyme}
               <span className="ml-2 tag bg-vert-dim text-vert">Vérifié</span>
             </p>
+
             <p className="font-mono text-xs text-blanc-faint mb-4">
-              Dépt. {o.transporteur?.departement_siege} · ★ {o.transporteur?.note_moyenne ?? "—"}/5
+              Dépt. {o.transporteur?.departement_siege} · ★{" "}
+              {o.transporteur?.note_moyenne ?? "—"}/5
               ({o.transporteur?.nb_avis} avis · {o.transporteur?.nb_missions} missions)
             </p>
+
             <p className="font-mono text-3xl font-semibold border-t border-ligne pt-4 mb-2">
               {Number(o.prix_ttc).toLocaleString("fr-FR")} €
               <span className="text-xs text-blanc-faint font-normal ml-1.5">TTC</span>
             </p>
+
             <p className="text-[13px] text-blanc-dim mb-4">
-              {o.vehicule_type} · {o.vehicule_places} places{o.vehicule_annee ? ` · ${o.vehicule_annee}` : ""}
+              {o.vehicule_type} · {o.vehicule_places} places
+              {o.vehicule_annee ? ` · ${o.vehicule_annee}` : ""}
             </p>
+
             {(o.conditions || o.transporteur?.cgv) && (
               <details className="mb-5 group">
                 <summary className="font-mono text-[11.5px] uppercase tracking-wider text-blanc-faint cursor-pointer hover:text-blanc-dim">
@@ -152,19 +238,28 @@ async function DevisView({ demandeId }: { demandeId: string }) {
                 </div>
               </details>
             )}
+
             <RetenirOffre offreId={o.id} />
           </div>
         ))}
+
         {!list.length && (
-          <p className="text-blanc-dim col-span-3">Aucune offre reçue pour l&apos;instant — les transporteurs de votre zone ont été notifiés.</p>
+          <p className="text-blanc-dim col-span-3">
+            Aucune offre reçue pour l&apos;instant — les transporteurs de votre zone ont été notifiés.
+          </p>
         )}
       </div>
     </>
   );
 }
 
-/* ---------- Sous-vue enchère (serveur → client) ---------- */
-async function EnchereClienteWrapper({ demandeId, enchereFin }: { demandeId: string; enchereFin: string | null }) {
+async function EnchereClienteWrapper({
+  demandeId,
+  enchereFin,
+}: {
+  demandeId: string;
+  enchereFin: string | null;
+}) {
   const supabase = await createClient();
   const { data: bestBid } = await supabase
     .from("bids")

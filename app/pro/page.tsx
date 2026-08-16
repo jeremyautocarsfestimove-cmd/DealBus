@@ -102,6 +102,14 @@ export default async function ProPage() {
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
+  const enchereEstTerminee = (d: any) =>
+    d?.mode === "enchere" &&
+    !!d?.enchere_fin &&
+    new Date(d.enchere_fin).getTime() <= now.getTime();
+
+  const leadsActifs = L.filter((d: any) => !enchereEstTerminee(d));
+  const encheresTermineesSansOffre = L.filter((d: any) => enchereEstTerminee(d));
+
   const offreEstActive = (o: any) =>
     ["envoyee", "consultee"].includes(o.statut) &&
     ["ouverte", "selection"].includes(o.demande?.statut ?? "ouverte") &&
@@ -166,14 +174,14 @@ export default async function ProPage() {
 
         {/* Compteurs */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-          <div className="card"><p className="font-mono text-xl font-semibold">{L.length}</p><p className="font-mono text-[10px] uppercase tracking-wider text-blanc-faint mt-1">Leads disponibles</p></div>
+          <div className="card"><p className="font-mono text-xl font-semibold">{leadsActifs.length}</p><p className="font-mono text-[10px] uppercase tracking-wider text-blanc-faint mt-1">Leads disponibles</p></div>
           <div className="card"><p className="font-mono text-xl font-semibold">{offresActives.length + encheres.filter((e) => e.demande?.statut === "ouverte" && (!e.demande?.enchere_fin || new Date(e.demande.enchere_fin) > now)).length}</p><p className="font-mono text-[10px] uppercase tracking-wider text-blanc-faint mt-1">Offres en cours</p></div>
           <div className="card"><p className="font-mono text-xl font-semibold text-vert">{missionsActives.length}</p><p className="font-mono text-[10px] uppercase tracking-wider text-blanc-faint mt-1">Missions à venir</p></div>
           <div className="card"><p className="font-mono text-xl font-semibold text-ambre">{eur(commissionsDues)}</p><p className="font-mono text-[10px] uppercase tracking-wider text-blanc-faint mt-1">Commissions dues</p></div>
         </div>
 
         <Tabs labels={[
-          `Nouveaux leads (${L.length})`,
+          `Nouveaux leads (${leadsActifs.length})`,
           `Mes offres (${offresActives.length + encheres.filter((e) => e.demande?.statut === "ouverte" && (!e.demande?.enchere_fin || new Date(e.demande.enchere_fin) > now)).length})`,
           `Mes missions (${missionsActives.length})`,
           `Mes retours à vide (${retoursActifs.length})`,
@@ -182,24 +190,65 @@ export default async function ProPage() {
         ]}>
           {[
             /* ---------- LEADS ---------- */
-            <div key="l" className="space-y-3">
-              {L.map((d) => (
-                <Link key={d.id} href={`/pro/leads/${d.id}`} className="card block hover:border-ligne-strong transition">
-                  <div className="flex items-center justify-between flex-wrap gap-3 mb-2">
-                    <span className="flex items-center gap-3 font-condensed font-semibold text-xl uppercase">
-                      <span className={d.mode === "enchere" ? "tag-enchere" : "tag-devis"}>
-                        {d.mode === "enchere" ? "Enchère" : "Devis"}
+            <div key="l" className="space-y-8">
+              <div className="space-y-3">
+                {leadsActifs.map((d) => (
+                  <Link key={d.id} href={`/pro/leads/${d.id}`} className="card block hover:border-ligne-strong transition">
+                    <div className="flex items-center justify-between flex-wrap gap-3 mb-2">
+                      <span className="flex items-center gap-3 font-condensed font-semibold text-xl uppercase">
+                        <span className={d.mode === "enchere" ? "tag-enchere" : "tag-devis"}>
+                          {d.mode === "enchere" ? "Enchère" : "Devis"}
+                        </span>
+                        {d.depart_adresse} <span className="text-blanc-faint font-sans normal-case font-normal">→</span> {d.arrivee_adresse}
                       </span>
-                      {d.depart_adresse} <span className="text-blanc-faint font-sans normal-case font-normal">→</span> {d.arrivee_adresse}
-                    </span>
-                    <span className="font-mono text-[11.5px] uppercase tracking-wider text-blanc-faint">Client anonyme</span>
+                      {d.mode === "enchere" ? (
+                        <span className="inline-flex items-center gap-2 rounded-full border border-vert/30 bg-vert-dim px-3 py-1.5 font-mono text-[10.5px] uppercase tracking-[0.12em] text-vert">
+                          <span className="h-1.5 w-1.5 rounded-full bg-vert animate-pulse" />
+                          En direct
+                        </span>
+                      ) : (
+                        <span className="font-mono text-[11.5px] uppercase tracking-wider text-blanc-faint">Client anonyme</span>
+                      )}
+                    </div>
+                    <p className="font-mono text-xs text-blanc-faint">
+                      {new Date(d.date_aller).toLocaleDateString("fr-FR")} · {d.passagers} passagers · Demande #{d.numero}
+                    </p>
+                  </Link>
+                ))}
+                {leadsActifs.length === 0 && <p className="text-blanc-dim text-sm">Aucune demande active dans vos zones pour l&apos;instant.</p>}
+              </div>
+
+              {encheresTermineesSansOffre.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-3 mb-4">
+                    <h3 className="h-display text-xl">Enchères terminées</h3>
+                    <span className="tag bg-[#3a2020] text-[#E8735D]">{encheresTermineesSansOffre.length}</span>
                   </div>
-                  <p className="font-mono text-xs text-blanc-faint">
-                    {new Date(d.date_aller).toLocaleDateString("fr-FR")} · {d.passagers} passagers · Demande #{d.numero}
-                  </p>
-                </Link>
-              ))}
-              {L.length === 0 && <p className="text-blanc-dim text-sm">Aucune demande ouverte dans vos zones pour l&apos;instant.</p>}
+                  <div className="space-y-3">
+                    {encheresTermineesSansOffre.map((d) => (
+                      <Link
+                        key={d.id}
+                        href={`/pro/leads/${d.id}`}
+                        className="card block border-[#6b3434]/60 bg-[#24191a]/40 hover:border-[#8a4545] transition"
+                      >
+                        <div className="flex items-center justify-between flex-wrap gap-3 mb-2">
+                          <span className="flex items-center gap-3 font-condensed font-semibold text-xl uppercase">
+                            <span className="tag-enchere">Enchère</span>
+                            {d.depart_adresse} <span className="text-blanc-faint font-sans normal-case font-normal">→</span> {d.arrivee_adresse}
+                          </span>
+                          <span className="inline-flex items-center gap-2 rounded-full border border-[#E8735D]/30 bg-[#3a2020] px-3 py-1.5 font-mono text-[10.5px] uppercase tracking-[0.12em] text-[#E8735D]">
+                            <span className="h-1.5 w-1.5 rounded-full bg-[#E8735D]" />
+                            Enchère terminée
+                          </span>
+                        </div>
+                        <p className="font-mono text-xs text-blanc-faint">
+                          {new Date(d.date_aller).toLocaleDateString("fr-FR")} · {d.passagers} passagers · Demande #{d.numero}
+                        </p>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>,
 
             /* ---------- MES OFFRES ---------- */
@@ -269,7 +318,7 @@ export default async function ProPage() {
                         <p className="font-semibold">#{e.demande?.numero} — {e.demande?.depart_adresse} → {e.demande?.arrivee_adresse}</p>
                         <p className="font-mono text-xs text-blanc-faint mt-1.5">Meilleure relance : <strong className="text-blanc">{eur(e.mienne)}</strong> · {e.nb} relance{e.nb > 1 ? "s" : ""}</p>
                       </div>
-                      <span className="tag bg-asphalte-3 text-blanc-faint">Enchère clôturée</span>
+                      <span className="tag bg-asphalte-3 text-blanc-faint">Enchère terminée</span>
                     </div>
                   ))}
                   {offresArchivees.length === 0 && encheres.filter((e) => !(e.demande?.statut === "ouverte" && (!e.demande?.enchere_fin || new Date(e.demande.enchere_fin) > now))).length === 0 && <p className="text-blanc-dim text-sm">Aucune offre archivée.</p>}

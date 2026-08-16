@@ -174,28 +174,44 @@ export function PublierRetour({ transporteurId }: { transporteurId: string }) {
 /* ---------- Annuler une mission (motif obligatoire, tracé) ---------- */
 export function AnnulerMission({ missionId }: { missionId: string }) {
   const router = useRouter();
-  const supabase = createClient();
   const [busy, setBusy] = useState(false);
   const [open, setOpen] = useState(false);
   const [motif, setMotif] = useState("");
+  const [error, setError] = useState("");
 
   async function run() {
     setBusy(true);
-    const { data: { user } } = await supabase.auth.getUser();
-    await supabase.from("missions").update({
-      statut: "annulee",
-      annulee_par: user!.id,
-      annulation_motif: motif.trim(),
-      annulee_at: new Date().toISOString(),
-    }).eq("id", missionId);
-    router.refresh();
+    setError("");
+
+    try {
+      const res = await fetch(`/api/missions/${missionId}/cancel`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ motif: motif.trim() }),
+      });
+      const payload = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        throw new Error(payload.error || "Impossible d'annuler la mission");
+      }
+
+      setMotif("");
+      router.refresh();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Une erreur est survenue");
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
     <>
-      <button className="btn-ghost text-xs px-4 py-2 disabled:opacity-50" disabled={busy} onClick={() => setOpen(true)}>
-        Annuler la mission
-      </button>
+      <div>
+        <button className="btn-ghost text-xs px-4 py-2 disabled:opacity-50" disabled={busy} onClick={() => { setError(""); setOpen(true); }}>
+          Annuler la mission
+        </button>
+        {error && <p className="mt-2 font-mono text-xs text-[#E8735D]">{error}</p>}
+      </div>
       <ConfirmModal
         open={open}
         title="Annuler cette mission ?"

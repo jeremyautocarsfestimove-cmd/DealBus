@@ -57,10 +57,20 @@ export default async function AdminPage() {
   const R = (retours ?? []) as any[];
 
   const enAttente = T.filter((t) => t.statut === "en_attente");
-  const caTotal = M.reduce((s, m) => s + Number(m.commission_montant), 0);
-  const caAFacturer = M.filter((m) => m.facturation === "a_facturer").reduce((s, m) => s + Number(m.commission_montant), 0);
-  const caFacture = M.filter((m) => m.facturation === "facturee").reduce((s, m) => s + Number(m.commission_montant), 0);
-  const caPaye = M.filter((m) => m.facturation === "payee").reduce((s, m) => s + Number(m.commission_montant), 0);
+  const dossiersAnnulationLitige = M.filter(
+    (m) => m.statut === "annulee" || m.statut === "litige" || !!m.annulation_motif
+  );
+  const dossiersATraiter = dossiersAnnulationLitige.filter(
+    (m) =>
+      m.statut === "litige" ||
+      (m.statut === "annulee" && m.client_confirmation !== "bien_annule")
+  );
+  // Une mission annulée validée ne doit pas gonfler les commissions à facturer.
+  const missionsCommissionnables = M.filter((m) => m.statut !== "annulee");
+  const caTotal = missionsCommissionnables.reduce((s, m) => s + Number(m.commission_montant), 0);
+  const caAFacturer = missionsCommissionnables.filter((m) => m.facturation === "a_facturer").reduce((s, m) => s + Number(m.commission_montant), 0);
+  const caFacture = missionsCommissionnables.filter((m) => m.facturation === "facturee").reduce((s, m) => s + Number(m.commission_montant), 0);
+  const caPaye = missionsCommissionnables.filter((m) => m.facturation === "payee").reduce((s, m) => s + Number(m.commission_montant), 0);
 
   const kpis = [
     { num: eur(caPaye), label: "Commissions encaissées", accent: true },
@@ -94,6 +104,7 @@ export default async function AdminPage() {
           `Transporteurs${enAttente.length ? ` (${enAttente.length} ⚠)` : ""}`,
           `Demandes (${D.length})`,
           `Missions & commissions (${M.length})`,
+          `Annulations & litiges${dossiersATraiter.length ? ` (${dossiersATraiter.length})` : ""}`,
           `Avis (${A.length})`,
           `Retours à vide (${R.length})`,
         ]}>
@@ -204,17 +215,221 @@ export default async function AdminPage() {
                         </p>
                       )}
                     </div>
-                    <div className="flex gap-2">
-                      {m.facturation === "a_facturer" && (
+                    <div className="flex gap-2 flex-wrap justify-end">
+                      {m.statut === "annulee" && m.client_confirmation !== "bien_annule" && (
+                        <>
+                          <PilotageAction
+                            entity="mission"
+                            id={m.id}
+                            action="valider_annulation"
+                            label="Valider l'annulation"
+                            primary
+                            confirm="Confirmer que cette mission a bien été annulée ? Elle ne sera plus considérée comme une commission à facturer."
+                          />
+                          <PilotageAction
+                            entity="mission"
+                            id={m.id}
+                            action="mettre_litige"
+                            label="Passer en litige"
+                            confirm="Passer cette annulation en litige pour contrôle ?"
+                          />
+                        </>
+                      )}
+
+                      {m.statut === "annulee" && m.client_confirmation === "bien_annule" && (
+                        <span className="tag bg-vert-dim text-vert">Annulation traitée ✓</span>
+                      )}
+
+                      {m.statut === "litige" && (
+                        <>
+                          <PilotageAction
+                            entity="mission"
+                            id={m.id}
+                            action="resoudre_annulation"
+                            label="Confirmer l'annulation"
+                            confirm="Clôturer ce litige en confirmant que la mission a bien été annulée ?"
+                          />
+                          <PilotageAction
+                            entity="mission"
+                            id={m.id}
+                            action="resoudre_realisee"
+                            label="Trajet réalisé"
+                            primary
+                            confirm="Confirmer que le trajet a eu lieu ? La mission redeviendra facturable."
+                          />
+                        </>
+                      )}
+
+                      {!["annulee", "litige"].includes(m.statut) && m.facturation === "a_facturer" && (
                         <PilotageAction entity="mission" id={m.id} action="facturer" label="Marquer facturée" primary />
                       )}
-                      {m.facturation === "facturee" && (
+                      {!["annulee", "litige"].includes(m.statut) && m.facturation === "facturee" && (
                         <PilotageAction entity="mission" id={m.id} action="payer" label="Marquer payée" primary />
                       )}
                     </div>
                   </div>
                 ))}
                 {M.length === 0 && <p className="text-blanc-dim text-sm">Aucune mission confirmée pour l&apos;instant.</p>}
+              </div>
+            </div>,
+
+            /* ---------- ONGLET ANNULATIONS & LITIGES ---------- */
+            <div key="al">
+              <div className="flex items-end justify-between gap-4 flex-wrap mb-6">
+                <div>
+                  <h2 className="h-display text-2xl">Annulations & litiges</h2>
+                  <p className="text-sm text-blanc-dim mt-1">
+                    Toutes les annulations transporteur et les dossiers nécessitant un traitement administratif.
+                  </p>
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  <span className="tag bg-[#3a2020] text-[#E8735D]">
+                    {dossiersATraiter.length} à traiter
+                  </span>
+                  <span className="tag bg-asphalte-3 text-blanc-dim">
+                    {dossiersAnnulationLitige.length} total
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                {dossiersAnnulationLitige.map((m) => {
+                  const traite =
+                    m.statut === "annulee" && m.client_confirmation === "bien_annule";
+
+                  return (
+                    <div
+                      key={m.id}
+                      className={`card ${m.statut === "litige"
+                        ? "border-ambre/40"
+                        : traite
+                          ? "border-vert/25"
+                          : "border-[#E8735D]/35"}`}
+                    >
+                      <div className="flex items-start justify-between gap-5 flex-wrap">
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2.5 flex-wrap mb-2">
+                            <span className={`tag ${
+                              m.statut === "litige"
+                                ? "bg-ambre-dim text-ambre"
+                                : traite
+                                  ? "bg-vert-dim text-vert"
+                                  : "bg-[#3a2020] text-[#E8735D]"
+                            }`}>
+                              {m.statut === "litige"
+                                ? "Litige"
+                                : traite
+                                  ? "Annulation traitée"
+                                  : "Annulation à traiter"}
+                            </span>
+                            <span className="font-mono text-[11px] text-blanc-faint">
+                              Mission {String(m.id).slice(0, 8)}
+                            </span>
+                          </div>
+
+                          <p className="font-semibold text-lg">
+                            {m.demande
+                              ? `#${m.demande.numero} — ${m.demande.depart_adresse} → ${m.demande.arrivee_adresse}`
+                              : `${m.retour?.depart_adresse ?? "?"} → ${m.retour?.arrivee_adresse ?? "?"}`}
+                          </p>
+
+                          <p className="font-mono text-xs text-blanc-faint mt-1.5">
+                            {m.transporteur?.raison_sociale ?? "Transporteur inconnu"} ·
+                            mission {eur(m.prix_final)} · source {m.source}
+                          </p>
+
+                          {m.annulation_motif && (
+                            <div className="mt-4 rounded-sm border border-ligne bg-asphalte/35 px-4 py-3 max-w-3xl">
+                              <p className="font-mono text-[10px] uppercase tracking-wider text-blanc-faint mb-1">
+                                Motif communiqué
+                              </p>
+                              <p className="text-sm text-blanc-dim">« {m.annulation_motif} »</p>
+                            </div>
+                          )}
+
+                          <div className="mt-3 font-mono text-[11px] text-blanc-faint">
+                            {m.client_confirmation === "a_eu_lieu" && (
+                              <span className="text-[#E8735D]">
+                                Le client déclare que le trajet a eu lieu.
+                              </span>
+                            )}
+                            {m.client_confirmation === "bien_annule" && (
+                              <span className="text-vert">
+                                Annulation confirmée ✓
+                              </span>
+                            )}
+                            {!m.client_confirmation && m.statut === "litige" && (
+                              <span className="text-ambre">
+                                En attente de décision administrative.
+                              </span>
+                            )}
+                            {!m.client_confirmation && m.statut === "annulee" && (
+                              <span>
+                                Annulation enregistrée, validation administrative requise.
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="flex gap-2 flex-wrap justify-end">
+                          {m.statut === "annulee" && m.client_confirmation !== "bien_annule" && (
+                            <>
+                              <PilotageAction
+                                entity="mission"
+                                id={m.id}
+                                action="valider_annulation"
+                                label="Valider l'annulation"
+                                primary
+                                confirm="Confirmer définitivement l'annulation de cette mission ?"
+                              />
+                              <PilotageAction
+                                entity="mission"
+                                id={m.id}
+                                action="mettre_litige"
+                                label="Passer en litige"
+                                confirm="Passer ce dossier en litige pour contrôle manuel ?"
+                              />
+                            </>
+                          )}
+
+                          {m.statut === "litige" && (
+                            <>
+                              <PilotageAction
+                                entity="mission"
+                                id={m.id}
+                                action="resoudre_annulation"
+                                label="Confirmer l'annulation"
+                                confirm="Clôturer ce litige en confirmant l'annulation ?"
+                              />
+                              <PilotageAction
+                                entity="mission"
+                                id={m.id}
+                                action="resoudre_realisee"
+                                label="Trajet réalisé"
+                                primary
+                                confirm="Confirmer que le trajet a finalement eu lieu ?"
+                              />
+                            </>
+                          )}
+
+                          {traite && (
+                            <span className="tag bg-vert-dim text-vert">
+                              Dossier clôturé ✓
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {dossiersAnnulationLitige.length === 0 && (
+                  <div className="card text-center py-12">
+                    <p className="text-blanc-dim">
+                      Aucun dossier d&apos;annulation ou de litige.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>,
 
