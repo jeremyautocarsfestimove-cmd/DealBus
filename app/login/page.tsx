@@ -24,7 +24,15 @@ function LoginForm() {
       setSaving(false);
       return;
     }
-    const next = params.get("next") ?? "/mes-demandes";
+    // Destination : paramètre "next" explicite, sinon selon le rôle du profil
+    async function destination(userId: string): Promise<string> {
+      const explicite = params.get("next");
+      if (explicite) return explicite;
+      const { data: p } = await supabase.from("profiles").select("role").eq("id", userId).maybeSingle();
+      if (p?.role === "transporteur") return "/pro";
+      if (p?.role === "admin") return "/admin";
+      return "/mes-demandes";
+    }
 
     if (mode === "signup") {
       const { data, error: err } = await supabase.auth.signUp({ email, password });
@@ -43,15 +51,16 @@ function LoginForm() {
       await supabase.from("profiles").upsert({
         id: data.session.user.id,
         role: "client",
+        email: data.session.user.email,
         ...(nom.trim() && { nom: nom.trim() }),
       });
-      router.push(next);
+      router.push(await destination(data.session.user.id));
       return;
     }
 
-    const { error: err } = await supabase.auth.signInWithPassword({ email, password });
+    const { data: signin, error: err } = await supabase.auth.signInWithPassword({ email, password });
     if (err) { setError("Identifiants incorrects."); setSaving(false); return; }
-    router.push(next);
+    router.push(await destination(signin.user.id));
   }
 
   return (

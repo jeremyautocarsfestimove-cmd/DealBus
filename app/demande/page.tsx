@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useRef, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Nav } from "@/components/Nav";
 import { AddressInput } from "@/components/AddressInput";
@@ -24,6 +24,23 @@ function DemandeWizard() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [nomClient, setNomClient] = useState("");
+  const [enchereFin, setEnchereFin] = useState("");
+  const enchereFinManuelle = useRef(false);
+
+  // Format datetime-local en HEURE LOCALE (toISOString serait en UTC : décalé de 2h en France)
+  const toLocalInput = (d: Date) => {
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
+
+  // Clôture au plus tard : 3h avant le départ si l'heure est connue, sinon fin du jour J
+  const clotureMax = (): Date | null => {
+    if (!form.date_aller) return null;
+    if (form.heure_aller) {
+      return new Date(new Date(`${form.date_aller}T${form.heure_aller}`).getTime() - 3 * 3600 * 1000);
+    }
+    return new Date(`${form.date_aller}T23:59:59`);
+  };
 
   const [form, setForm] = useState({
     type_trajet: params.get("type") ?? "aller_retour",
@@ -50,9 +67,11 @@ function DemandeWizard() {
 
   async function insertDemande(userId: string) {
     // Le profil doit exister (FK demandes.client_id → profiles.id)
+    const { data: { user: u } } = await supabase.auth.getUser();
     await supabase.from("profiles").upsert({
       id: userId,
       role: "client",
+      ...(u?.email && { email: u.email }),
       ...(nomClient.trim() && { nom: nomClient.trim() }),
     });
 
@@ -72,9 +91,9 @@ function DemandeWizard() {
       precisions: form.precisions || null,
       motif: form.motif || null,
       prix_estime: estimation,
-      // Enchère : fenêtre de 2h par défaut, prix de départ = estimation
+      // Enchère : clôture choisie par le client (au plus tard le jour J)
       ...(form.mode === "enchere" && {
-        enchere_fin: new Date(Date.now() + 2 * 3600 * 1000).toISOString(),
+        enchere_fin: new Date(enchereFin).toISOString(),
         enchere_prix_depart: estimation,
       }),
     });
@@ -83,9 +102,31 @@ function DemandeWizard() {
     router.push("/mes-demandes");
   }
 
+  function validerEnchereFin(): string | null {
+    if (form.mode !== "enchere") return null;
+    if (!enchereFin) return "Choisissez la date et l'heure de clôture de votre enchère.";
+    const fin = new Date(enchereFin);
+    if (isNaN(fin.getTime())) return "Date de clôture invalide.";
+    if (fin.getTime() < Date.now() + 30 * 60 * 1000) {
+      return "La clôture doit être au moins dans 30 minutes, pour laisser les transporteurs enchérir.";
+    }
+    const max = clotureMax();
+    if (max && fin > max) {
+      return form.heure_aller
+        ? `La clôture doit être au moins 3 heures avant le départ (au plus tard le ${max.toLocaleDateString("fr-FR")} à ${max.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}).`
+        : "La clôture doit être au plus tard le jour du transport.";
+    }
+    if (max && max.getTime() < Date.now() + 30 * 60 * 1000) {
+      return "Le départ est trop proche pour lancer une enchère — choisissez plutôt le mode devis.";
+    }
+    return null;
+  }
+
   async function submit() {
     setSaving(true);
     setError(null);
+    const erreurEnchere = validerEnchereFin();
+    if (erreurEnchere) { setError(erreurEnchere); setSaving(false); return; }
     const { data: { user } } = await supabase.auth.getUser();
     if (user) { await insertDemande(user.id); return; }
     // Pas connecté : on affiche le panneau email + mot de passe, la demande reste en mémoire
@@ -283,14 +324,39 @@ function DemandeWizard() {
                     Devis multiples
                     <span className="block font-mono text-[10.5px] font-normal opacity-75 mt-1">Jusqu&apos;à 6 offres, à votre rythme</span>
                   </button>
-                  <button onClick={() => set("mode", "enchere")}
+                  <button onClick={() => {
+                      set("mode", "enchere");
+                      if (!enchereFinManuelle.current) {
+                        // Suggestion : +24h, plafonnée à la borne max (départ - 3h ou jour J)
+                        const dansUnJour = new Date(Date.now() + 24 * 3600 * 1000);
+                        const max = clotureMax();
+                        setEnchereFin(toLocalInput(max && dansUnJour > max ? max : dansUnJour));
+                      }
+                    }}
                     className={`flex-1 border rounded-sm py-4 text-sm font-semibold transition
                       ${form.mode === "enchere" ? "border-vert bg-vert-dim text-vert" : "border-ligne-strong text-blanc-dim"}`}>
                     Enchère en direct
-                    <span className="block font-mono text-[10.5px] font-normal opacity-75 mt-1">Prix en baisse, fenêtre 2h</span>
+                    <span className="block font-mono text-[10.5px] font-normal opacity-75 mt-1">Prix en baisse, vous fixez la clôture</span>
                   </button>
                 </div>
               </div>
+              {form.mode === "enchere" && (
+                <div>
+                  <label className="label">Clôture de l&apos;enchère</label>
+                  <input
+                    className="input"
+                    type="datetime-local"
+                    value={enchereFin}
+                    min={toLocalInput(new Date(Date.now() + 30 * 60 * 1000))}
+                    max={clotureMax() ? toLocalInput(clotureMax()!) : undefined}
+                    onChange={(e) => { enchereFinManuelle.current = true; setEnchereFin(e.target.value); }}
+                  />
+                  <p className="font-mono text-[11px] text-blanc-faint mt-2">
+                    L&apos;enchère court jusqu&apos;à cette date — au plus tard 3 h avant le départ.
+                    Plus la fenêtre est longue, plus les transporteurs peuvent se battre sur le prix.
+                  </p>
+                </div>
+              )}
               <p className="text-[13px] text-blanc-dim bg-vert-dim border border-vert/30 rounded-sm px-4 py-3">
                 Client et transporteurs restent mutuellement anonymes jusqu&apos;à votre sélection —
                 gratuit pour vous, commission au succès pour le transporteur retenu.

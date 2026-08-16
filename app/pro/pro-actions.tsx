@@ -4,15 +4,16 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { AddressInput } from "@/components/AddressInput";
+import { ConfirmModal } from "@/components/ConfirmModal";
 
 /* ---------- Déclarer une mission terminée ---------- */
 export function DeclarerTerminee({ missionId }: { missionId: string }) {
   const router = useRouter();
   const supabase = createClient();
   const [busy, setBusy] = useState(false);
+  const [open, setOpen] = useState(false);
 
   async function run() {
-    if (!window.confirm("Déclarer cette mission comme effectuée ? Le client pourra alors laisser un avis, et la commission sera facturée.")) return;
     setBusy(true);
     await supabase.from("missions").update({
       statut: "terminee_declaree",
@@ -22,9 +23,20 @@ export function DeclarerTerminee({ missionId }: { missionId: string }) {
   }
 
   return (
-    <button className="btn-primary text-xs px-4 py-2 disabled:opacity-50" disabled={busy} onClick={run}>
-      Déclarer terminée ✓
-    </button>
+    <>
+      <button className="btn-primary text-xs px-4 py-2 disabled:opacity-50" disabled={busy} onClick={() => setOpen(true)}>
+        Déclarer terminée ✓
+      </button>
+      <ConfirmModal
+        open={open}
+        title="Mission effectuée ?"
+        message="Le client pourra laisser un avis sur cette prestation, et la commission correspondante sera facturée."
+        confirmLabel="Déclarer terminée ✓"
+        busy={busy}
+        onConfirm={() => { setOpen(false); run(); }}
+        onCancel={() => setOpen(false)}
+      />
+    </>
   );
 }
 
@@ -42,18 +54,15 @@ export function ReservationActions({
 
   async function run(action: "validee" | "refusee") {
     setBusy(true);
-    await supabase.from("reservations_retour").update({ statut: action }).eq("id", reservationId);
-    if (action === "validee") {
-      // Le trajet est attribué : les autres demandes en attente sont refusées
-      await supabase.from("reservations_retour")
-        .update({ statut: "refusee" })
-        .eq("retour_id", retourId)
-        .neq("id", reservationId)
-        .eq("statut", "en_attente");
-    }
-    await supabase.from("retours_vide")
-      .update({ statut: action === "validee" ? "confirme" : "publie" })
-      .eq("id", retourId);
+    // La route serveur crée la mission (commission retour à vide) et notifie le client
+    await fetch("/api/reservations", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        reservation_id: reservationId,
+        action: action === "validee" ? "valider" : "refuser",
+      }),
+    });
     router.refresh();
   }
 
@@ -167,13 +176,10 @@ export function AnnulerMission({ missionId }: { missionId: string }) {
   const router = useRouter();
   const supabase = createClient();
   const [busy, setBusy] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [motif, setMotif] = useState("");
 
   async function run() {
-    const motif = window.prompt(
-      "Motif de l'annulation (obligatoire) :\n\nRappel : les annulations sont tracées. Un trajet déclaré annulé mais réalisé en direct constitue un contournement — commission due rétroactivement et exclusion de la plateforme."
-    );
-    if (motif === null) return;              // clic Annuler
-    if (!motif.trim()) { window.alert("Le motif est obligatoire."); return; }
     setBusy(true);
     const { data: { user } } = await supabase.auth.getUser();
     await supabase.from("missions").update({
@@ -186,8 +192,280 @@ export function AnnulerMission({ missionId }: { missionId: string }) {
   }
 
   return (
-    <button className="btn-ghost text-xs px-4 py-2 disabled:opacity-50" disabled={busy} onClick={run}>
-      Annuler la mission
-    </button>
+    <>
+      <button className="btn-ghost text-xs px-4 py-2 disabled:opacity-50" disabled={busy} onClick={() => setOpen(true)}>
+        Annuler la mission
+      </button>
+      <ConfirmModal
+        open={open}
+        title="Annuler cette mission ?"
+        danger
+        confirmLabel="Confirmer l'annulation"
+        confirmDisabled={!motif.trim()}
+        busy={busy}
+        onConfirm={() => { setOpen(false); run(); }}
+        onCancel={() => { setOpen(false); setMotif(""); }}
+      >
+        <div>
+          <label className="label">Motif de l&apos;annulation (obligatoire)</label>
+          <textarea
+            className="input min-h-[90px] resize-none"
+            placeholder="Ex. le client a annulé son événement…"
+            value={motif}
+            onChange={(e) => setMotif(e.target.value)}
+          />
+          <p className="mt-3 text-[12px] text-blanc-dim bg-ambre-dim border border-ambre/40 rounded-sm px-3.5 py-2.5">
+            Les annulations sont tracées et vérifiées auprès du client. Un trajet déclaré
+            annulé mais réalisé en direct constitue un contournement : commission due
+            rétroactivement et exclusion de la plateforme.
+          </p>
+        </div>
+      </ConfirmModal>
+    </>
+  );
+}
+
+/* ---------- Types de véhicules (partagé) ---------- */
+export const TYPES_VEHICULES: Record<string, string> = {
+  autocar_grand_tourisme: "Autocar grand tourisme",
+  autocar_standard: "Autocar standard",
+  minibus: "Minibus (10-30 places)",
+  van: "Van / minivan (≤ 9 places)",
+  berline: "Berline",
+};
+
+/* ---------- Gestion de la flotte ---------- */
+export function GererVehicules({
+  transporteurId,
+  vehicules,
+}: {
+  transporteurId: string;
+  vehicules: { id: string; type: string; marque_modele: string | null; places: number; annee: number | null }[];
+}) {
+  const router = useRouter();
+  const supabase = createClient();
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [form, setForm] = useState({ type: "", marque_modele: "", places: "", annee: "" });
+  const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
+
+  async function ajouter() {
+    setError(null);
+    if (!form.type || !form.places) { setError("Type et nombre de places requis."); return; }
+    setBusy(true);
+    const { error: err } = await supabase.from("vehicules").insert({
+      transporteur_id: transporteurId,
+      type: form.type,
+      marque_modele: form.marque_modele.trim() || null,
+      places: Number(form.places),
+      annee: form.annee ? Number(form.annee) : null,
+    });
+    if (err) { setError(err.message); setBusy(false); return; }
+    setForm({ type: "", marque_modele: "", places: "", annee: "" });
+    setBusy(false);
+    router.refresh();
+  }
+
+  async function supprimer(id: string) {
+    await supabase.from("vehicules").delete().eq("id", id);
+    router.refresh();
+  }
+
+  return (
+    <div className="card">
+      <p className="font-semibold text-sm mb-1.5">Ma flotte</p>
+      <p className="text-[12.5px] text-blanc-dim mb-5">
+        Renseignez vos véhicules une fois : vous les sélectionnerez en un clic
+        dans vos devis, et ils crédibilisent vos offres auprès des clients.
+      </p>
+
+      <div className="space-y-2.5 mb-6">
+        {vehicules.map((v) => (
+          <div key={v.id} className="flex items-center justify-between gap-3 border border-ligne rounded-sm px-4 py-3">
+            <p className="text-sm">
+              <span className="font-semibold">{TYPES_VEHICULES[v.type] ?? v.type}</span>
+              <span className="font-mono text-xs text-blanc-faint ml-2.5">
+                {v.marque_modele ? `${v.marque_modele} · ` : ""}{v.places} places{v.annee ? ` · ${v.annee}` : ""}
+              </span>
+            </p>
+            <button className="font-mono text-[11px] text-blanc-faint hover:text-[#E8735D] uppercase tracking-wider"
+              onClick={() => supprimer(v.id)}>
+              Retirer
+            </button>
+          </div>
+        ))}
+        {vehicules.length === 0 && (
+          <p className="text-sm text-blanc-faint">Aucun véhicule renseigné.</p>
+        )}
+      </div>
+
+      <div className="border-t border-ligne pt-5 grid sm:grid-cols-[1fr_1fr_90px_90px] gap-3 items-end">
+        <div>
+          <label className="label">Type</label>
+          <select className="input" value={form.type} onChange={(e) => set("type", e.target.value)}>
+            <option value="">Sélectionner…</option>
+            {Object.entries(TYPES_VEHICULES).map(([k, v]) => (
+              <option key={k} value={k}>{v}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="label">Marque / modèle</label>
+          <input className="input" placeholder="Ex. Setra S 516 HD"
+            value={form.marque_modele} onChange={(e) => set("marque_modele", e.target.value)} />
+        </div>
+        <div>
+          <label className="label">Places</label>
+          <input className="input font-mono" type="number" min={1} placeholder="59"
+            value={form.places} onChange={(e) => set("places", e.target.value)} />
+        </div>
+        <div>
+          <label className="label">Année</label>
+          <input className="input font-mono" type="number" placeholder="2022"
+            value={form.annee} onChange={(e) => set("annee", e.target.value)} />
+        </div>
+      </div>
+      {error && <p className="font-mono text-xs text-[#E8735D] mt-3">{error}</p>}
+      <button className="btn-primary mt-4 disabled:opacity-50" disabled={busy} onClick={ajouter}>
+        {busy ? "Ajout…" : "+ Ajouter ce véhicule"}
+      </button>
+    </div>
+  );
+}
+
+/* ---------- CGV réduites ---------- */
+export function CgvForm({
+  transporteurId,
+  initial,
+}: {
+  transporteurId: string;
+  initial: string | null;
+}) {
+  const router = useRouter();
+  const supabase = createClient();
+  const [cgv, setCgv] = useState(initial ?? "");
+  const [busy, setBusy] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  async function save() {
+    setBusy(true);
+    await supabase.from("transporteurs").update({ cgv: cgv.trim() || null }).eq("id", transporteurId);
+    setBusy(false);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2500);
+    router.refresh();
+  }
+
+  return (
+    <div className="card mt-5">
+      <p className="font-semibold text-sm mb-1.5">Mes conditions (CGV réduites)</p>
+      <p className="text-[12.5px] text-blanc-dim mb-4">
+        Affichées aux clients sur chacune de vos offres : acompte, conditions
+        d&apos;annulation, ce qui est inclus… L&apos;essentiel en quelques lignes.
+      </p>
+      <textarea
+        className="input min-h-[140px] resize-none mb-3"
+        placeholder={"Ex.\n— Acompte de 30 % à la réservation\n— Annulation gratuite jusqu'à 15 jours avant le départ\n— Péages et parking inclus, repas du conducteur non inclus"}
+        value={cgv}
+        onChange={(e) => setCgv(e.target.value)}
+      />
+      <p className="text-[12px] text-blanc-dim bg-ambre-dim border border-ambre/40 rounded-sm px-3.5 py-2.5 mb-4">
+        N&apos;y mentionnez <strong>ni nom de société, ni coordonnées</strong> : ces conditions
+        sont visibles pendant la phase anonyme, avant la sélection.
+      </p>
+      <button className="btn-primary disabled:opacity-50" disabled={busy} onClick={save}>
+        {busy ? "Enregistrement…" : saved ? "Enregistré ✓" : "Enregistrer mes conditions"}
+      </button>
+    </div>
+  );
+}
+
+/* ---------- Zones de chalandise ---------- */
+export function GererZones({
+  transporteurId,
+  zones,
+}: {
+  transporteurId: string;
+  zones: { departement: string }[];
+}) {
+  const router = useRouter();
+  const supabase = createClient();
+  const [saisie, setSaisie] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Départements français valides : 01-95 (hors 20), 2A/2B, 971-976
+  function valide(d: string): boolean {
+    if (/^2[AB]$/.test(d)) return true;
+    if (/^97[1-6]$/.test(d)) return true;
+    if (/^\d{2}$/.test(d)) { const n = Number(d); return n >= 1 && n <= 95 && d !== "20"; }
+    return false;
+  }
+
+  async function ajouter() {
+    setError(null);
+    const deps = saisie.split(/[,\s;]+/).map((d) => d.trim().toUpperCase()).filter(Boolean);
+    if (!deps.length) return;
+    const invalides = deps.filter((d) => !valide(d));
+    if (invalides.length) {
+      setError(`Département(s) invalide(s) : ${invalides.join(", ")} — attendu : 01-95, 2A, 2B ou 971-976.`);
+      return;
+    }
+    const existants = new Set(zones.map((z) => z.departement));
+    const nouveaux = deps.filter((d) => !existants.has(d));
+    if (!nouveaux.length) { setSaisie(""); return; }
+    setBusy(true);
+    const { error: err } = await supabase.from("transporteur_zones")
+      .insert(nouveaux.map((departement) => ({ transporteur_id: transporteurId, departement })));
+    if (err) { setError(err.message); setBusy(false); return; }
+    setSaisie("");
+    setBusy(false);
+    router.refresh();
+  }
+
+  async function retirer(departement: string) {
+    if (zones.length === 1) {
+      setError("Gardez au moins une zone — sans zone, vous ne recevez plus aucun lead.");
+      return;
+    }
+    await supabase.from("transporteur_zones").delete()
+      .eq("transporteur_id", transporteurId)
+      .eq("departement", departement);
+    router.refresh();
+  }
+
+  return (
+    <div className="card mb-5">
+      <p className="font-semibold text-sm mb-1.5">Mes zones de chalandise</p>
+      <p className="text-[12.5px] text-blanc-dim mb-4">
+        Les départements où vous prenez en charge des groupes : vous ne recevez
+        que les demandes qui en partent. Modifiable à tout moment, effet immédiat.
+      </p>
+
+      <div className="flex gap-2 flex-wrap mb-5">
+        {zones.map((z) => (
+          <span key={z.departement} className="inline-flex items-center gap-2 border border-ligne-strong rounded-sm px-3 py-1.5 font-mono text-sm">
+            {z.departement}
+            <button className="text-blanc-faint hover:text-[#E8735D] leading-none" title="Retirer"
+              onClick={() => retirer(z.departement)}>×</button>
+          </span>
+        ))}
+        {zones.length === 0 && <span className="text-sm text-blanc-faint">Aucune zone.</span>}
+      </div>
+
+      <div className="flex gap-3">
+        <input
+          className="input flex-1 font-mono"
+          placeholder="Ajouter : 78, 95, 2A…"
+          value={saisie}
+          onChange={(e) => setSaisie(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && ajouter()}
+        />
+        <button className="btn-primary disabled:opacity-50" disabled={busy} onClick={ajouter}>
+          Ajouter
+        </button>
+      </div>
+      {error && <p className="font-mono text-xs text-[#E8735D] mt-3">{error}</p>}
+    </div>
   );
 }

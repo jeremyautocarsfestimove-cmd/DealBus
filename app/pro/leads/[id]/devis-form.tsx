@@ -1,8 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { TYPES_VEHICULES } from "../../pro-actions";
+
+type Vehicule = { id: string; type: string; marque_modele: string | null; places: number; annee: number | null };
 
 export function DevisForm({ demandeId }: { demandeId: string }) {
   const router = useRouter();
@@ -17,6 +20,28 @@ export function DevisForm({ demandeId }: { demandeId: string }) {
     conditions: "",
   });
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
+  const [flotte, setFlotte] = useState<Vehicule[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase.from("vehicules").select("*").eq("transporteur_id", user.id);
+      setFlotte((data ?? []) as Vehicule[]);
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function choisirVehicule(id: string) {
+    const v = flotte.find((x) => x.id === id);
+    if (!v) return;
+    setForm((f) => ({
+      ...f,
+      vehicule_type: `${TYPES_VEHICULES[v.type] ?? v.type}${v.marque_modele ? ` — ${v.marque_modele}` : ""}`,
+      vehicule_places: String(v.places),
+      vehicule_annee: v.annee ? String(v.annee) : "",
+    }));
+  }
 
   async function submit() {
     if (!form.prix_ttc || !form.vehicule_type || !form.vehicule_places) {
@@ -47,6 +72,19 @@ export function DevisForm({ demandeId }: { demandeId: string }) {
 
   return (
     <div className="card space-y-4">
+      {flotte.length > 0 && (
+        <div>
+          <label className="label">Choisir un véhicule de ma flotte</label>
+          <select className="input" defaultValue="" onChange={(e) => choisirVehicule(e.target.value)}>
+            <option value="">— Saisie manuelle —</option>
+            {flotte.map((v) => (
+              <option key={v.id} value={v.id}>
+                {(TYPES_VEHICULES[v.type] ?? v.type)}{v.marque_modele ? ` ${v.marque_modele}` : ""} · {v.places} pl.
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
       <div>
         <label className="label">Votre prix (TTC, tout compris)</label>
         <input className="input font-mono" type="number" placeholder="Ex. 1480"

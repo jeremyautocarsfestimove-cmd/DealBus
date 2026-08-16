@@ -2,34 +2,37 @@ import { notFound } from "next/navigation";
 import { Nav } from "@/components/Nav";
 import { createClient } from "@/lib/supabase/server";
 import type { Demande, Offre, TransporteurAnonyme } from "@/lib/types";
+import { RetenirOffre, EnchereCliente, AvisForm } from "./client-actions";
+
+const eur = (n: number) => Number(n).toLocaleString("fr-FR") + " €";
 
 export default async function DemandeDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
   const { data: demande } = await supabase.from("demandes").select("*").eq("id", id).single();
   if (!demande) notFound();
-  const d = demande as Demande;
+  const d = demande as Demande & { statut: string; client_id: string };
 
-  // Offres (devis) avec profil transporteur ANONYME uniquement
-  const { data: offres } = await supabase
-    .from("offres")
-    .select("*, transporteur:transporteurs_anonymes(*)")
+  // Mission éventuelle (identités révélées par RLS une fois la mission créée)
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  const { data: mission } = await supabase
+    .from("missions")
+    .select("*, transporteur:transporteurs(raison_sociale), contact:transporteur_id")
     .eq("demande_id", id)
-    .order("prix_ttc", { ascending: true });
+    .maybeSingle() as { data: any };
 
-  // Meilleure enchère en cours — realtime à brancher côté client
-  const { data: bestBid } = await supabase
-    .from("bids")
-    .select("prix_ttc")
-    .eq("demande_id", id)
-    .order("prix_ttc", { ascending: true })
-    .limit(1)
-    .maybeSingle();
+  let transporteurProfile: { nom: string | null; telephone: string | null; email: string | null } | null = null;
+  if (mission) {
+    const { data } = await supabase
+      .from("profiles").select("nom, telephone, email").eq("id", mission.transporteur_id).maybeSingle();
+    transporteurProfile = data;
+  }
 
-  const list = (offres ?? []) as (Offre & { transporteur: TransporteurAnonyme })[];
-  const minPrix = list[0]?.prix_ttc;
-  const maxNote = Math.max(...list.map((o) => o.transporteur?.note_moyenne ?? 0), 0);
+  const { data: monAvis } = mission
+    ? await supabase.from("avis").select("note").eq("mission_id", mission.id).maybeSingle()
+    : { data: null };
 
   return (
     <>
@@ -39,65 +42,143 @@ export default async function DemandeDetailPage({ params }: { params: Promise<{ 
           Demande #{d.numero} · {d.depart_adresse} → {d.arrivee_adresse}
         </p>
 
-        {d.mode === "devis" ? (
+        {/* ---------- MISSION CONFIRMÉE ---------- */}
+        {mission ? (
           <>
-            <h1 className="h-display text-4xl mb-3">Comparez vos offres.</h1>
-            <p className="text-blanc-dim mb-10 max-w-xl">
-              Profils anonymisés, un seul prix chacun — les transporteurs répondent en tir unique.
-            </p>
-            <div className="grid md:grid-cols-3 gap-4">
-              {list.map((o) => (
-                <div key={o.id} className="card relative">
-                  {o.prix_ttc === minPrix && (
-                    <span className="absolute -top-px right-5 bg-ambre text-asphalte font-mono text-[10.5px] uppercase font-semibold px-2.5 py-1 rounded-b-sm">Prix le plus bas</span>
-                  )}
-                  {(o.transporteur?.note_moyenne ?? 0) === maxNote && maxNote > 0 && o.prix_ttc !== minPrix && (
-                    <span className="absolute -top-px right-5 bg-vert text-asphalte font-mono text-[10.5px] uppercase font-semibold px-2.5 py-1 rounded-b-sm">Mieux noté</span>
-                  )}
-                  <p className="font-semibold text-sm mb-1">
-                    Transporteur #{o.transporteur?.numero_anonyme}
-                    <span className="ml-2 tag bg-vert-dim text-vert">Vérifié</span>
-                  </p>
-                  <p className="font-mono text-xs text-blanc-faint mb-4">
-                    Dépt. {o.transporteur?.departement_siege} · ★ {o.transporteur?.note_moyenne ?? "—"}/5
-                    ({o.transporteur?.nb_avis} avis · {o.transporteur?.nb_missions} missions)
-                  </p>
-                  <p className="font-mono text-3xl font-semibold border-t border-ligne pt-4 mb-2">
-                    {Number(o.prix_ttc).toLocaleString("fr-FR")} €
-                    <span className="text-xs text-blanc-faint font-normal ml-1.5">TTC</span>
-                  </p>
-                  <p className="text-[13px] text-blanc-dim mb-5">
-                    {o.vehicule_type} · {o.vehicule_places} places{o.vehicule_annee ? ` · ${o.vehicule_annee}` : ""}
-                  </p>
-                  {/* TODO: server action de sélection → crée mission, révèle identités */}
-                  <button className="btn-primary w-full">Retenir cette offre →</button>
-                </div>
-              ))}
-              {!list.length && (
-                <p className="text-blanc-dim col-span-3">Aucune offre reçue pour l&apos;instant — les transporteurs de votre zone ont été notifiés.</p>
+            <h1 className="h-display text-4xl mb-3">Transporteur sélectionné.</h1>
+            <div className="card max-w-xl border-vert/30">
+              <p className="font-semibold text-lg mb-1">{mission.transporteur?.raison_sociale}</p>
+              <p className="font-mono text-sm text-blanc-dim mb-4">
+                Contact : {transporteurProfile?.nom ?? "—"}
+                {transporteurProfile?.telephone ? ` · ${transporteurProfile.telephone}` : ""}
+                {transporteurProfile?.email ? ` · ${transporteurProfile.email}` : ""}
+              </p>
+              <p className="font-mono text-3xl font-semibold border-t border-ligne pt-4 mb-1">
+                {eur(mission.prix_final)}
+                <span className="text-xs text-blanc-faint font-normal ml-1.5">TTC</span>
+              </p>
+              <p className="font-mono text-xs text-blanc-faint">
+                Sélectionné via {mission.source === "enchere" ? "enchère" : "devis"} ·
+                {" "}{mission.statut === "a_venir" ? "trajet à venir"
+                  : mission.statut === "terminee_declaree" ? "trajet effectué"
+                  : mission.statut === "annulee" ? "mission annulée"
+                  : mission.statut}
+              </p>
+              <p className="text-[13px] text-blanc-dim mt-4 bg-vert-dim border border-vert/30 rounded-sm px-4 py-3">
+                Vous payez le transporteur directement — DealBus ne prélève rien côté client.
+              </p>
+
+              {mission.statut === "terminee_declaree" && !monAvis && user && (
+                <AvisForm missionId={mission.id} clientId={user.id} transporteurId={mission.transporteur_id} />
+              )}
+              {monAvis && (
+                <p className="border-t border-ligne pt-4 mt-5 font-mono text-sm text-blanc-dim">
+                  Merci pour votre avis ! <span className="text-ambre">{"★".repeat(monAvis.note)}</span>
+                </p>
               )}
             </div>
           </>
+        ) : d.statut !== "ouverte" ? (
+          /* ---------- DEMANDE CLOSE SANS SÉLECTION ---------- */
+          <>
+            <h1 className="h-display text-4xl mb-3">Demande close.</h1>
+            <p className="text-blanc-dim">Cette demande a été {d.statut === "annulee" ? "annulée" : "close sans sélection"}.</p>
+          </>
+        ) : d.mode === "devis" ? (
+          /* ---------- DEVIS : COMPARAISON ---------- */
+          <DevisView demandeId={id} />
         ) : (
+          /* ---------- ENCHÈRE ---------- */
           <>
             <h1 className="h-display text-4xl mb-3">Enchère en direct.</h1>
-            <div className="card max-w-lg">
-              <p className="font-mono text-xs uppercase tracking-wider text-blanc-faint mb-2">Meilleure offre actuelle (anonyme)</p>
-              <p className="font-mono text-5xl font-semibold text-vert mb-4">
-                {bestBid ? `${Number(bestBid.prix_ttc).toLocaleString("fr-FR")} €` : "—"}
-              </p>
-              <p className="font-mono text-sm text-blanc-dim">
-                Clôture : {d.enchere_fin ? new Date(d.enchere_fin).toLocaleString("fr-FR") : "—"}
-              </p>
-              <p className="mt-5 text-[13px] text-blanc-dim border-t border-ligne pt-4">
-                L&apos;enchère va jusqu&apos;au bout du compte à rebours. À la clôture, vous validez
-                (ou non) la meilleure offre — identités révélées uniquement à ce moment.
-              </p>
-              {/* TODO: composant client avec supabase.channel() pour le realtime + compte à rebours */}
-            </div>
+            <EnchereClienteWrapper demandeId={id} enchereFin={d.enchere_fin} />
           </>
         )}
       </main>
     </>
+  );
+}
+
+/* ---------- Sous-vue devis (serveur) ---------- */
+async function DevisView({ demandeId }: { demandeId: string }) {
+  const supabase = await createClient();
+  const { data: offres } = await supabase
+    .from("offres")
+    .select("*, transporteur:transporteurs_anonymes(*)")
+    .eq("demande_id", demandeId)
+    .order("prix_ttc", { ascending: true });
+
+  const list = (offres ?? []) as (Offre & { transporteur: TransporteurAnonyme })[];
+  const minPrix = list[0]?.prix_ttc;
+  const maxNote = Math.max(...list.map((o) => o.transporteur?.note_moyenne ?? 0), 0);
+
+  return (
+    <>
+      <h1 className="h-display text-4xl mb-3">Comparez vos offres.</h1>
+      <p className="text-blanc-dim mb-10 max-w-xl">
+        Profils anonymisés, un seul prix chacun — les transporteurs répondent en tir unique.
+      </p>
+      <div className="grid md:grid-cols-3 gap-4">
+        {list.map((o) => (
+          <div key={o.id} className="card relative">
+            {o.prix_ttc === minPrix && (
+              <span className="absolute -top-px right-5 bg-ambre text-asphalte font-mono text-[10.5px] uppercase font-semibold px-2.5 py-1 rounded-b-sm">Prix le plus bas</span>
+            )}
+            {(o.transporteur?.note_moyenne ?? 0) === maxNote && maxNote > 0 && o.prix_ttc !== minPrix && (
+              <span className="absolute -top-px right-5 bg-vert text-asphalte font-mono text-[10.5px] uppercase font-semibold px-2.5 py-1 rounded-b-sm">Mieux noté</span>
+            )}
+            <p className="font-semibold text-sm mb-1">
+              Transporteur #{o.transporteur?.numero_anonyme}
+              <span className="ml-2 tag bg-vert-dim text-vert">Vérifié</span>
+            </p>
+            <p className="font-mono text-xs text-blanc-faint mb-4">
+              Dépt. {o.transporteur?.departement_siege} · ★ {o.transporteur?.note_moyenne ?? "—"}/5
+              ({o.transporteur?.nb_avis} avis · {o.transporteur?.nb_missions} missions)
+            </p>
+            <p className="font-mono text-3xl font-semibold border-t border-ligne pt-4 mb-2">
+              {Number(o.prix_ttc).toLocaleString("fr-FR")} €
+              <span className="text-xs text-blanc-faint font-normal ml-1.5">TTC</span>
+            </p>
+            <p className="text-[13px] text-blanc-dim mb-4">
+              {o.vehicule_type} · {o.vehicule_places} places{o.vehicule_annee ? ` · ${o.vehicule_annee}` : ""}
+            </p>
+            {(o.conditions || o.transporteur?.cgv) && (
+              <details className="mb-5 group">
+                <summary className="font-mono text-[11.5px] uppercase tracking-wider text-blanc-faint cursor-pointer hover:text-blanc-dim">
+                  Conditions du transporteur ▾
+                </summary>
+                <div className="mt-2.5 text-[12.5px] text-blanc-dim border border-ligne rounded-sm px-3.5 py-3 whitespace-pre-line">
+                  {[o.conditions, o.transporteur?.cgv].filter(Boolean).join("\n\n")}
+                </div>
+              </details>
+            )}
+            <RetenirOffre offreId={o.id} />
+          </div>
+        ))}
+        {!list.length && (
+          <p className="text-blanc-dim col-span-3">Aucune offre reçue pour l&apos;instant — les transporteurs de votre zone ont été notifiés.</p>
+        )}
+      </div>
+    </>
+  );
+}
+
+/* ---------- Sous-vue enchère (serveur → client) ---------- */
+async function EnchereClienteWrapper({ demandeId, enchereFin }: { demandeId: string; enchereFin: string | null }) {
+  const supabase = await createClient();
+  const { data: bestBid } = await supabase
+    .from("bids")
+    .select("prix_ttc")
+    .eq("demande_id", demandeId)
+    .order("prix_ttc", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  return (
+    <EnchereCliente
+      demandeId={demandeId}
+      enchereFin={enchereFin}
+      initialBest={bestBid ? Number(bestBid.prix_ttc) : null}
+    />
   );
 }

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { ConfirmModal } from "@/components/ConfirmModal";
 
 export function TransporteurActions({
   id,
@@ -73,8 +74,9 @@ export function PilotageAction({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
   async function run() {
-    if (confirm && !window.confirm(confirm)) return;
     setBusy(true);
     setError(null);
     const res = await fetch("/api/admin/pilotage", {
@@ -96,11 +98,23 @@ export function PilotageAction({
       <button
         className={`${primary ? "btn-primary" : "btn-ghost"} text-xs px-3.5 py-1.5 disabled:opacity-50`}
         disabled={busy}
-        onClick={run}
+        onClick={() => (confirm ? setConfirmOpen(true) : run())}
       >
         {label}
       </button>
       {error && <span className="font-mono text-[11px] text-[#E8735D]">{error}</span>}
+      {confirm && (
+        <ConfirmModal
+          open={confirmOpen}
+          title={label}
+          message={confirm}
+          confirmLabel={label}
+          danger
+          busy={busy}
+          onConfirm={() => { setConfirmOpen(false); run(); }}
+          onCancel={() => setConfirmOpen(false)}
+        />
+      )}
     </span>
   );
 }

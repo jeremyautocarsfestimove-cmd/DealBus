@@ -35,6 +35,7 @@ export interface TransporteurAnonyme {
   note_moyenne: number | null;
   nb_avis: number;
   nb_missions: number;
+  cgv: string | null;
 }
 
 export interface RetourVide {

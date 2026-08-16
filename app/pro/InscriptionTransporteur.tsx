@@ -82,6 +82,7 @@ export function InscriptionTransporteur() {
       role: "transporteur",
       nom: `${form.prenom} ${form.nom}`,
       telephone: form.telephone,
+      email: existing?.email ?? form.email,
     });
     if (pErr) { setError(pErr.message); setSaving(false); return; }
 

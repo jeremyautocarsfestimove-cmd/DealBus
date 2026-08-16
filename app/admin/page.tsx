@@ -39,7 +39,7 @@ export default async function AdminPage() {
         .select("*, client:profiles(nom)")
         .order("created_at", { ascending: false }).limit(100),
       supabase.from("missions")
-        .select("*, demande:demandes(numero, depart_adresse, arrivee_adresse), transporteur:transporteurs(raison_sociale)")
+        .select("*, demande:demandes(numero, depart_adresse, arrivee_adresse), retour:retours_vide(depart_adresse, arrivee_adresse), transporteur:transporteurs(raison_sociale)")
         .order("created_at", { ascending: false }).limit(100),
       supabase.from("avis")
         .select("*, transporteur:transporteurs(raison_sociale)")
@@ -186,7 +186,9 @@ export default async function AdminPage() {
                   <div key={m.id} className="card flex items-center justify-between gap-4 flex-wrap">
                     <div>
                       <p className="font-semibold">
-                        #{m.demande?.numero} — {m.demande?.depart_adresse} → {m.demande?.arrivee_adresse}
+                        {m.demande
+                          ? `#${m.demande.numero} — ${m.demande.depart_adresse} → ${m.demande.arrivee_adresse}`
+                          : `${m.retour?.depart_adresse ?? "?"} → ${m.retour?.arrivee_adresse ?? "?"}`}
                         <span className="ml-2.5 tag bg-asphalte-3 text-blanc-dim">{m.source}</span>
                       </p>
                       <p className="font-mono text-xs text-blanc-faint mt-1.5">

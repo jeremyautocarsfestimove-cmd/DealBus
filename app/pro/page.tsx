@@ -4,7 +4,7 @@ import { Tabs } from "@/components/Tabs";
 import { createClient } from "@/lib/supabase/server";
 import type { Demande } from "@/lib/types";
 import { InscriptionTransporteur } from "./InscriptionTransporteur";
-import { DeclarerTerminee, ReservationActions, PublierRetour, AnnulerMission } from "./pro-actions";
+import { DeclarerTerminee, ReservationActions, PublierRetour, AnnulerMission, GererVehicules, CgvForm, GererZones } from "./pro-actions";
 
 const eur = (n: number) => Number(n).toLocaleString("fr-FR") + " €";
 const OFFRE_STATUT: Record<string, { label: string; cls: string }> = {
@@ -68,12 +68,20 @@ export default async function ProPage() {
         .select("*, demande:demandes(id, numero, depart_adresse, arrivee_adresse, enchere_fin, statut)")
         .eq("transporteur_id", user!.id).order("created_at", { ascending: false }),
       supabase.from("missions")
-        .select("*, demande:demandes(numero, depart_adresse, arrivee_adresse, date_aller, passagers, client:profiles(nom, telephone))")
+        .select("*, demande:demandes(numero, depart_adresse, arrivee_adresse, date_aller, passagers), retour:retours_vide(depart_adresse, arrivee_adresse, date_dispo, places), client:profiles!missions_client_id_fkey(nom, telephone, email)")
         .eq("transporteur_id", user!.id).order("created_at", { ascending: false }),
       supabase.from("retours_vide")
-        .select("*, reservations:reservations_retour(*, client:profiles(nom, telephone))")
+        .select("*, reservations:reservations_retour(*, client:profiles(nom, telephone, email))")
         .eq("transporteur_id", user!.id).order("created_at", { ascending: false }),
     ]);
+
+  const { data: vehicules } = await supabase
+    .from("vehicules").select("*")
+    .eq("transporteur_id", user!.id).order("created_at", { ascending: true });
+
+  const { data: zones } = await supabase
+    .from("transporteur_zones").select("departement")
+    .eq("transporteur_id", user!.id).order("departement", { ascending: true });
 
   /* eslint-disable @typescript-eslint/no-explicit-any */
   const L = (leads ?? []) as Demande[];
@@ -96,15 +104,30 @@ export default async function ProPage() {
     .filter((m) => m.facturation !== "payee")
     .reduce((s, m) => s + Number(m.commission_montant), 0);
 
+  // CA généré via DealBus (toutes missions hors annulées)
+  const chiffreAffaires = M
+    .filter((m) => m.statut !== "annulee")
+    .reduce((s, m) => s + Number(m.prix_final), 0);
+
   return (
     <>
       <Nav />
       <main className="max-w-5xl mx-auto px-7 py-14">
         <p className="eyebrow mb-4">Espace transporteur</p>
-        <h1 className="h-display text-4xl mb-2">{transporteur.raison_sociale}</h1>
-        <p className="font-mono text-xs text-blanc-faint mb-8">
-          ★ {transporteur.note_moyenne ?? "—"}/5 · {transporteur.nb_avis} avis · {transporteur.nb_missions} missions réalisées
-        </p>
+        <div className="flex items-start justify-between gap-6 flex-wrap mb-8">
+          <div>
+            <h1 className="h-display text-4xl mb-2">{transporteur.raison_sociale}</h1>
+            <p className="font-mono text-xs text-blanc-faint">
+              ★ {transporteur.note_moyenne ?? "—"}/5 · {transporteur.nb_avis} avis · {transporteur.nb_missions} missions réalisées
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="font-mono text-3xl font-semibold text-vert">{eur(chiffreAffaires)}</p>
+            <p className="font-mono text-[10px] uppercase tracking-wider text-blanc-faint mt-1">
+              CA généré via DealBus
+            </p>
+          </div>
+        </div>
 
         {/* Compteurs */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
@@ -119,6 +142,7 @@ export default async function ProPage() {
           `Mes offres (${O.length + encheres.length})`,
           `Mes missions (${M.length})`,
           `Mes retours à vide (${R.length})`,
+          "Mon profil",
         ]}>
           {[
             /* ---------- LEADS ---------- */
@@ -192,11 +216,16 @@ export default async function ProPage() {
             <div key="m" className="space-y-3">
               {M.map((m) => (
                 <div key={m.id} className="card">
-                  <div className="flex items-start justify-between gap-4 flex-wrap">
+                  <div className="grid sm:grid-cols-[1fr_auto] gap-4 items-start">
                     <div>
                       <p className="font-semibold">
-                        #{m.demande?.numero} — {m.demande?.depart_adresse} → {m.demande?.arrivee_adresse}
-                        <span className={`ml-2.5 tag ${
+                        {m.demande
+                          ? `#${m.demande.numero} — ${m.demande.depart_adresse} → ${m.demande.arrivee_adresse}`
+                          : `${m.retour?.depart_adresse} → ${m.retour?.arrivee_adresse}`}
+                      </p>
+                      <p className="mt-2 flex gap-2 flex-wrap">
+                        {m.source === "retour_vide" && <span className="tag bg-ambre-dim text-ambre whitespace-nowrap">Retour à vide</span>}
+                        <span className={`tag whitespace-nowrap ${
                           m.statut === "a_venir" ? "bg-vert-dim text-vert"
                           : m.statut === "annulee" ? "bg-[#3a2020] text-[#E8735D]"
                           : "bg-asphalte-3 text-blanc-dim"}`}>
@@ -207,22 +236,24 @@ export default async function ProPage() {
                         </span>
                       </p>
                       <p className="font-mono text-xs text-blanc-faint mt-1.5">
-                        {m.demande?.date_aller && new Date(m.demande.date_aller).toLocaleDateString("fr-FR")} ·
-                        {" "}{m.demande?.passagers} pax · prix {eur(m.prix_final)} ·
+                        {(m.demande?.date_aller || m.retour?.date_dispo) &&
+                          new Date(m.demande?.date_aller ?? m.retour?.date_dispo).toLocaleDateString("fr-FR")} ·
+                        {" "}{m.demande?.passagers ?? m.retour?.places} pax · prix {eur(m.prix_final)} ·
                         commission <strong className="text-ambre">{eur(m.commission_montant)}</strong> ({m.commission_taux} %)
                       </p>
                       <p className="font-mono text-xs text-blanc mt-2">
-                        Contact client : {m.demande?.client?.nom ?? "—"} · {m.demande?.client?.telephone ?? "téléphone non renseigné"}
+                        Contact client : {m.client?.nom ?? "—"} · {m.client?.telephone ?? "tél. non renseigné"}
+                        {m.client?.email ? ` · ${m.client.email}` : ""}
                       </p>
                     </div>
                     {m.statut === "a_venir" && (
-                      <div className="flex gap-2 flex-wrap">
+                      <div className="flex gap-2 shrink-0 whitespace-nowrap sm:justify-end">
                         <DeclarerTerminee missionId={m.id} />
                         <AnnulerMission missionId={m.id} />
                       </div>
                     )}
                     {m.statut === "terminee_declaree" && (
-                      <span className="font-mono text-[11.5px] text-blanc-faint">En attente d&apos;avis client</span>
+                      <span className="font-mono text-[11.5px] text-blanc-faint sm:justify-self-end">En attente d&apos;avis client</span>
                     )}
                   </div>
                 </div>
@@ -253,7 +284,7 @@ export default async function ProPage() {
                       <div key={resa.id} className="border-t border-ligne pt-3 mt-2 flex items-center justify-between gap-4 flex-wrap">
                         <p className="font-mono text-xs text-blanc-dim">
                           {resa.statut === "en_attente" && <>Demande de réservation du trajet — client anonyme jusqu&apos;à votre validation</>}
-                          {resa.statut === "validee" && <>Réservation validée ✓ — {resa.client?.nom ?? "client"} · {resa.client?.telephone ?? "tél. non renseigné"}</>}
+                          {resa.statut === "validee" && <>Réservation validée ✓ — {resa.client?.nom ?? "client"} · {resa.client?.telephone ?? "tél. non renseigné"}{resa.client?.email ? ` · ${resa.client.email}` : ""}</>}
                           {resa.statut === "refusee" && <>Demande refusée</>}
                         </p>
                         {resa.statut === "en_attente" && (
@@ -265,6 +296,12 @@ export default async function ProPage() {
                 ))}
                 {R.length === 0 && <p className="text-blanc-dim text-sm">Aucun trajet retour publié — c&apos;est le moment de rentabiliser vos kilomètres à vide.</p>}
               </div>
+            </div>,
+            /* ---------- MON PROFIL ---------- */
+            <div key="p">
+              <GererZones transporteurId={user!.id} zones={(zones ?? []) as any[]} />
+              <GererVehicules transporteurId={user!.id} vehicules={(vehicules ?? []) as any[]} />
+              <CgvForm transporteurId={user!.id} initial={transporteur.cgv ?? null} />
             </div>,
           ]}
         </Tabs>
