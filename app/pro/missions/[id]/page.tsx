@@ -36,12 +36,14 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
     <>
       <Nav />
       <main className="max-w-2xl mx-auto px-7 py-14">
-        <Link
-          href="/pro"
-          className="inline-flex mb-8 font-mono text-[11px] uppercase tracking-[0.14em] text-blanc-dim hover:text-blanc transition"
-        >
-          Retour
-        </Link>
+        <div className="flex justify-end mb-8">
+          <Link
+            href="/pro"
+            className="inline-flex items-center border border-white/15 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.14em] text-blanc-dim hover:border-white/30 hover:text-blanc transition"
+          >
+            Retour
+          </Link>
+        </div>
         <p className="eyebrow mb-4">
           Demande #{d.numero} · Client anonyme
         </p>

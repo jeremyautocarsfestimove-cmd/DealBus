@@ -58,11 +58,11 @@ export default async function ProPage() {
   }
 
   // ---------- Données du tableau de bord ----------
-  const [{ data: leads }, { data: offres }, { data: mesBids }, { data: missions }, { data: retours }] =
+  const [{ data: leads }, { data: offres }, { data: mesBids }, { data: missions }, { data: retours }, { data: avis }] =
     await Promise.all([
       supabase.from("demandes").select("*").eq("statut", "ouverte").order("created_at", { ascending: false }),
       supabase.from("offres")
-        .select("*, demande:demandes(numero, depart_adresse, arrivee_adresse, date_aller, passagers)")
+        .select("*, demande:demandes(numero, depart_adresse, arrivee_adresse, date_aller, passagers, statut, enchere_fin)")
         .eq("transporteur_id", user!.id).order("created_at", { ascending: false }),
       supabase.from("bids")
         .select("*, demande:demandes(id, numero, depart_adresse, arrivee_adresse, enchere_fin, statut)")
@@ -72,6 +72,9 @@ export default async function ProPage() {
         .eq("transporteur_id", user!.id).order("created_at", { ascending: false }),
       supabase.from("retours_vide")
         .select("*, reservations:reservations_retour(*, client:profiles(nom, telephone, email))")
+        .eq("transporteur_id", user!.id).order("created_at", { ascending: false }),
+      supabase.from("avis")
+        .select("*, client:profiles(nom), mission:missions(demande:demandes(numero, depart_adresse, arrivee_adresse, date_aller))")
         .eq("transporteur_id", user!.id).order("created_at", { ascending: false }),
     ]);
 
@@ -89,6 +92,38 @@ export default async function ProPage() {
   const B = (mesBids ?? []) as any[];
   const M = (missions ?? []) as any[];
   const R = (retours ?? []) as any[];
+  const A = (avis ?? []) as any[];
+  const noteMoyenneAvis = A.length
+    ? (A.reduce((s, a) => s + Number(a.note), 0) / A.length).toFixed(1)
+    : null;
+
+  // Archivage automatique : on garde la partie active légère et on range
+  // automatiquement les éléments terminés / dépassés dans une section repliable.
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  const offreEstActive = (o: any) =>
+    ["envoyee", "consultee"].includes(o.statut) &&
+    ["ouverte", "selection"].includes(o.demande?.statut ?? "ouverte") &&
+    (!o.demande?.date_aller || new Date(`${o.demande.date_aller}T23:59:59`) >= today);
+
+  const offresActives = O.filter(offreEstActive);
+  const offresArchivees = O.filter((o) => !offreEstActive(o));
+
+  const missionEstActive = (m: any) => {
+    const date = m.demande?.date_aller ?? m.retour?.date_dispo;
+    return m.statut === "a_venir" && (!date || new Date(`${date}T23:59:59`) >= today);
+  };
+
+  const missionsActives = M.filter(missionEstActive);
+  const missionsArchivees = M.filter((m) => !missionEstActive(m));
+
+  const retourEstActif = (r: any) =>
+    !["expire", "annule"].includes(r.statut) &&
+    (!r.date_dispo || new Date(`${r.date_dispo}T23:59:59`) >= today);
+
+  const retoursActifs = R.filter(retourEstActif);
+  const retoursArchives = R.filter((r) => !retourEstActif(r));
 
   // Enchères : regrouper mes relances par demande (ma meilleure offre par enchère)
   const encheresMap = new Map<string, { demande: any; mienne: number; nb: number }>();
@@ -118,7 +153,7 @@ export default async function ProPage() {
           <div>
             <h1 className="h-display text-4xl mb-2">{transporteur.raison_sociale}</h1>
             <p className="font-mono text-xs text-blanc-faint">
-              ★ {transporteur.note_moyenne ?? "—"}/5 · {transporteur.nb_avis} avis · {transporteur.nb_missions} missions réalisées
+              ★ {noteMoyenneAvis ?? "—"}/5 · {A.length} avis · {transporteur.nb_missions} missions réalisées
             </p>
           </div>
           <div className="text-right">
@@ -132,16 +167,17 @@ export default async function ProPage() {
         {/* Compteurs */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
           <div className="card"><p className="font-mono text-xl font-semibold">{L.length}</p><p className="font-mono text-[10px] uppercase tracking-wider text-blanc-faint mt-1">Leads disponibles</p></div>
-          <div className="card"><p className="font-mono text-xl font-semibold">{O.filter((o) => o.statut === "envoyee" || o.statut === "consultee").length + encheres.filter((e) => e.demande?.statut === "ouverte").length}</p><p className="font-mono text-[10px] uppercase tracking-wider text-blanc-faint mt-1">Offres en cours</p></div>
-          <div className="card"><p className="font-mono text-xl font-semibold text-vert">{M.filter((m) => m.statut === "a_venir").length}</p><p className="font-mono text-[10px] uppercase tracking-wider text-blanc-faint mt-1">Missions à venir</p></div>
+          <div className="card"><p className="font-mono text-xl font-semibold">{offresActives.length + encheres.filter((e) => e.demande?.statut === "ouverte" && (!e.demande?.enchere_fin || new Date(e.demande.enchere_fin) > now)).length}</p><p className="font-mono text-[10px] uppercase tracking-wider text-blanc-faint mt-1">Offres en cours</p></div>
+          <div className="card"><p className="font-mono text-xl font-semibold text-vert">{missionsActives.length}</p><p className="font-mono text-[10px] uppercase tracking-wider text-blanc-faint mt-1">Missions à venir</p></div>
           <div className="card"><p className="font-mono text-xl font-semibold text-ambre">{eur(commissionsDues)}</p><p className="font-mono text-[10px] uppercase tracking-wider text-blanc-faint mt-1">Commissions dues</p></div>
         </div>
 
         <Tabs labels={[
           `Nouveaux leads (${L.length})`,
-          `Mes offres (${O.length + encheres.length})`,
-          `Mes missions (${M.length})`,
-          `Mes retours à vide (${R.length})`,
+          `Mes offres (${offresActives.length + encheres.filter((e) => e.demande?.statut === "ouverte" && (!e.demande?.enchere_fin || new Date(e.demande.enchere_fin) > now)).length})`,
+          `Mes missions (${missionsActives.length})`,
+          `Mes retours à vide (${retoursActifs.length})`,
+          `Avis (${A.length})`,
           "Mon profil",
         ]}>
           {[
@@ -168,118 +204,172 @@ export default async function ProPage() {
 
             /* ---------- MES OFFRES ---------- */
             <div key="o">
-              <h2 className="h-display text-xl mb-4">Devis envoyés (tir unique)</h2>
-              <div className="space-y-3 mb-10">
-                {O.map((o) => (
-                  <div key={o.id} className="card flex items-center justify-between gap-4 flex-wrap">
-                    <div>
-                      <p className="font-semibold">
-                        #{o.demande?.numero} — {o.demande?.depart_adresse} → {o.demande?.arrivee_adresse}
-                      </p>
-                      <p className="font-mono text-xs text-blanc-faint mt-1.5">
-                        Votre offre : <strong className="text-blanc">{eur(o.prix_ttc)}</strong> ·
-                        {" "}{o.vehicule_type} {o.vehicule_places} pl. ·
-                        envoyée le {new Date(o.created_at).toLocaleDateString("fr-FR")}
-                      </p>
-                    </div>
-                    <span className={`tag ${OFFRE_STATUT[o.statut].cls}`}>{OFFRE_STATUT[o.statut].label}</span>
-                  </div>
-                ))}
-                {O.length === 0 && <p className="text-blanc-dim text-sm">Aucun devis envoyé.</p>}
+              <div className="flex items-end justify-between gap-4 flex-wrap mb-6">
+                <div>
+                  <h2 className="h-display text-2xl mb-1">Mes offres</h2>
+                  <p className="text-sm text-blanc-dim">Les offres encore actives restent ici. Les offres terminées sont archivées automatiquement.</p>
+                </div>
+                <span className="tag bg-vert-dim text-vert">{offresActives.length + encheres.filter((e) => e.demande?.statut === "ouverte" && (!e.demande?.enchere_fin || new Date(e.demande.enchere_fin) > now)).length} en cours</span>
               </div>
 
-              <h2 className="h-display text-xl mb-4">Enchères en cours ou passées</h2>
-              <div className="space-y-3">
-                {encheres.map((e, i) => {
-                  const live = e.demande?.statut === "ouverte" && e.demande?.enchere_fin && new Date(e.demande.enchere_fin) > new Date();
+              <h3 className="h-display text-xl mb-4">Devis en cours</h3>
+              <div className="space-y-3 mb-8">
+                {offresActives.map((o) => {
+                  const statut = OFFRE_STATUT[o.statut] ?? { label: o.statut, cls: "bg-asphalte-3 text-blanc-dim" };
                   return (
-                    <Link key={i} href={`/pro/leads/${e.demande?.id}`} className="card flex items-center justify-between gap-4 flex-wrap hover:border-ligne-strong transition">
+                    <div key={o.id} className="card flex items-center justify-between gap-4 flex-wrap">
                       <div>
-                        <p className="font-semibold">
-                          #{e.demande?.numero} — {e.demande?.depart_adresse} → {e.demande?.arrivee_adresse}
-                        </p>
+                        <p className="font-semibold">#{o.demande?.numero} — {o.demande?.depart_adresse} → {o.demande?.arrivee_adresse}</p>
                         <p className="font-mono text-xs text-blanc-faint mt-1.5">
-                          Votre meilleure relance : <strong className="text-blanc">{eur(e.mienne)}</strong> ({e.nb} relance{e.nb > 1 ? "s" : ""})
+                          Votre offre : <strong className="text-blanc">{eur(o.prix_ttc)}</strong> · {o.vehicule_type} {o.vehicule_places} pl. · envoyée le {new Date(o.created_at).toLocaleDateString("fr-FR")}
                         </p>
                       </div>
-                      <span className={`tag ${live ? "bg-vert-dim text-vert" : "bg-asphalte-3 text-blanc-faint"}`}>
-                        {live ? "En direct — relancer" : "Clôturée"}
-                      </span>
-                    </Link>
+                      <span className={`tag ${statut.cls}`}>{statut.label}</span>
+                    </div>
                   );
                 })}
-                {encheres.length === 0 && <p className="text-blanc-dim text-sm">Aucune participation à une enchère.</p>}
+                {offresActives.length === 0 && <p className="text-blanc-dim text-sm">Aucun devis en cours.</p>}
               </div>
+
+              <h3 className="h-display text-xl mb-4">Enchères en cours</h3>
+              <div className="space-y-3 mb-8">
+                {encheres.filter((e) => e.demande?.statut === "ouverte" && (!e.demande?.enchere_fin || new Date(e.demande.enchere_fin) > now)).map((e, i) => (
+                  <Link key={i} href={`/pro/leads/${e.demande?.id}`} className="card flex items-center justify-between gap-4 flex-wrap hover:border-ligne-strong transition">
+                    <div>
+                      <p className="font-semibold">#{e.demande?.numero} — {e.demande?.depart_adresse} → {e.demande?.arrivee_adresse}</p>
+                      <p className="font-mono text-xs text-blanc-faint mt-1.5">Votre meilleure relance : <strong className="text-blanc">{eur(e.mienne)}</strong> ({e.nb} relance{e.nb > 1 ? "s" : ""})</p>
+                    </div>
+                    <span className="tag bg-vert-dim text-vert">En direct — relancer</span>
+                  </Link>
+                ))}
+                {encheres.filter((e) => e.demande?.statut === "ouverte" && (!e.demande?.enchere_fin || new Date(e.demande.enchere_fin) > now)).length === 0 && <p className="text-blanc-dim text-sm">Aucune enchère en cours.</p>}
+              </div>
+
+              <details className="card p-0 overflow-hidden group">
+                <summary className="cursor-pointer list-none px-5 py-4 flex items-center justify-between gap-4 hover:bg-asphalte-2 transition">
+                  <span className="font-semibold">Archives</span>
+                  <span className="font-mono text-xs text-blanc-faint">{offresArchivees.length + encheres.filter((e) => !(e.demande?.statut === "ouverte" && (!e.demande?.enchere_fin || new Date(e.demande.enchere_fin) > now))).length} offre(s) passée(s) ▾</span>
+                </summary>
+                <div className="border-t border-ligne p-5 space-y-3">
+                  {offresArchivees.map((o) => {
+                    const statut = OFFRE_STATUT[o.statut] ?? { label: o.statut, cls: "bg-asphalte-3 text-blanc-dim" };
+                    return (
+                      <div key={o.id} className="border border-ligne rounded-lg p-4 flex items-center justify-between gap-4 flex-wrap opacity-80">
+                        <div>
+                          <p className="font-semibold">#{o.demande?.numero} — {o.demande?.depart_adresse} → {o.demande?.arrivee_adresse}</p>
+                          <p className="font-mono text-xs text-blanc-faint mt-1.5">{eur(o.prix_ttc)} · {new Date(o.created_at).toLocaleDateString("fr-FR")}</p>
+                        </div>
+                        <span className={`tag ${statut.cls}`}>{statut.label}</span>
+                      </div>
+                    );
+                  })}
+                  {encheres.filter((e) => !(e.demande?.statut === "ouverte" && (!e.demande?.enchere_fin || new Date(e.demande.enchere_fin) > now))).map((e, i) => (
+                    <div key={`archive-enchere-${i}`} className="border border-ligne rounded-lg p-4 flex items-center justify-between gap-4 flex-wrap opacity-80">
+                      <div>
+                        <p className="font-semibold">#{e.demande?.numero} — {e.demande?.depart_adresse} → {e.demande?.arrivee_adresse}</p>
+                        <p className="font-mono text-xs text-blanc-faint mt-1.5">Meilleure relance : <strong className="text-blanc">{eur(e.mienne)}</strong> · {e.nb} relance{e.nb > 1 ? "s" : ""}</p>
+                      </div>
+                      <span className="tag bg-asphalte-3 text-blanc-faint">Enchère clôturée</span>
+                    </div>
+                  ))}
+                  {offresArchivees.length === 0 && encheres.filter((e) => !(e.demande?.statut === "ouverte" && (!e.demande?.enchere_fin || new Date(e.demande.enchere_fin) > now))).length === 0 && <p className="text-blanc-dim text-sm">Aucune offre archivée.</p>}
+                </div>
+              </details>
             </div>,
 
             /* ---------- MES MISSIONS ---------- */
-            <div key="m" className="space-y-3">
-              {M.map((m) => (
-                <div key={m.id} className="card">
-                  <div className="grid sm:grid-cols-[1fr_auto] gap-4 items-start">
-                    <div>
-                      <p className="font-semibold">
-                        {m.demande
-                          ? `#${m.demande.numero} — ${m.demande.depart_adresse} → ${m.demande.arrivee_adresse}`
-                          : `${m.retour?.depart_adresse} → ${m.retour?.arrivee_adresse}`}
-                      </p>
-                      <p className="mt-2 flex gap-2 flex-wrap">
-                        {m.source === "retour_vide" && <span className="tag bg-ambre-dim text-ambre whitespace-nowrap">Retour à vide</span>}
-                        <span className={`tag whitespace-nowrap ${
-                          m.statut === "a_venir" ? "bg-vert-dim text-vert"
-                          : m.statut === "annulee" ? "bg-[#3a2020] text-[#E8735D]"
-                          : "bg-asphalte-3 text-blanc-dim"}`}>
-                          {m.statut === "a_venir" ? "À venir"
-                            : m.statut === "terminee_declaree" ? "Terminée"
-                            : m.statut === "annulee" ? "Annulée"
-                            : m.statut}
-                        </span>
-                      </p>
-                      <p className="font-mono text-xs text-blanc-faint mt-1.5">
-                        {(m.demande?.date_aller || m.retour?.date_dispo) &&
-                          new Date(m.demande?.date_aller ?? m.retour?.date_dispo).toLocaleDateString("fr-FR")} ·
-                        {" "}{m.demande?.passagers ?? m.retour?.places} pax · prix {eur(m.prix_final)} ·
-                        commission <strong className="text-ambre">{eur(m.commission_montant)}</strong> ({m.commission_taux} %)
-                      </p>
-                      <p className="font-mono text-xs text-blanc mt-2">
-                        Contact client : {m.client?.nom ?? "—"} · {m.client?.telephone ?? "tél. non renseigné"}
-                        {m.client?.email ? ` · ${m.client.email}` : ""}
-                      </p>
-                    </div>
-                    {m.statut === "a_venir" && (
-                      <div className="flex gap-2 shrink-0 whitespace-nowrap sm:justify-end">
-                        <DeclarerTerminee missionId={m.id} />
-                        <AnnulerMission missionId={m.id} />
-                      </div>
-                    )}
-                    {m.statut === "terminee_declaree" && (
-                      <span className="font-mono text-[11.5px] text-blanc-faint sm:justify-self-end">En attente d&apos;avis client</span>
-                    )}
-                  </div>
+            <div key="m">
+              <div className="flex items-end justify-between gap-4 flex-wrap mb-6">
+                <div>
+                  <h2 className="h-display text-2xl mb-1">Mes missions</h2>
+                  <p className="text-sm text-blanc-dim">Les missions terminées, annulées ou dont la date est passée sont archivées automatiquement.</p>
                 </div>
-              ))}
-              {M.length === 0 && <p className="text-blanc-dim text-sm">Aucune mission remportée pour l&apos;instant — répondez aux leads !</p>}
+                <span className="tag bg-vert-dim text-vert">{missionsActives.length} à venir</span>
+              </div>
+
+              <div className="space-y-3">
+                {missionsActives.map((m) => (
+                  <div key={m.id} className="card">
+                    <div className="grid sm:grid-cols-[1fr_auto] gap-4 items-start">
+                      <div>
+                        <Link href={`/pro/missions/${m.id}`} className="font-semibold hover:text-ambre transition inline-block">
+                          {m.demande ? `#${m.demande.numero} — ${m.demande.depart_adresse} → ${m.demande.arrivee_adresse}` : `${m.retour?.depart_adresse} → ${m.retour?.arrivee_adresse}`}
+                        </Link>
+                        <p className="mt-2 flex gap-2 flex-wrap">
+                          {m.source === "retour_vide" && <span className="tag bg-ambre-dim text-ambre whitespace-nowrap">Retour à vide</span>}
+                          <span className="tag whitespace-nowrap bg-vert-dim text-vert">À venir</span>
+                        </p>
+                        <p className="font-mono text-xs text-blanc-faint mt-1.5">
+                          {(m.demande?.date_aller || m.retour?.date_dispo) && new Date(m.demande?.date_aller ?? m.retour?.date_dispo).toLocaleDateString("fr-FR")} · {m.demande?.passagers ?? m.retour?.places} pax · prix {eur(m.prix_final)} · commission <strong className="text-ambre">{eur(m.commission_montant)}</strong> ({m.commission_taux} %)
+                        </p>
+                        <p className="font-mono text-xs text-blanc mt-2">Contact client : {m.client?.nom ?? "—"} · {m.client?.telephone ?? "tél. non renseigné"}{m.client?.email ? ` · ${m.client.email}` : ""}</p>
+                        <Link href={`/pro/missions/${m.id}`} className="inline-block mt-3 font-mono text-[11px] uppercase tracking-wider text-blanc-dim hover:text-blanc transition">Voir la mission →</Link>
+                      </div>
+                      {m.statut === "a_venir" && (
+                        <div className="flex gap-2 shrink-0 whitespace-nowrap sm:justify-end">
+                          <DeclarerTerminee missionId={m.id} />
+                          <AnnulerMission missionId={m.id} />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                {missionsActives.length === 0 && <p className="text-blanc-dim text-sm">Aucune mission à venir.</p>}
+              </div>
+
+              <details className="card p-0 overflow-hidden mt-6">
+                <summary className="cursor-pointer list-none px-5 py-4 flex items-center justify-between gap-4 hover:bg-asphalte-2 transition">
+                  <span className="font-semibold">Archives</span>
+                  <span className="font-mono text-xs text-blanc-faint">{missionsArchivees.length} mission(s) passée(s) ▾</span>
+                </summary>
+                <div className="border-t border-ligne p-5 space-y-3">
+                  {missionsArchivees.map((m) => (
+                    <div key={m.id} className="border border-ligne rounded-lg p-4 opacity-80">
+                      <div className="flex items-start justify-between gap-4 flex-wrap">
+                        <div>
+                          <Link href={`/pro/missions/${m.id}`} className="font-semibold hover:text-ambre transition inline-block">
+                            {m.demande ? `#${m.demande.numero} — ${m.demande.depart_adresse} → ${m.demande.arrivee_adresse}` : `${m.retour?.depart_adresse} → ${m.retour?.arrivee_adresse}`}
+                          </Link>
+                          <p className="font-mono text-xs text-blanc-faint mt-1.5">
+                            {(m.demande?.date_aller || m.retour?.date_dispo) && new Date(m.demande?.date_aller ?? m.retour?.date_dispo).toLocaleDateString("fr-FR")} · prix {eur(m.prix_final)}
+                          </p>
+                        </div>
+                        <span className={`tag ${m.statut === "annulee" ? "bg-[#3a2020] text-[#E8735D]" : "bg-asphalte-3 text-blanc-dim"}`}>
+                          {m.statut === "terminee_declaree" ? "Terminée" : m.statut === "annulee" ? "Annulée" : m.statut === "a_venir" ? "Date passée" : m.statut}
+                        </span>
+                      </div>
+                      {m.statut === "a_venir" && (
+                        <div className="mt-3 flex gap-2"><DeclarerTerminee missionId={m.id} /><AnnulerMission missionId={m.id} /></div>
+                      )}
+                      {m.statut === "terminee_declaree" && <p className="font-mono text-[11px] text-blanc-faint mt-3">En attente d&apos;avis client</p>}
+                    </div>
+                  ))}
+                  {missionsArchivees.length === 0 && <p className="text-blanc-dim text-sm">Aucune mission archivée.</p>}
+                </div>
+              </details>
             </div>,
 
             /* ---------- MES RETOURS À VIDE ---------- */
             <div key="r">
               <PublierRetour transporteurId={user!.id} />
+              <div className="flex items-end justify-between gap-4 flex-wrap mb-5">
+                <div>
+                  <h2 className="h-display text-2xl mb-1">Mes retours à vide</h2>
+                  <p className="text-sm text-blanc-dim">Les retours arrivés à échéance ou annulés sont archivés automatiquement.</p>
+                </div>
+                <span className="tag bg-vert-dim text-vert">{retoursActifs.length} actif(s)</span>
+              </div>
+
               <div className="space-y-3">
-                {R.map((r) => (
+                {retoursActifs.map((r) => (
                   <div key={r.id} className="card">
                     <div className="flex items-center justify-between gap-4 flex-wrap mb-1">
-                      <p className="font-semibold">
-                        {r.depart_adresse} → {r.arrivee_adresse}
-                        <span className="ml-2.5 tag bg-ambre-dim text-ambre">{eur(r.prix_fixe)}</span>
-                      </p>
+                      <p className="font-semibold">{r.depart_adresse} → {r.arrivee_adresse}<span className="ml-2.5 tag bg-ambre-dim text-ambre">{eur(r.prix_fixe)}</span></p>
                       <span className={`tag ${["publie", "demande_recue"].includes(r.statut) ? "bg-vert-dim text-vert" : "bg-asphalte-3 text-blanc-faint"}`}>
-                        {r.statut === "publie" ? "En ligne" : r.statut === "demande_recue" ? "Demande reçue" : r.statut}
+                        {r.statut === "publie" ? "En ligne" : r.statut === "demande_recue" ? "Demande reçue" : r.statut === "confirme" ? "Confirmé" : r.statut}
                       </span>
                     </div>
-                    <p className="font-mono text-xs text-blanc-faint mb-3">
-                      {new Date(r.date_dispo).toLocaleDateString("fr-FR")}
-                      {r.heure_apres ? `, départ après ${String(r.heure_apres).slice(0, 5)}` : ""} · {r.places} places
-                    </p>
+                    <p className="font-mono text-xs text-blanc-faint mb-3">{new Date(r.date_dispo).toLocaleDateString("fr-FR")}{r.heure_apres ? `, départ après ${String(r.heure_apres).slice(0, 5)}` : ""} · {r.places} places</p>
                     {(r.reservations ?? []).map((resa: any) => (
                       <div key={resa.id} className="border-t border-ligne pt-3 mt-2 flex items-center justify-between gap-4 flex-wrap">
                         <p className="font-mono text-xs text-blanc-dim">
@@ -287,16 +377,101 @@ export default async function ProPage() {
                           {resa.statut === "validee" && <>Réservation validée ✓ — {resa.client?.nom ?? "client"} · {resa.client?.telephone ?? "tél. non renseigné"}{resa.client?.email ? ` · ${resa.client.email}` : ""}</>}
                           {resa.statut === "refusee" && <>Demande refusée</>}
                         </p>
-                        {resa.statut === "en_attente" && (
-                          <ReservationActions reservationId={resa.id} retourId={r.id} />
-                        )}
+                        {resa.statut === "en_attente" && <ReservationActions reservationId={resa.id} retourId={r.id} />}
                       </div>
                     ))}
                   </div>
                 ))}
-                {R.length === 0 && <p className="text-blanc-dim text-sm">Aucun trajet retour publié — c&apos;est le moment de rentabiliser vos kilomètres à vide.</p>}
+                {retoursActifs.length === 0 && <p className="text-blanc-dim text-sm">Aucun retour à vide actif.</p>}
+              </div>
+
+              <details className="card p-0 overflow-hidden mt-6">
+                <summary className="cursor-pointer list-none px-5 py-4 flex items-center justify-between gap-4 hover:bg-asphalte-2 transition">
+                  <span className="font-semibold">Archives</span>
+                  <span className="font-mono text-xs text-blanc-faint">{retoursArchives.length} retour(s) passé(s) ▾</span>
+                </summary>
+                <div className="border-t border-ligne p-5 space-y-3">
+                  {retoursArchives.map((r) => (
+                    <div key={r.id} className="border border-ligne rounded-lg p-4 flex items-center justify-between gap-4 flex-wrap opacity-80">
+                      <div>
+                        <p className="font-semibold">{r.depart_adresse} → {r.arrivee_adresse}</p>
+                        <p className="font-mono text-xs text-blanc-faint mt-1.5">{new Date(r.date_dispo).toLocaleDateString("fr-FR")} · {r.places} places · {eur(r.prix_fixe)}</p>
+                      </div>
+                      <span className="tag bg-asphalte-3 text-blanc-faint">{r.statut === "annule" ? "Annulé" : r.statut === "expire" ? "Expiré" : "Date passée"}</span>
+                    </div>
+                  ))}
+                  {retoursArchives.length === 0 && <p className="text-blanc-dim text-sm">Aucun retour archivé.</p>}
+                </div>
+              </details>
+            </div>,
+            /* ---------- AVIS CLIENTS ---------- */
+            <div key="a">
+              <div className="flex items-end justify-between gap-4 flex-wrap mb-6">
+                <div>
+                  <h2 className="h-display text-2xl mb-1">Avis clients</h2>
+                  <p className="text-sm text-blanc-dim">
+                    Les avis laissés après une mission réalisée apparaissent ici.
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="font-mono text-2xl font-semibold text-ambre">
+                    ★ {noteMoyenneAvis ?? "—"}/5
+                  </p>
+                  <p className="font-mono text-[10px] uppercase tracking-wider text-blanc-faint mt-1">
+                    {A.length} avis reçu{A.length > 1 ? "s" : ""}
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                {A.map((a) => {
+                  const trajet = a.mission?.demande;
+                  return (
+                    <div key={a.id} className="card">
+                      <div className="flex items-start justify-between gap-4 flex-wrap">
+                        <div>
+                          <p className="font-mono text-lg tracking-wide text-ambre" aria-label={`${a.note} étoiles sur 5`}>
+                            {"★".repeat(Number(a.note))}
+                            <span className="text-blanc-faint">{"★".repeat(5 - Number(a.note))}</span>
+                          </p>
+                          <p className="font-semibold mt-2">{a.client?.nom ?? "Client DealBus"}</p>
+                        </div>
+                        <p className="font-mono text-[11px] text-blanc-faint">
+                          {new Date(a.created_at).toLocaleDateString("fr-FR")}
+                        </p>
+                      </div>
+
+                      {a.commentaire ? (
+                        <p className="mt-4 text-sm leading-6 text-blanc-dim whitespace-pre-line">
+                          “{a.commentaire}”
+                        </p>
+                      ) : (
+                        <p className="mt-4 text-sm text-blanc-faint italic">Aucun commentaire laissé.</p>
+                      )}
+
+                      {trajet && (
+                        <div className="border-t border-ligne mt-4 pt-3">
+                          <p className="font-mono text-[11px] text-blanc-faint">
+                            Mission #{trajet.numero} · {trajet.depart_adresse} → {trajet.arrivee_adresse}
+                            {trajet.date_aller ? ` · ${new Date(trajet.date_aller).toLocaleDateString("fr-FR")}` : ""}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+
+                {A.length === 0 && (
+                  <div className="card py-10 text-center">
+                    <p className="font-semibold mb-1">Aucun avis pour le moment</p>
+                    <p className="text-sm text-blanc-dim">
+                      Les avis apparaîtront ici dès qu’un client aura évalué une mission terminée.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>,
+
             /* ---------- MON PROFIL ---------- */
             <div key="p">
               <GererZones transporteurId={user!.id} zones={(zones ?? []) as any[]} />
