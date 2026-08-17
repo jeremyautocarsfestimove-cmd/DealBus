@@ -61,9 +61,6 @@ function DemandeWizard() {
   const set = (k: string, v: unknown) => setForm((f) => ({ ...f, [k]: v }));
 
   // Estimation simple côté client — TODO: affiner (distance réelle via API)
-  const estimation = form.passagers
-    ? Math.round(900 + Number(form.passagers) * 28)
-    : null;
 
   async function insertDemande(userId: string) {
     // Le profil doit exister (FK demandes.client_id → profiles.id)
@@ -73,7 +70,7 @@ function DemandeWizard() {
       role: "client",
       ...(u?.email && { email: u.email }),
       ...(nomClient.trim() && { nom: nomClient.trim() }),
-    });
+    }, { onConflict: "id", ignoreDuplicates: true });
 
     const { data: nouvelle, error: err } = await supabase.from("demandes").insert({
       client_id: userId,
@@ -90,11 +87,10 @@ function DemandeWizard() {
       vehicule_utilise_sur_place: form.vehicule_utilise_sur_place,
       precisions: form.precisions || null,
       motif: form.motif || null,
-      prix_estime: estimation,
+
       // Enchère : clôture choisie par le client (au plus tard le jour J)
       ...(form.mode === "enchere" && {
         enchere_fin: new Date(enchereFin).toISOString(),
-        enchere_prix_depart: estimation,
       }),
     }).select("id").single();
 
@@ -279,19 +275,24 @@ function DemandeWizard() {
           )}
 
           {step === 2 && (
-            <div>
-              <p className="text-sm text-blanc-dim mb-1.5">Prix estimé à partir de</p>
-              <p className="font-mono text-4xl font-semibold text-ambre mb-6">
-                {estimation ? `${estimation.toLocaleString("fr-FR")} €` : "—"}
-                <span className="text-sm text-blanc-faint font-normal ml-2">TTC indicatif</span>
-              </p>
-              <div className="border-t border-ligne pt-4 space-y-2 font-mono text-sm">
-                <p className="flex justify-between"><span className="text-blanc-faint">Trajet</span><span>{form.depart_adresse || "—"} → {form.arrivee_adresse || "—"}</span></p>
-                <p className="flex justify-between"><span className="text-blanc-faint">Passagers</span><span>{form.passagers || "—"}</span></p>
+            <div className="space-y-5">
+              <div className="card">
+                <p className="font-mono text-[11px] uppercase tracking-wider text-blanc-faint mb-4">Récapitulatif de votre trajet</p>
+                <p className="font-semibold text-lg mb-2">
+                  {form.depart_adresse || "Départ"} <span className="text-blanc-faint font-normal">→</span> {form.arrivee_adresse || "Destination"}
+                </p>
+                <p className="font-mono text-sm text-blanc-dim">
+                  {form.date_aller ? new Date(form.date_aller).toLocaleDateString("fr-FR") : "—"}
+                  {form.heure_aller ? ` à ${form.heure_aller.slice(0, 5).replace(":", "h")}` : ""}
+                  {form.date_retour ? ` → ${new Date(form.date_retour).toLocaleDateString("fr-FR")}` : ""}
+                  {" "}· {form.passagers || "—"} passagers
+                </p>
               </div>
-              <p className="mt-5 text-[13px] text-blanc-dim bg-vert-dim border border-vert/30 rounded-sm px-4 py-3">
-                Cette estimation est calculée automatiquement, sans transmettre votre trajet à un transporteur.
-              </p>
+              <div className="text-[13.5px] text-blanc-dim bg-vert-dim border border-vert/30 rounded-sm px-5 py-4 leading-relaxed">
+                Pas d&apos;estimation théorique ici : vos prix seront de <strong className="text-blanc">vraies offres fermes</strong>,
+                établies par des transporteurs vérifiés qui connaissent leurs coûts.
+                Vous comparez, vous choisissez — ou vous ne donnez pas suite.
+              </div>
             </div>
           )}
 

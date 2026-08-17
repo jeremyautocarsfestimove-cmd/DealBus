@@ -149,7 +149,7 @@ export function LiveBoard() {
           route: `${ville(d.depart_adresse)} → ${ville(d.arrivee_adresse)}`,
           pax: d.passagers,
           valeur: d.mode === "enchere"
-            ? eur(d.meilleure_enchere ?? d.prix_estime ?? 0)
+            ? (d.meilleure_enchere ? eur(d.meilleure_enchere) : "En attente")
             : `${d.nb_offres} offre${d.nb_offres > 1 ? "s" : ""}`,
           reel: true,
           created_at: d.created_at,

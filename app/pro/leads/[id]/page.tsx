@@ -79,7 +79,7 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
           <EnchereForm
             demandeId={id}
             enchereFin={d.enchere_fin}
-            bestPrix={bestBid?.prix_ttc ?? d.prix_estime ?? null}
+            bestPrix={bestBid?.prix_ttc ?? null}
           />
         )}
       </main>
