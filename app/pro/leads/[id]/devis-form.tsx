@@ -52,7 +52,7 @@ export function DevisForm({ demandeId }: { demandeId: string }) {
     setError(null);
     const { data: { user } } = await supabase.auth.getUser();
 
-    const { error: err } = await supabase.from("offres").insert({
+    const { data: creee, error: err } = await supabase.from("offres").insert({
       demande_id: demandeId,
       transporteur_id: user!.id,
       prix_ttc: Number(form.prix_ttc),
@@ -60,12 +60,20 @@ export function DevisForm({ demandeId }: { demandeId: string }) {
       vehicule_places: Number(form.vehicule_places),
       vehicule_annee: form.vehicule_annee ? Number(form.vehicule_annee) : null,
       conditions: form.conditions || null,
-    });
+    }).select("id").single();
 
     if (err) {
       setError(err.message.includes("duplicate") ? "Vous avez déjà répondu à cette demande (tir unique)." : err.message);
       setSaving(false);
       return;
+    }
+    // Prévenir le client de la nouvelle offre (jamais bloquant)
+    if (creee?.id) {
+      fetch("/api/notify-event", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "offre", id: creee.id }),
+      }).catch(() => {});
     }
     router.refresh();
   }
