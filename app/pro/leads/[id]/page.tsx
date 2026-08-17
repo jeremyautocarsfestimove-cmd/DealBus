@@ -50,7 +50,8 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
         </h1>
         <p className="font-mono text-xs text-blanc-faint mb-10">
           {new Date(d.date_aller).toLocaleDateString("fr-FR")}
-          {d.date_retour ? ` → ${new Date(d.date_retour).toLocaleDateString("fr-FR")}` : ""} ·
+          {d.heure_aller ? ` à ${String(d.heure_aller).slice(0, 5).replace(":", "h")}` : ""}
+          {d.date_retour ? ` → ${new Date(d.date_retour).toLocaleDateString("fr-FR")}${d.heure_retour ? ` à ${String(d.heure_retour).slice(0, 5).replace(":", "h")}` : ""}` : ""} ·
           {" "}{d.passagers} passagers · {d.type_trajet.replace("_", "-")}
         </p>
 

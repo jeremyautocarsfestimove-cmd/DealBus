@@ -23,6 +23,7 @@ export default async function MissionPage({ params }: { params: Promise<{ id: st
   if (!mission) notFound();
 
   const dateMission = mission.demande?.date_aller ?? mission.retour?.date_dispo;
+  const heureMission = mission.demande?.heure_aller ?? mission.retour?.heure_apres;
   const depart = mission.demande?.depart_adresse ?? mission.retour?.depart_adresse ?? "—";
   const arrivee = mission.demande?.arrivee_adresse ?? mission.retour?.arrivee_adresse ?? "—";
 
@@ -39,7 +40,7 @@ export default async function MissionPage({ params }: { params: Promise<{ id: st
           <div>
             <h1 className="h-display text-4xl mb-2">{depart} → {arrivee}</h1>
             <p className="font-mono text-xs text-blanc-faint">
-              {dateMission ? new Date(dateMission).toLocaleDateString("fr-FR") : "Date non renseignée"}
+              {dateMission ? new Date(dateMission).toLocaleDateString("fr-FR") + (heureMission ? ` à ${String(heureMission).slice(0, 5).replace(":", "h")}` : "") : "Date non renseignée"}
               {mission.demande?.passagers ? ` · ${mission.demande.passagers} passagers` : mission.retour?.places ? ` · ${mission.retour.places} places` : ""}
             </p>
           </div>

@@ -171,7 +171,7 @@ export default async function AdminPage() {
                     </p>
                     <p className="font-mono text-xs text-blanc-faint mt-1.5">
                       {d.client?.nom ?? "Client sans nom"} · {d.passagers} pax ·
-                      {" "}{new Date(d.date_aller).toLocaleDateString("fr-FR")} ·
+                      {" "}{new Date(d.date_aller).toLocaleDateString("fr-FR")}{d.heure_aller ? ` à ${String(d.heure_aller).slice(0, 5).replace(":", "h")}` : ""} ·
                       statut <strong className="text-blanc-dim">{d.statut}</strong> ·
                       créée le {new Date(d.created_at).toLocaleDateString("fr-FR")}
                     </p>

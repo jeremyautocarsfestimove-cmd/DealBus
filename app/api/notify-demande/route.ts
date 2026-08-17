@@ -51,7 +51,8 @@ export async function POST(req: Request) {
 
   const resend = new Resend(process.env.RESEND_API_KEY);
   const site = process.env.NEXT_PUBLIC_SITE_URL;
-  const dateAller = new Date(demande.date_aller).toLocaleDateString("fr-FR");
+  const dateAller = new Date(demande.date_aller).toLocaleDateString("fr-FR")
+    + (demande.heure_aller ? ` à ${String(demande.heure_aller).slice(0, 5).replace(":", "h")}` : "");
   const modeLabel = demande.mode === "enchere" ? "Enchère en direct" : "Demande de devis";
   const sujet = demande.mode === "enchere"
     ? `🔨 Nouvelle enchère : ${demande.depart_adresse} → ${demande.arrivee_adresse}`

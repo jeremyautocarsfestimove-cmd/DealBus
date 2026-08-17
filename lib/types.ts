@@ -10,6 +10,8 @@ export interface Demande {
   depart_adresse: string;
   arrivee_adresse: string;
   date_aller: string;
+  heure_aller: string | null;
+  heure_retour: string | null;
   date_retour: string | null;
   passagers: number;
   prix_estime: number | null;

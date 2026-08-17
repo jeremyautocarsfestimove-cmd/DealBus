@@ -7,6 +7,8 @@ import { InscriptionTransporteur } from "./InscriptionTransporteur";
 import { DeclarerTerminee, ReservationActions, PublierRetour, AnnulerMission, GererVehicules, CgvForm, GererZones } from "./pro-actions";
 
 const eur = (n: number) => Number(n).toLocaleString("fr-FR") + " €";
+const dateHeure = (date: string | null, heure?: string | null) =>
+  date ? new Date(date).toLocaleDateString("fr-FR") + (heure ? ` à ${String(heure).slice(0, 5).replace(":", "h")}` : "") : "";
 const OFFRE_STATUT: Record<string, { label: string; cls: string }> = {
   envoyee: { label: "En attente", cls: "bg-asphalte-3 text-blanc-dim" },
   consultee: { label: "Consultée", cls: "bg-bleunuit text-[#9DB3DE]" },
@@ -62,13 +64,13 @@ export default async function ProPage() {
     await Promise.all([
       supabase.from("demandes").select("*").eq("statut", "ouverte").order("created_at", { ascending: false }),
       supabase.from("offres")
-        .select("*, demande:demandes(numero, depart_adresse, arrivee_adresse, date_aller, passagers, statut, enchere_fin)")
+        .select("*, demande:demandes(numero, depart_adresse, arrivee_adresse, date_aller, heure_aller, passagers, statut, enchere_fin)")
         .eq("transporteur_id", user!.id).order("created_at", { ascending: false }),
       supabase.from("bids")
         .select("*, demande:demandes(id, numero, depart_adresse, arrivee_adresse, enchere_fin, statut)")
         .eq("transporteur_id", user!.id).order("created_at", { ascending: false }),
       supabase.from("missions")
-        .select("*, demande:demandes(numero, depart_adresse, arrivee_adresse, date_aller, passagers), retour:retours_vide(depart_adresse, arrivee_adresse, date_dispo, places), client:profiles!missions_client_id_fkey(nom, telephone, email)")
+        .select("*, demande:demandes(numero, depart_adresse, arrivee_adresse, date_aller, heure_aller, passagers), retour:retours_vide(depart_adresse, arrivee_adresse, date_dispo, heure_apres, places), client:profiles!missions_client_id_fkey(nom, telephone, email)")
         .eq("transporteur_id", user!.id).order("created_at", { ascending: false }),
       supabase.from("retours_vide")
         .select("*, reservations:reservations_retour(*, client:profiles(nom, telephone, email))")
@@ -211,7 +213,7 @@ export default async function ProPage() {
                       )}
                     </div>
                     <p className="font-mono text-xs text-blanc-faint">
-                      {new Date(d.date_aller).toLocaleDateString("fr-FR")} · {d.passagers} passagers · Demande #{d.numero}
+                      {dateHeure(d.date_aller, d.heure_aller)} · {d.passagers} passagers · Demande #{d.numero}
                     </p>
                   </Link>
                 ))}
@@ -242,7 +244,7 @@ export default async function ProPage() {
                           </span>
                         </div>
                         <p className="font-mono text-xs text-blanc-faint">
-                          {new Date(d.date_aller).toLocaleDateString("fr-FR")} · {d.passagers} passagers · Demande #{d.numero}
+                          {dateHeure(d.date_aller, d.heure_aller)} · {d.passagers} passagers · Demande #{d.numero}
                         </p>
                       </Link>
                     ))}
