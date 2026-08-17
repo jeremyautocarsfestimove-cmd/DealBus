@@ -267,6 +267,13 @@ export function InscriptionTransporteur() {
               {saving ? "Création…" : "Créer mon compte →"}
             </button>
           </div>
+          <p className="font-mono text-[11px] text-blanc-faint text-center mt-4">
+            En créant votre compte, vous acceptez les{" "}
+            <a href="/cgu" target="_blank" className="underline underline-offset-2 hover:text-blanc-dim">Conditions Générales d&apos;Utilisation</a>,
+            dont le barème de commission et le droit de suite.
+          </p>
+          <div className="hidden">
+          </div>
           <p className="font-mono text-[11px] text-blanc-faint">
             Votre compte passe ensuite en vérification manuelle (licence + RC Pro). Vous êtes averti par email dès l&apos;activation.
           </p>
