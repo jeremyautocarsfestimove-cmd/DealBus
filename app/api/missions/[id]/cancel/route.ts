@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { emailHtml } from "@/lib/email";
 
 export async function POST(
   req: Request,
@@ -31,6 +32,7 @@ export async function POST(
       transporteur_id,
       statut,
       prix_final,
+      commission_montant,
       demande:demandes(id, numero, depart_adresse, arrivee_adresse, date_aller)
     `)
     .eq("id", missionId)
@@ -132,6 +134,44 @@ export async function POST(
       console.error("[DealBus] Email annulation client non envoyé:", error);
       // L'échec email ne doit pas annuler l'annulation métier.
     }
+  }
+
+  // ---- Alerte immédiate de l'administration ----
+  if (process.env.RESEND_API_KEY) {
+    try {
+      /* eslint-disable @typescript-eslint/no-explicit-any */
+      const [{ data: admins }, { data: transporteurFiche }] = await Promise.all([
+        admin.from("profiles").select("email").eq("role", "admin").not("email", "is", null),
+        admin.from("transporteurs").select("raison_sociale").eq("id", mission.transporteur_id).single(),
+      ]);
+      const destinataires = (admins ?? []).map((a: any) => a.email).filter(Boolean);
+      if (destinataires.length) {
+        const demande = Array.isArray(mission.demande) ? mission.demande[0] : mission.demande;
+        const trajet = demande ? `${demande.depart_adresse} → ${demande.arrivee_adresse}` : "trajet inconnu";
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? new URL(req.url).origin;
+        const resend = new Resend(process.env.RESEND_API_KEY);
+        await resend.emails.send({
+          from: process.env.RESEND_FROM ?? "DealBus <onboarding@resend.dev>",
+          to: destinataires,
+          subject: `🚫 Mission annulée par le transporteur — #${demande?.numero ?? "?"}`,
+          text: `${transporteurFiche?.raison_sociale ?? "?"} a annulé ${trajet}. Motif : ${motifNettoye}. ${siteUrl}/admin`,
+          html: emailHtml({
+            titre: "Mission annulée par le transporteur",
+            paragraphes: [
+              `<strong>${transporteurFiche?.raison_sociale ?? "Transporteur inconnu"}</strong> vient d'annuler la mission <strong>${trajet}</strong>${demande?.date_aller ? ` prévue le ${new Date(demande.date_aller).toLocaleDateString("fr-FR")}` : ""}.`,
+              `<strong>Motif déclaré :</strong> « ${motifNettoye.replace(/</g, "&lt;").replace(/>/g, "&gt;")} »`,
+            ],
+            highlight: {
+              label: "Commission perdue si l'annulation est réelle",
+              value: `${Number(mission.commission_montant ?? 0).toLocaleString("fr-FR")} €`,
+              detail: `Mission de ${Number(mission.prix_final).toLocaleString("fr-FR")} € — vérification automatique auprès du client après la date du trajet`,
+            },
+            cta: { label: "Voir dans le back-office", url: `${siteUrl}/admin` },
+            note: "Le client a été notifié de l'annulation. Si le taux d'annulation de ce transporteur devient anormal, une revue de compte s'impose.",
+          }),
+        });
+      }
+    } catch { /* l'alerte admin ne bloque jamais l'annulation */ }
   }
 
   return NextResponse.json({ ok: true, email_sent: emailSent });
