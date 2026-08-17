@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Favicon DealBus — face avant d'autocar, fond asphalte, traits ambre -->
+  <rect width="64" height="64" rx="14" fill="#12151B"/>
+  <rect x="13" y="14" width="38" height="37" rx="7" fill="none" stroke="#E8A63D" stroke-width="3.8"/>
+  <path d="M 17 32 L 17 21 Q 17 18 20 18 L 44 18 Q 47 18 47 21 L 47 32 Z" fill="#E8A63D" opacity="0.3"/>
+  <line x1="17" y1="32" x2="47" y2="32" stroke="#E8A63D" stroke-width="3"/>
+  <circle cx="23.5" cy="41.5" r="4" fill="#E8A63D"/>
+  <circle cx="40.5" cy="41.5" r="4" fill="#E8A63D"/>
+</svg>
