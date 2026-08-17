@@ -23,19 +23,30 @@ export async function POST(req: Request) {
   if (!demande) return NextResponse.json({ ok: true, sent: 0, note: "déjà notifiée ou close" });
 
   // Transporteurs validés couvrant le département de départ
-  const { data: zones } = await admin
+  // (chemin de jointure : zones → transporteurs → profiles ; pas de lien direct zones→profiles)
+  const { data: zones, error: zonesError } = await admin
     .from("transporteur_zones")
-    .select("transporteur_id, transporteur:transporteurs!inner(statut), profile:profiles!inner(email)")
+    .select("transporteur_id, transporteur:transporteurs!inner(statut, profile:profiles!inner(email))")
     .eq("departement", demande.depart_departement)
     .eq("transporteur.statut", "valide");
 
   /* eslint-disable @typescript-eslint/no-explicit-any */
   const emails = Array.from(new Set(
-    (zones ?? []).map((z: any) => z.profile?.email).filter(Boolean)
+    (zones ?? []).map((z: any) => z.transporteur?.profile?.email).filter(Boolean)
   )) as string[];
 
-  if (!emails.length || !process.env.RESEND_API_KEY) {
-    return NextResponse.json({ ok: true, sent: 0 });
+  if (zonesError || !emails.length || !process.env.RESEND_API_KEY) {
+    return NextResponse.json({
+      ok: true,
+      sent: 0,
+      debug: {
+        departement: demande.depart_departement,
+        zones_trouvees: zones?.length ?? 0,
+        emails_trouves: emails.length,
+        erreur_jointure: zonesError?.message ?? null,
+        resend_configure: Boolean(process.env.RESEND_API_KEY),
+      },
+    });
   }
 
   const resend = new Resend(process.env.RESEND_API_KEY);
