@@ -19,3 +19,33 @@ body {
 .tag { @apply font-mono text-[10.5px] uppercase tracking-wide font-semibold px-2 py-1 rounded-sm; }
 .tag-devis { @apply tag bg-bleunuit text-[#9DB3DE]; }
 .tag-enchere { @apply tag bg-vert-dim text-vert; }
+/* ============================================================
+   Sections claires — bande "papier crème" pour rythmer la page.
+   Tous les tokens sombres s'adaptent automatiquement à l'intérieur.
+   ============================================================ */
+.section-claire {
+  background: #EFEAE0;
+  color: #12151B;
+}
+.section-claire .h-display { color: #12151B; }
+.section-claire .text-blanc { color: #12151B; }
+.section-claire .text-blanc-dim { color: rgba(18, 21, 27, 0.74); }
+.section-claire .text-blanc-faint { color: rgba(18, 21, 27, 0.52); }
+.section-claire .card {
+  background: #F8F5EC;
+  border-color: rgba(18, 21, 27, 0.16);
+}
+.section-claire .border-ligne { border-color: rgba(18, 21, 27, 0.14); }
+.section-claire .border-ligne-strong { border-color: rgba(18, 21, 27, 0.26); }
+.section-claire .bg-asphalte-2 { background: #F8F5EC; }
+.section-claire .bg-asphalte-3 { background: #E7E1D3; }
+.section-claire .btn-ghost {
+  color: rgba(18, 21, 27, 0.8);
+  border-color: rgba(18, 21, 27, 0.3);
+}
+.section-claire .tag-devis { background: rgba(30, 79, 189, 0.12); color: #1E4FBD; }
+.section-claire .tag-enchere { background: rgba(20, 108, 67, 0.12); color: #146C43; }
+.section-claire .text-vert { color: #146C43; }
+.section-claire .bg-vert-dim { background: rgba(20, 108, 67, 0.1); }
+.section-claire .bg-ambre-dim { background: rgba(168, 93, 0, 0.1); }
+.section-claire .text-ambre { color: #A85D00; }

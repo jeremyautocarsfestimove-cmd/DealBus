@@ -88,7 +88,8 @@ export default function Home() {
         </section>
 
         {/* ---------- DEUX PARCOURS ---------- */}
-        <section id="comment-ca-marche" className="max-w-6xl mx-auto px-7 py-24">
+        <section id="comment-ca-marche" className="section-claire">
+          <div className="max-w-6xl mx-auto px-7 py-24">
           <p className="eyebrow mb-4">Deux façons de recevoir vos offres</p>
           <h2 className="h-display text-4xl md:text-5xl mb-3">Vous choisissez le rythme.</h2>
           <p className="text-blanc-dim max-w-lg mb-12">
@@ -128,13 +129,14 @@ export default function Home() {
               </ul>
             </div>
           </div>
+          </div>
         </section>
 
         {/* ---------- RETOURS À VIDE (avec image latérale) ---------- */}
-        <section className="max-w-6xl mx-auto px-7 pb-24">
+        <section className="max-w-6xl mx-auto px-7 py-24">
           <div className="relative rounded border border-ambre/25 overflow-hidden md:grid md:grid-cols-[1fr_340px] bg-gradient-to-r from-[#241A10] via-asphalte-2 to-asphalte-2">
             <div className="p-9">
-              <p className="eyebrow mb-4">Inventaire exclusif</p>
+              <p className="eyebrow mb-4">Uniquement sur DealBus</p>
               <h2 className="h-display text-3xl md:text-4xl mb-3">
                 Un trajet déjà en route, à prix cassé.
               </h2>
