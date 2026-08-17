@@ -27,11 +27,11 @@ export default function CguPage() {
         <Article n={1} titre="Éditeur et hébergement">
           <p>
             La plateforme DealBus, accessible à l&apos;adresse dealbus.fr (ci-après « la Plateforme »),
-            est éditée par [RAISON SOCIALE À COMPLÉTER], [FORME JURIDIQUE] au capital de [MONTANT] €,
-            immatriculée sous le numéro SIREN [NUMÉRO], dont le siège social est situé [ADRESSE].
+            est éditée par DEALBUS, SASU au capital de 500 €,
+            immatriculée sous le numéro SIREN 933210296, dont le siège social est situé 78270 Limetz-Villez.
           </p>
           <p>
-            Directeur de la publication : [NOM] · Contact : contact@dealbus.fr.
+            Directeur de la publication : Peloso Jeremy · Contact : contact@dealbus.fr.
             La Plateforme est hébergée par Vercel Inc. (440 N Barranca Ave #4133, Covina, CA 91723,
             États-Unis) ; les données sont hébergées par Supabase (infrastructure située dans
             l&apos;Union européenne).
@@ -377,7 +377,7 @@ export default function CguPage() {
             Les présentes CGU sont soumises au droit français. En cas de différend, les parties
             rechercheront prioritairement une solution amiable. Le Client consommateur peut
             recourir gratuitement au médiateur de la consommation dont relève DealBus
-            [MÉDIATEUR À DÉSIGNER] ou à la plateforme européenne de règlement en ligne des
+            ou à la plateforme européenne de règlement en ligne des
             litiges. À défaut de résolution amiable, compétence est attribuée aux tribunaux
             français ; pour les Utilisateurs professionnels, compétence exclusive est attribuée
             au tribunal des activités économiques du ressort du siège de l&apos;éditeur.
