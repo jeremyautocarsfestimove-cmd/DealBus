@@ -58,12 +58,14 @@ function LoginForm() {
           setError("Confirmez votre email (lien envoyé), puis reconnectez-vous.");
           return;
         }
+        // Création du profil UNIQUEMENT s'il n'existe pas : ne jamais
+        // écraser un rôle déjà attribué (admin/transporteur)
         await supabase.from("profiles").upsert({
           id: data.session.user.id,
           role: "client",
           email: data.session.user.email,
           ...(nom.trim() && { nom: nom.trim() }),
-        });
+        }, { onConflict: "id", ignoreDuplicates: true });
         const dest = await destination(data.session.user.id);
         router.push(dest);
         router.refresh();
@@ -90,18 +92,18 @@ function LoginForm() {
       {mode === "signup" && (
         <div>
           <label className="label">Prénom et nom</label>
-          <input className="input mb-4" placeholder="Ex. Jeremy Peloso"
+          <input onKeyDown={(e) => e.key === "Enter" && go()} className="input mb-4" placeholder="Ex. Jeremy Peloso"
             value={nom} onChange={(e) => setNom(e.target.value)} />
         </div>
       )}
       <div>
         <label className="label">Email</label>
-        <input className="input mb-4" type="email" placeholder="vous@exemple.fr"
+        <input onKeyDown={(e) => e.key === "Enter" && go()} className="input mb-4" type="email" placeholder="vous@exemple.fr"
           value={email} onChange={(e) => setEmail(e.target.value)} />
       </div>
       <div>
         <label className="label">Mot de passe</label>
-        <input className="input mb-5" type="password" placeholder="6 caractères minimum"
+        <input onKeyDown={(e) => e.key === "Enter" && go()} className="input mb-5" type="password" placeholder="6 caractères minimum"
           value={password} onChange={(e) => setPassword(e.target.value)} />
       </div>
       {error && <p className="font-mono text-sm text-[#E8735D] mb-4">{error}</p>}
