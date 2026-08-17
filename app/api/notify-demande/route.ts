@@ -103,5 +103,36 @@ export async function POST(req: Request) {
     } catch { /* on continue avec les suivants */ }
   }
 
+  // ---- Copie de veille à l'administration ----
+  try {
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    const { data: admins } = await admin
+      .from("profiles").select("email").eq("role", "admin").not("email", "is", null);
+    const destinataires = (admins ?? []).map((a: any) => a.email).filter(Boolean);
+    if (destinataires.length) {
+      await resend.emails.send({
+        from: process.env.RESEND_FROM ?? "DealBus <onboarding@resend.dev>",
+        to: destinataires,
+        subject: `📥 Lead #${demande.numero} — ${demande.depart_adresse} → ${demande.arrivee_adresse}`,
+        text: `${modeLabel} · ${dateAller} · ${demande.passagers} pax · dépt. ${demande.depart_departement} · ${sent} transporteur(s) notifié(s). ${site}/admin`,
+        html: emailHtml({
+          titre: sent > 0 ? "Nouveau lead sur la plateforme 📥" : "⚠ Lead sans couverture",
+          paragraphes: [
+            `Une demande vient d'être publiée :`,
+          ],
+          highlight: {
+            label: `${modeLabel} · Demande #${demande.numero}`,
+            value: `${demande.depart_adresse} → ${demande.arrivee_adresse}`,
+            detail: [`Le ${dateAller}`, `${demande.passagers} passagers`, `Départ dépt. ${demande.depart_departement}`, ligneKm].filter(Boolean).join(" · "),
+          },
+          cta: { label: "Voir dans le back-office", url: `${site}/admin` },
+          note: sent > 0
+            ? `${sent} transporteur${sent > 1 ? "s" : ""} de la zone ${sent > 1 ? "ont" : "a"} été notifié${sent > 1 ? "s" : ""} par email.`
+            : `Aucun transporteur validé ne couvre le département ${demande.depart_departement} : ce lead ne recevra aucune offre. Piste : recruter dans cette zone, ou répondre via Festimove.`,
+        }),
+      });
+    }
+  } catch { /* la veille admin ne bloque jamais le flux */ }
+
   return NextResponse.json({ ok: true, sent });
 }
