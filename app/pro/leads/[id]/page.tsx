@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { Demande } from "@/lib/types";
 import { DevisForm } from "./devis-form";
 import { EnchereForm } from "./enchere-form";
+import { ItineraireMap } from "@/components/ItineraireMap";
 
 export default async function LeadPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -54,6 +55,13 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
           {d.date_retour ? ` → ${new Date(d.date_retour).toLocaleDateString("fr-FR")}${d.heure_retour ? ` à ${String(d.heure_retour).slice(0, 5).replace(":", "h")}` : ""}` : ""} ·
           {" "}{d.passagers} passagers · {d.type_trajet.replace("_", "-")}
         </p>
+
+        <ItineraireMap
+          depart={d.depart_adresse}
+          arrivee={d.arrivee_adresse}
+          allerRetour={d.type_trajet === "aller_retour"}
+          montrerTemps
+        />
 
         {d.mode === "devis" ? (
           monOffre ? (

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { calcItineraire, dureeA80 } from "@/lib/itineraire";
 
 // Notifie par email tous les transporteurs VALIDÉS dont une zone couvre
 // le département de départ. Contenu 100 % anonyme (aucune info client).
@@ -51,6 +52,21 @@ export async function POST(req: Request) {
 
   const resend = new Resend(process.env.RESEND_API_KEY);
   const site = process.env.NEXT_PUBLIC_SITE_URL;
+
+  // Kilométrage : calcul + mémorisation (best effort, jamais bloquant)
+  let ligneKm: string | null = null;
+  try {
+    const itin = demande.distance_km
+      ? { km: Number(demande.distance_km) }
+      : await calcItineraire(demande.depart_adresse, demande.arrivee_adresse);
+    if (itin) {
+      if (!demande.distance_km) {
+        await admin.from("demandes").update({ distance_km: itin.km }).eq("id", demande_id);
+      }
+      const ar = demande.type_trajet === "aller_retour";
+      ligneKm = `≈ ${(ar ? itin.km * 2 : itin.km).toLocaleString("fr-FR")} km${ar ? " A/R" : ""} · ≈ ${dureeA80(itin.km)} de route par trajet (moy. 80 km/h)`;
+    }
+  } catch { /* sans km, l'email part quand même */ }
   const dateAller = new Date(demande.date_aller).toLocaleDateString("fr-FR")
     + (demande.heure_aller ? ` à ${String(demande.heure_aller).slice(0, 5).replace(":", "h")}` : "");
   const modeLabel = demande.mode === "enchere" ? "Enchère en direct" : "Demande de devis";
@@ -70,6 +86,7 @@ export async function POST(req: Request) {
           ``,
           `${demande.depart_adresse} → ${demande.arrivee_adresse}`,
           `Le ${dateAller} · ${demande.passagers} passagers · ${modeLabel}`,
+          ligneKm,
           demande.mode === "enchere" && demande.enchere_fin
             ? `Clôture de l'enchère : ${new Date(demande.enchere_fin).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}`
             : `Devis en tir unique : un seul prix, définitif — soignez-le.`,

@@ -213,7 +213,8 @@ export default async function ProPage() {
                       )}
                     </div>
                     <p className="font-mono text-xs text-blanc-faint">
-                      {dateHeure(d.date_aller, d.heure_aller)} · {d.passagers} passagers · Demande #{d.numero}
+                      {dateHeure(d.date_aller, d.heure_aller)} · {d.passagers} passagers
+                      {(d as any).distance_km ? ` · ≈ ${Number((d as any).distance_km).toLocaleString("fr-FR")} km · ${(() => { const min = Math.round((Number((d as any).distance_km) / 80) * 60); const h = Math.floor(min / 60); return h ? `${h} h${min % 60 ? ` ${String(min % 60).padStart(2, "0")}` : ""}` : `${min} min`; })()} de route` : ""} · Demande #{d.numero}
                     </p>
                   </Link>
                 ))}
@@ -244,7 +245,8 @@ export default async function ProPage() {
                           </span>
                         </div>
                         <p className="font-mono text-xs text-blanc-faint">
-                          {dateHeure(d.date_aller, d.heure_aller)} · {d.passagers} passagers · Demande #{d.numero}
+                          {dateHeure(d.date_aller, d.heure_aller)} · {d.passagers} passagers
+                      {(d as any).distance_km ? ` · ≈ ${Number((d as any).distance_km).toLocaleString("fr-FR")} km · ${(() => { const min = Math.round((Number((d as any).distance_km) / 80) * 60); const h = Math.floor(min / 60); return h ? `${h} h${min % 60 ? ` ${String(min % 60).padStart(2, "0")}` : ""}` : `${min} min`; })()} de route` : ""} · Demande #{d.numero}
                         </p>
                       </Link>
                     ))}

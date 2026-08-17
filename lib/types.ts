@@ -11,6 +11,7 @@ export interface Demande {
   arrivee_adresse: string;
   date_aller: string;
   heure_aller: string | null;
+  distance_km: number | null;
   heure_retour: string | null;
   date_retour: string | null;
   passagers: number;

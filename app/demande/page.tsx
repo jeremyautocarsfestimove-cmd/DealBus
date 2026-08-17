@@ -100,8 +100,13 @@ function DemandeWizard() {
 
     if (err) { setError(err.message); setSaving(false); return; }
 
-    // Notifier par email les transporteurs de la zone (jamais bloquant)
+    // Calcul du kilométrage + notification des transporteurs (jamais bloquants)
     if (nouvelle?.id) {
+      fetch("/api/itineraire", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ demande_id: nouvelle.id }),
+      }).catch(() => {});
       fetch("/api/notify-demande", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
