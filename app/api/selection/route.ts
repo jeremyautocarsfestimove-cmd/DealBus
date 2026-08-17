@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { emailHtml } from "@/lib/email";
 
 // Barème DealBus (identique à la fonction SQL commission_taux)
 function commissionTaux(prix: number, source: "devis" | "enchere" | "retour_vide"): number {
@@ -31,19 +32,17 @@ async function notifierTransporteur(
       from: process.env.RESEND_FROM ?? "DealBus <onboarding@resend.dev>",
       to: email,
       subject: "🎉 Votre offre a été retenue !",
-      text: [
-        `Félicitations,`,
-        ``,
-        `Votre offre sur le trajet ${trajet} vient d'être retenue, pour ${prix.toLocaleString("fr-FR")} € TTC.`,
-        ``,
-        `Contact client : ${clientProfile?.nom ?? "voir votre tableau de bord"}${clientProfile?.telephone ? ` · ${clientProfile.telephone}` : ""}${clientProfile?.email ? ` · ${clientProfile.email}` : ""}`,
-        ``,
-        `Retrouvez tous les détails dans votre espace : ${process.env.NEXT_PUBLIC_SITE_URL}/pro (onglet Mes missions).`,
-        `Pensez à déclarer la mission terminée après la prestation — c'est ce qui permet au client de vous laisser un avis.`,
-        ``,
-        `Bonne route,`,
-        `L'équipe DealBus`,
-      ].join("\n"),
+      text: `Votre offre sur ${trajet} est retenue pour ${prix.toLocaleString("fr-FR")} € TTC. Détails : ${process.env.NEXT_PUBLIC_SITE_URL}/pro`,
+      html: emailHtml({
+        titre: "Félicitations, votre offre est retenue !",
+        paragraphes: [
+          `Le client vient de vous sélectionner sur le trajet <strong>${trajet}</strong>.`,
+          `<strong>Contact client :</strong> ${clientProfile?.nom ?? "voir votre tableau de bord"}${clientProfile?.telephone ? ` · ${clientProfile.telephone}` : ""}${clientProfile?.email ? ` · ${clientProfile.email}` : ""}`,
+        ],
+        highlight: { label: "Prix de la mission", value: `${prix.toLocaleString("fr-FR")} € TTC`, detail: "Réglé directement par le client, sans intermédiaire" },
+        cta: { label: "Voir ma mission", url: `${process.env.NEXT_PUBLIC_SITE_URL}/pro` },
+        note: "Après la prestation, pensez à déclarer la mission terminée : c'est ce qui permet au client de vous laisser un avis et fait progresser votre profil.",
+      }),
     });
   } catch {
     // l'email ne doit jamais bloquer la sélection

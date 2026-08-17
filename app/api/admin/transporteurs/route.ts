@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { emailHtml } from "@/lib/email";
 
 const ACTIONS = {
   valider: "valide",
@@ -52,18 +53,16 @@ export async function POST(req: Request) {
           from: process.env.RESEND_FROM ?? "DealBus <onboarding@resend.dev>",
           to: email,
           subject: "Votre compte transporteur DealBus est activé",
-          text: [
-            `Bonjour,`,
-            ``,
-            `Bonne nouvelle : le compte transporteur de ${transporteur.raison_sociale} vient d'être vérifié et activé.`,
-            ``,
-            `Vous avez désormais accès aux demandes de transport de vos zones : ${process.env.NEXT_PUBLIC_SITE_URL}/pro`,
-            ``,
-            `Rappel : commission uniquement sur les missions gagnées (9/7/5 % selon le montant, taux réduit en enchère et sur vos trajets retour à vide), facturée après la prestation.`,
-            ``,
-            `À très vite sur les routes,`,
-            `L'équipe DealBus`,
-          ].join("\n"),
+          text: `Le compte de ${transporteur.raison_sociale} est vérifié et activé. Accédez aux demandes : ${process.env.NEXT_PUBLIC_SITE_URL}/pro`,
+          html: emailHtml({
+            titre: "Votre compte est activé 🎉",
+            paragraphes: [
+              `Bonne nouvelle : le compte transporteur de <strong>${transporteur.raison_sociale}</strong> vient d'être vérifié par notre équipe.`,
+              `Vous avez désormais accès aux demandes de transport de vos zones de chalandise, et vous pouvez publier vos trajets retour à vide.`,
+            ],
+            cta: { label: "Accéder à mon espace", url: `${process.env.NEXT_PUBLIC_SITE_URL}/pro` },
+            note: "Rappel : commission uniquement sur les missions gagnées (9/7/5 % selon le montant, réduite en enchère et sur vos retours à vide), facturée après la prestation. Aucun abonnement, aucun frais d'accès.",
+          }),
         });
       }
     } catch {

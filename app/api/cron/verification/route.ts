@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createHmac } from "crypto";
 import { Resend } from "resend";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { emailHtml } from "@/lib/email";
 
 // Cron quotidien (vercel.json) : pour chaque mission ANNULÉE dont la date de
 // trajet est passée, on demande au client si le trajet a réellement eu lieu.
@@ -50,19 +51,16 @@ export async function GET(req: Request) {
         from: process.env.RESEND_FROM ?? "DealBus <onboarding@resend.dev>",
         to: email,
         subject: "Votre trajet a-t-il finalement eu lieu ?",
-        text: [
-          `Bonjour,`,
-          ``,
-          `Votre trajet ${d.depart_adresse} → ${d.arrivee_adresse} du ${new Date(d.date_aller).toLocaleDateString("fr-FR")} a été déclaré annulé.`,
-          ``,
-          `Pour la qualité du service, pouvez-vous nous confirmer ce qui s'est passé ? Un clic suffit :`,
-          ``,
-          `→ Le trajet a bien été ANNULÉ : ${base}bien_annule`,
-          `→ Le trajet A EU LIEU malgré tout : ${base}a_eu_lieu`,
-          ``,
-          `Merci de votre aide,`,
-          `L'équipe DealBus`,
-        ].join("\n"),
+        text: `Votre trajet ${d.depart_adresse} → ${d.arrivee_adresse} du ${new Date(d.date_aller).toLocaleDateString("fr-FR")} a été déclaré annulé. Annulé : ${base}bien_annule — A eu lieu : ${base}a_eu_lieu`,
+        html: emailHtml({
+          titre: "Un dernier mot sur votre trajet",
+          paragraphes: [
+            `Votre trajet <strong>${d.depart_adresse} → ${d.arrivee_adresse}</strong> du ${new Date(d.date_aller).toLocaleDateString("fr-FR")} a été déclaré <strong>annulé</strong>.`,
+            `Pour la fiabilité du service, pouvez-vous nous confirmer ce qui s'est passé ? Un simple clic suffit :`,
+            `<a href="${base}bien_annule" style="color:#146C43;font-weight:700;">→ Le trajet a bien été annulé</a><br/><br/><a href="${base}a_eu_lieu" style="color:#A85D00;font-weight:700;">→ Le trajet a eu lieu malgré tout</a>`,
+          ],
+          note: "Votre réponse reste confidentielle et nous aide à garantir des règles identiques pour tous.",
+        }),
       });
       await admin.from("missions").update({ verification_envoyee: true }).eq("id", m.id);
       sent++;

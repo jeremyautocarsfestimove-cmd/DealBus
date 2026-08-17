@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { emailHtml } from "@/lib/email";
 
 // Emails transactionnels du cycle de vie :
 // - "offre"            → au CLIENT : nouvelle offre de devis reçue (anonyme)
@@ -34,18 +35,16 @@ export async function POST(req: Request) {
       await resend.emails.send({
         from, to: client.email,
         subject: `💶 Nouvelle offre sur votre demande #${d.numero}`,
-        text: [
-          `Bonne nouvelle,`,
-          ``,
-          `Le Transporteur #${anonyme?.numero_anonyme}${anonyme?.nb_avis ? ` (★ ${anonyme.note_moyenne}/5, ${anonyme.nb_avis} avis)` : ""} vient de répondre à votre demande ${d.depart_adresse} → ${d.arrivee_adresse} :`,
-          ``,
-          `${Number(offre.prix_ttc).toLocaleString("fr-FR")} € TTC, tout compris`,
-          ``,
-          `Comparez et retenez l'offre de votre choix : ${site}/mes-demandes/${d.id}`,
-          ``,
-          `Chaque transporteur n'a droit qu'à un seul prix — pas de marchandage, pas de relance.`,
-          `L'équipe DealBus`,
-        ].join("\n"),
+        text: `Transporteur #${anonyme?.numero_anonyme} propose ${Number(offre.prix_ttc).toLocaleString("fr-FR")} € TTC sur ${d.depart_adresse} → ${d.arrivee_adresse}. Comparer : ${site}/mes-demandes/${d.id}`,
+        html: emailHtml({
+          titre: "Vous avez reçu une nouvelle offre 💶",
+          paragraphes: [
+            `Le <strong>Transporteur #${anonyme?.numero_anonyme}</strong>${anonyme?.nb_avis ? ` (★ ${anonyme.note_moyenne}/5 · ${anonyme.nb_avis} avis)` : ""} vient de répondre à votre demande <strong>${d.depart_adresse} → ${d.arrivee_adresse}</strong>.`,
+          ],
+          highlight: { label: "Son offre — ferme et définitive", value: `${Number(offre.prix_ttc).toLocaleString("fr-FR")} € TTC`, detail: "Tout compris · un seul prix par transporteur, pas de marchandage" },
+          cta: { label: "Comparer les offres", url: `${site}/mes-demandes/${d.id}` },
+          note: "Les identités restent anonymes jusqu'à votre sélection. Prenez le temps de comparer prix, notes et conditions.",
+        }),
       });
       return NextResponse.json({ ok: true, sent: 1 });
     }
@@ -63,16 +62,18 @@ export async function POST(req: Request) {
       await resend.emails.send({
         from, to: client.email,
         subject: `🔨 Votre enchère a démarré — demande #${d.numero}`,
-        text: [
-          `C'est parti,`,
-          ``,
-          `Un premier transporteur vient d'enchérir sur votre trajet ${d.depart_adresse} → ${d.arrivee_adresse}.`,
-          `Le prix ne peut désormais que baisser, jusqu'à la clôture${d.enchere_fin ? ` le ${new Date(d.enchere_fin).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}` : ""}.`,
-          ``,
-          `Suivre l'enchère en direct : ${site}/mes-demandes/${d.id}`,
-          ``,
-          `L'équipe DealBus`,
-        ].join("\n"),
+        text: `Premier prix positionné sur ${d.depart_adresse} → ${d.arrivee_adresse}. Suivre : ${site}/mes-demandes/${d.id}`,
+        html: emailHtml({
+          titre: "Votre enchère a démarré 🔨",
+          paragraphes: [
+            `Un premier transporteur vient de positionner un prix sur votre trajet <strong>${d.depart_adresse} → ${d.arrivee_adresse}</strong>.`,
+            `À partir de maintenant, le prix ne peut que <strong>baisser</strong> — chaque relance doit être inférieure d'au moins 1 % à la meilleure.`,
+          ],
+          cta: { label: "Suivre l'enchère en direct", url: `${site}/mes-demandes/${d.id}` },
+          note: d.enchere_fin
+            ? `Clôture le ${new Date(d.enchere_fin).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}. Vous validerez (ou non) la meilleure offre à ce moment-là — rien n'est engagé avant.`
+            : "Vous validerez (ou non) la meilleure offre à la clôture — rien n'est engagé avant.",
+        }),
       });
       return NextResponse.json({ ok: true, sent: 1 });
     }
@@ -89,16 +90,16 @@ export async function POST(req: Request) {
       await resend.emails.send({
         from, to: transporteur.email,
         subject: `🚌 Demande de réservation sur votre retour à vide`,
-        text: [
-          `Bonne nouvelle,`,
-          ``,
-          `Un client souhaite réserver votre trajet retour ${r.depart_adresse} → ${r.arrivee_adresse} du ${new Date(r.date_dispo).toLocaleDateString("fr-FR")} (${Number(r.prix_fixe).toLocaleString("fr-FR")} € prix fixe).`,
-          ``,
-          `Le trajet lui est réservé en exclusivité le temps de votre décision — validez ou refusez rapidement :`,
-          `${site}/pro (onglet Mes retours à vide)`,
-          ``,
-          `L'équipe DealBus`,
-        ].join("\n"),
+        text: `Un client souhaite réserver ${r.depart_adresse} → ${r.arrivee_adresse} du ${new Date(r.date_dispo).toLocaleDateString("fr-FR")} (${Number(r.prix_fixe).toLocaleString("fr-FR")} €). Valider : ${site}/pro`,
+        html: emailHtml({
+          titre: "Quelqu'un veut votre trajet retour 🚌",
+          paragraphes: [
+            `Un client souhaite réserver votre retour à vide <strong>${r.depart_adresse} → ${r.arrivee_adresse}</strong> du ${new Date(r.date_dispo).toLocaleDateString("fr-FR")}.`,
+            `Le trajet lui est réservé <strong>en exclusivité</strong> le temps de votre décision — répondez vite pour ne pas laisser filer l'opportunité.`,
+          ],
+          highlight: { label: "Votre prix fixe", value: `${Number(r.prix_fixe).toLocaleString("fr-FR")} € TTC`, detail: "Commission réduite de 2 points sur ce type de trajet" },
+          cta: { label: "Valider ou refuser", url: `${site}/pro` },
+        }),
       });
       return NextResponse.json({ ok: true, sent: 1 });
     }

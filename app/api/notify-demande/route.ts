@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { calcItineraire, dureeA80 } from "@/lib/itineraire";
+import { emailHtml } from "@/lib/email";
 
 // Notifie par email tous les transporteurs VALIDÉS dont une zone couvre
 // le département de départ. Contenu 100 % anonyme (aucune info client).
@@ -81,21 +82,22 @@ export async function POST(req: Request) {
         from: process.env.RESEND_FROM ?? "DealBus <onboarding@resend.dev>",
         to: email,
         subject: sujet,
-        text: [
-          `Une nouvelle demande vient d'arriver dans votre zone :`,
-          ``,
-          `${demande.depart_adresse} → ${demande.arrivee_adresse}`,
-          `Le ${dateAller} · ${demande.passagers} passagers · ${modeLabel}`,
-          ligneKm,
-          demande.mode === "enchere" && demande.enchere_fin
-            ? `Clôture de l'enchère : ${new Date(demande.enchere_fin).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}`
-            : `Devis en tir unique : un seul prix, définitif — soignez-le.`,
-          ``,
-          `Répondre à la demande : ${site}/pro`,
-          ``,
-          `Premier arrivé, mieux placé. Bonne route,`,
-          `L'équipe DealBus`,
-        ].filter(Boolean).join("\n"),
+        text: `${demande.depart_adresse} → ${demande.arrivee_adresse} · ${dateAller} · ${demande.passagers} pax · ${modeLabel}. Répondre : ${site}/pro`,
+        html: emailHtml({
+          titre: demande.mode === "enchere" ? "Nouvelle enchère dans votre zone 🔨" : "Nouveau lead dans votre zone 🚌",
+          paragraphes: [
+            `Une demande vient d'être publiée au départ de votre zone de chalandise :`,
+          ],
+          highlight: {
+            label: modeLabel,
+            value: `${demande.depart_adresse} → ${demande.arrivee_adresse}`,
+            detail: [`Le ${dateAller}`, `${demande.passagers} passagers`, ligneKm].filter(Boolean).join(" · "),
+          },
+          cta: { label: "Répondre à la demande", url: `${site}/pro` },
+          note: demande.mode === "enchere" && demande.enchere_fin
+            ? `Clôture de l'enchère le ${new Date(demande.enchere_fin).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}. Chaque prix positionné vous engage.`
+            : "Devis en tir unique : un seul prix, définitif — soignez-le. Premier arrivé, mieux placé.",
+        }),
       });
       sent++;
     } catch { /* on continue avec les suivants */ }

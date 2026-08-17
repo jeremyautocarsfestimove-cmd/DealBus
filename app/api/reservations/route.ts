@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { emailHtml } from "@/lib/email";
 
 // Barème DealBus — retour à vide : -2 points, plancher 3 %
 function commissionTaux(prix: number): number {
@@ -81,19 +82,16 @@ export async function POST(req: Request) {
           from: process.env.RESEND_FROM ?? "DealBus <onboarding@resend.dev>",
           to: email,
           subject: "✅ Votre trajet retour est confirmé",
-          text: [
-            `Bonne nouvelle,`,
-            ``,
-            `Le transporteur a validé votre réservation : ${retour.depart_adresse} → ${retour.arrivee_adresse}, le ${new Date(retour.date_dispo).toLocaleDateString("fr-FR")}, pour ${prix.toLocaleString("fr-FR")} € TTC (prix fixe).`,
-            ``,
-            `Votre transporteur : ${tFiche?.raison_sociale ?? ""}`,
-            `Contact : ${tProfile?.nom ?? ""}${tProfile?.telephone ? ` · ${tProfile.telephone}` : ""}${tProfile?.email ? ` · ${tProfile.email}` : ""}`,
-            ``,
-            `Vous le payez directement — DealBus ne prélève rien côté client.`,
-            ``,
-            `Bon voyage,`,
-            `L'équipe DealBus`,
-          ].join("\n"),
+          text: `Réservation validée : ${retour.depart_adresse} → ${retour.arrivee_adresse} le ${new Date(retour.date_dispo).toLocaleDateString("fr-FR")}, ${prix.toLocaleString("fr-FR")} € TTC.`,
+          html: emailHtml({
+            titre: "Votre trajet retour est confirmé ✅",
+            paragraphes: [
+              `Le transporteur a validé votre réservation sur le trajet <strong>${retour.depart_adresse} → ${retour.arrivee_adresse}</strong>, le ${new Date(retour.date_dispo).toLocaleDateString("fr-FR")}.`,
+              `<strong>Votre transporteur :</strong> ${tFiche?.raison_sociale ?? ""}<br/>${tProfile?.nom ?? ""}${tProfile?.telephone ? ` · ${tProfile.telephone}` : ""}${tProfile?.email ? ` · ${tProfile.email}` : ""}`,
+            ],
+            highlight: { label: "Prix fixe — autocar complet", value: `${prix.toLocaleString("fr-FR")} € TTC`, detail: "Vous payez le transporteur directement — DealBus ne prélève rien côté client" },
+            note: "Un imprévu ? Contactez directement votre transporteur, puis signalez toute annulation sur la plateforme.",
+          }),
         });
       }
     } catch { /* jamais bloquant */ }
