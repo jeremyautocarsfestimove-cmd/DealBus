@@ -75,7 +75,7 @@ function DemandeWizard() {
       ...(nomClient.trim() && { nom: nomClient.trim() }),
     });
 
-    const { error: err } = await supabase.from("demandes").insert({
+    const { data: nouvelle, error: err } = await supabase.from("demandes").insert({
       client_id: userId,
       mode: form.mode,
       type_trajet: form.type_trajet,
@@ -96,9 +96,18 @@ function DemandeWizard() {
         enchere_fin: new Date(enchereFin).toISOString(),
         enchere_prix_depart: estimation,
       }),
-    });
+    }).select("id").single();
 
     if (err) { setError(err.message); setSaving(false); return; }
+
+    // Notifier par email les transporteurs de la zone (jamais bloquant)
+    if (nouvelle?.id) {
+      fetch("/api/notify-demande", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ demande_id: nouvelle.id }),
+      }).catch(() => {});
+    }
     router.push("/mes-demandes");
   }
 

@@ -43,7 +43,7 @@ export async function GET(req: Request) {
     if (!email) continue;
 
     const token = sign(m.id);
-    const base = `${site}/api/verification?mission=${m.id}&token=${token}&reponse=`;
+    const base = `${site}/api/verifications?mission=${m.id}&token=${token}&reponse=`;
 
     try {
       await resend.emails.send({
