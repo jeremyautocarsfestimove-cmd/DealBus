@@ -97,6 +97,14 @@ export function InscriptionTransporteur() {
     });
     if (tErr) { setError(tErr.message); setSaving(false); return; }
 
+    // Alerter l'administration (jamais bloquant)
+    fetch("/api/notify-event", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "inscription_transporteur", id: userId }),
+    }).catch(() => {});
+
+
     await supabase.from("transporteur_zones").insert(
       zones.map((departement) => ({ transporteur_id: userId, departement }))
     );

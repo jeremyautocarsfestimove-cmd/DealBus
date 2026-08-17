@@ -104,6 +104,34 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true, sent: 1 });
     }
 
+    if (type === "inscription_transporteur") {
+      const { data: t } = await admin
+        .from("transporteurs")
+        .select("raison_sociale, siren, secteur, departement_siege, profile:profiles!transporteurs_id_fkey(nom, telephone, email)")
+        .eq("id", id).single();
+      if (!t) return NextResponse.json({ error: "transporteur introuvable" }, { status: 404 });
+      const { data: admins } = await admin
+        .from("profiles").select("email").eq("role", "admin").not("email", "is", null);
+      const destinataires = (admins ?? []).map((a: any) => a.email).filter(Boolean);
+      if (!destinataires.length) return NextResponse.json({ ok: true, sent: 0 });
+      const p = (t as any).profile;
+      await resend.emails.send({
+        from, to: destinataires,
+        subject: `🆕 Transporteur à valider : ${t.raison_sociale}`,
+        text: `${t.raison_sociale} (SIREN ${t.siren}, ${t.secteur}, dépt. ${t.departement_siege}) attend validation : ${site}/admin`,
+        html: emailHtml({
+          titre: "Nouvelle inscription à valider",
+          paragraphes: [
+            `Un transporteur vient de s'inscrire et attend votre validation :`,
+            `<strong>${t.raison_sociale}</strong><br/>SIREN ${t.siren} · ${t.secteur} · siège dépt. ${t.departement_siege}<br/>${p?.nom ?? ""}${p?.telephone ? ` · ${p.telephone}` : ""}${p?.email ? ` · ${p.email}` : ""}`,
+          ],
+          cta: { label: "Examiner et valider", url: `${site}/admin` },
+          note: "Vérifications d'usage : titre d'exercice sur le registre officiel, RC Pro à demander. La validation déclenche l'email d'activation.",
+        }),
+      });
+      return NextResponse.json({ ok: true, sent: destinataires.length });
+    }
+
     return NextResponse.json({ error: "type inconnu" }, { status: 400 });
   } catch (e) {
     return NextResponse.json({ error: (e as Error).message }, { status: 500 });

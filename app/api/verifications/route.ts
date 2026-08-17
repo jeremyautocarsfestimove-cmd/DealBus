@@ -1,5 +1,7 @@
 import { createHmac } from "crypto";
+import { Resend } from "resend";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { emailHtml } from "@/lib/email";
 
 // Réponse du client au mail de vérification — lien signé, aucune connexion requise.
 // "a_eu_lieu" sur une mission annulée → passage en LITIGE (contournement suspecté).
@@ -36,6 +38,42 @@ export async function GET(req: Request) {
     client_confirmation: reponse,
     ...(reponse === "a_eu_lieu" && { statut: "litige" }),
   }).eq("id", missionId);
+
+  // ⚠ Contournement suspecté : alerte immédiate de l'administration
+  if (reponse === "a_eu_lieu" && process.env.RESEND_API_KEY) {
+    try {
+      /* eslint-disable @typescript-eslint/no-explicit-any */
+      const { data: mission } = await admin
+        .from("missions")
+        .select("prix_final, commission_montant, annulation_motif, demande:demandes(numero, depart_adresse, arrivee_adresse, date_aller), transporteur:transporteurs(raison_sociale)")
+        .eq("id", missionId).single() as { data: any };
+      const { data: admins } = await admin
+        .from("profiles").select("email").eq("role", "admin").not("email", "is", null);
+      const destinataires = (admins ?? []).map((a: any) => a.email).filter(Boolean);
+      if (mission && destinataires.length) {
+        const resend = new Resend(process.env.RESEND_API_KEY);
+        await resend.emails.send({
+          from: process.env.RESEND_FROM ?? "DealBus <onboarding@resend.dev>",
+          to: destinataires,
+          subject: `⚠ LITIGE — trajet annulé mais réalisé (mission #${mission.demande?.numero ?? ""})`,
+          text: `Le client confirme que le trajet ${mission.demande?.depart_adresse} → ${mission.demande?.arrivee_adresse} a eu lieu malgré l'annulation. ${process.env.NEXT_PUBLIC_SITE_URL}/admin`,
+          html: emailHtml({
+            titre: "⚠ Contournement suspecté",
+            paragraphes: [
+              `Le client vient de confirmer que le trajet suivant, déclaré <strong>annulé</strong>, a <strong>bien eu lieu</strong> :`,
+              `<strong>${mission.demande?.depart_adresse} → ${mission.demande?.arrivee_adresse}</strong> du ${mission.demande?.date_aller ? new Date(mission.demande.date_aller).toLocaleDateString("fr-FR") : "—"}<br/>Transporteur : ${mission.transporteur?.raison_sociale ?? "—"}<br/>Motif d'annulation déclaré : « ${mission.annulation_motif ?? "—"} »`,
+            ],
+            highlight: {
+              label: "Commission en jeu",
+              value: `${Number(mission.commission_montant).toLocaleString("fr-FR")} €`,
+              detail: `Mission de ${Number(mission.prix_final).toLocaleString("fr-FR")} € — droit de suite applicable (CGU art. 13)`,
+            },
+            cta: { label: "Instruire le litige", url: `${process.env.NEXT_PUBLIC_SITE_URL}/admin` },
+          }),
+        });
+      }
+    } catch { /* l'alerte ne doit pas empêcher la page de réponse */ }
+  }
 
   return reponse === "bien_annule"
     ? page("Merci !", "C'est noté : le trajet a bien été annulé. Merci de nous aider à garder DealBus fiable.")
