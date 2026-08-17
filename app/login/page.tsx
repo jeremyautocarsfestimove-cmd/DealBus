@@ -32,13 +32,15 @@ function LoginForm() {
 
     // Destination selon le rôle — avec filet : jamais plus de 2,5 s d'attente
     async function destination(userId: string): Promise<string> {
-      const explicite = params.get("next");
-      if (explicite) return explicite;
       const lecture = (async () => {
         const { data: p } = await supabase
           .from("profiles").select("role").eq("id", userId).maybeSingle();
-        if (p?.role === "transporteur") return "/pro";
-        if (p?.role === "admin") return "/admin";
+        const role = p?.role ?? "client";
+        const explicite = params.get("next");
+        // un ?next= résiduel vers une zone interdite est ignoré
+        if (explicite && !(explicite.startsWith("/admin") && role !== "admin")) return explicite;
+        if (role === "transporteur") return "/pro";
+        if (role === "admin") return "/admin";
         return "/mes-demandes";
       })();
       const secours = new Promise<string>((r) => setTimeout(() => r("/mes-demandes"), 2500));
@@ -66,9 +68,7 @@ function LoginForm() {
           email: data.session.user.email,
           ...(nom.trim() && { nom: nom.trim() }),
         }, { onConflict: "id", ignoreDuplicates: true });
-        const dest = await destination(data.session.user.id);
-        router.push(dest);
-        router.refresh();
+        window.location.assign(await destination(data.session.user.id));
         return;
       }
 
@@ -77,9 +77,7 @@ function LoginForm() {
         setError(err.message.includes("Invalid") ? "Identifiants incorrects." : err.message);
         return;
       }
-      const dest = await destination(signin.user.id);
-      router.push(dest);
-      router.refresh();
+      window.location.assign(await destination(signin.user.id));
     } catch (e) {
       setError(`Connexion impossible : ${(e as Error).message || "erreur réseau"}. Réessayez.`);
     } finally {
