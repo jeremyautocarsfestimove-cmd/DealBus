@@ -55,7 +55,10 @@ export function Nav() {
   }
 
   const { checked, name, role } = state;
-  const espaceHref = role === "transporteur" ? "/pro" : "/mes-demandes";
+  const espaceHref =
+    role === "transporteur" ? "/pro"
+    : role === "admin" ? "/admin"
+    : "/mes-demandes";
 
   return (
     <header className="sticky top-0 z-50 bg-asphalte/90 backdrop-blur border-b border-ligne">
@@ -63,7 +66,7 @@ export function Nav() {
         <Link href="/"><Logo /></Link>
 
         {/* Menu central : jamais rendu tant que l'état est inconnu, jamais pour un transporteur */}
-        {checked && role !== "transporteur" && (
+        {checked && role !== "transporteur" && role !== "admin" && (
           <div className="hidden md:flex items-center gap-8 text-sm text-blanc-dim">
             <Link href="/demande" className="hover:text-blanc">Faire une demande</Link>
             <Link href="/mes-demandes" className="hover:text-blanc">Mes demandes</Link>
