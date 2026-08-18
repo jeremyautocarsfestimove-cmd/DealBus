@@ -34,7 +34,7 @@ Ce que j'ai construit pour y répondre :
 
 Être parmi les premiers a un avantage concret : les premiers inscrits de chaque département recevront naturellement les premières demandes de leur zone, sans concurrence ou presque.
 
-L'inscription prend 3 minutes, chaque compte est vérifié et validé sous 24 h :
+L'inscription prend 2 minutes, chaque compte est vérifié et validé sous 24 h :
 
 → https://dealbus.fr/pro
 
@@ -74,7 +74,7 @@ export function htmlProspection(p: Prospect): string {
   ${bloc("Des conditions de partenaires", "0 € d'abonnement, 0 engagement. Commission uniquement sur les missions gagnées : 5 à 9 %, réduite sur les retours à vide, facturée après la prestation. Le client vous règle en direct.")}
   ${par(`Avantage concret d'être parmi les premiers : <strong>les premiers inscrits de chaque département recevront les premières demandes de leur zone</strong>, sans concurrence ou presque.`)}
   <table role="presentation" cellpadding="0" cellspacing="0" style="margin:20px 0 8px;"><tr><td style="border-radius:5px;background:#E8A63D;">
-    <a href="https://dealbus.fr/pro" target="_blank" style="display:inline-block;padding:13px 26px;font-size:14.5px;font-weight:700;color:#12151B;text-decoration:none;font-family:Arial,sans-serif;">S'inscrire en 3 minutes &rarr;</a>
+    <a href="https://dealbus.fr/pro" target="_blank" style="display:inline-block;padding:13px 26px;font-size:14.5px;font-weight:700;color:#12151B;text-decoration:none;font-family:Arial,sans-serif;">S'inscrire en 2 minutes &rarr;</a>
   </td></tr></table>
   ${par(`<span style="font-size:13px;color:#6B7280;">Compte vérifié et validé sous 24 h. Une question ? Répondez à cet email — c'est moi qui vous lirai.</span>`)}
   ${par(`Bonne route,<br/><strong>Jeremy, de DealBus™</strong>`)}
