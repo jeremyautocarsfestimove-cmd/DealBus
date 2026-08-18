@@ -25,6 +25,7 @@ export function ProspectionClient() {
   const [recherche, setRecherche] = useState("");
   const [limite, setLimite] = useState(40);
   const [occupied, setOccupied] = useState<string | null>(null);
+  const [dialogue, setDialogue] = useState<{ titre: string; lignes: string[]; action: () => void } | null>(null);
   const [emailTest, setEmailTest] = useState("");
   const [message, setMessage] = useState<string | null>(null);
 
@@ -94,8 +95,15 @@ export function ProspectionClient() {
   }
 
   // ---------- Envoi d'une vague ----------
+  function demanderVague() {
+    setDialogue({
+      titre: "Envoyer une vague ?",
+      lignes: [`L'email de prospection partira aux ${Math.min(limite, stats.a_contacter)} prochains prospects « À contacter ».`],
+      action: envoyerVague,
+    });
+  }
+
   async function envoyerVague() {
-    if (!confirm(`Envoyer l'email de prospection aux ${Math.min(limite, stats.a_contacter)} prochains prospects « À contacter » ?`)) return;
     setOccupied("envoi");
     setMessage(null);
     try {
@@ -137,10 +145,20 @@ export function ProspectionClient() {
   }
 
   // ---------- Relance individuelle ----------
-  async function relancer(p: Prospect) {
+  function demanderRelance(p: Prospect) {
     const dernier = p.relance_le ?? p.envoye_le;
     const quand = dernier ? new Date(dernier).toLocaleDateString("fr-FR") : "—";
-    if (!confirm(`Relancer ${p.email} ?\nDernier contact : ${quand}${p.nb_relances ? ` · déjà ${p.nb_relances} relance(s)` : ""}`)) return;
+    setDialogue({
+      titre: `Relancer ${p.societe ?? p.email} ?`,
+      lignes: [
+        `Un email de relance (version courte, angle pionnier) partira à ${p.email}.`,
+        `Dernier contact : ${quand}${p.nb_relances ? ` · déjà ${p.nb_relances} relance(s)` : ""}.`,
+      ],
+      action: () => relancer(p),
+    });
+  }
+
+  async function relancer(p: Prospect) {
     setOccupied(p.id);
     try {
       const r = await fetch("/api/admin/prospection", {
@@ -215,7 +233,7 @@ export function ProspectionClient() {
             </div>
             <button className="btn-primary disabled:opacity-50"
               disabled={occupied !== null || !stats.a_contacter}
-              onClick={envoyerVague}>
+              onClick={demanderVague}>
               {occupied === "envoi" ? "Envoi en cours…" : `Envoyer une vague →`}
             </button>
           </div>
@@ -287,7 +305,7 @@ export function ProspectionClient() {
                   {p.statut === "envoye" && (
                     <button className="btn-ghost text-[12px] py-1 px-2.5 mr-2 disabled:opacity-50"
                       disabled={occupied !== null}
-                      onClick={() => relancer(p)}>
+                      onClick={() => demanderRelance(p)}>
                       {occupied === p.id ? "…" : "Relancer"}
                     </button>
                   )}
@@ -307,6 +325,29 @@ export function ProspectionClient() {
       </div>
       {visibles.length === 200 && (
         <p className="font-mono text-[10.5px] text-blanc-faint mt-3">Affichage limité aux 200 premières lignes — utilisez la recherche ou les filtres.</p>
+      )}
+
+      {/* ---------- Dialogue de confirmation interne ---------- */}
+      {dialogue && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6"
+          onClick={() => setDialogue(null)}>
+          <div className="absolute inset-0 bg-asphalte/80 backdrop-blur-sm" />
+          <div className="relative card max-w-md w-full border-ligne-strong shadow-2xl"
+            onClick={(e) => e.stopPropagation()}>
+            <p className="eyebrow mb-4">Confirmation</p>
+            <h2 className="h-display text-2xl mb-3">{dialogue.titre}</h2>
+            {dialogue.lignes.map((l) => (
+              <p key={l} className="text-[14px] text-blanc-dim leading-relaxed mb-2">{l}</p>
+            ))}
+            <div className="flex justify-end gap-3 mt-6">
+              <button className="btn-ghost" onClick={() => setDialogue(null)}>Annuler</button>
+              <button className="btn-primary"
+                onClick={() => { const a = dialogue.action; setDialogue(null); a(); }}>
+                Confirmer →
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </main>
   );
