@@ -24,6 +24,7 @@ export function ProspectionClient() {
   const [recherche, setRecherche] = useState("");
   const [limite, setLimite] = useState(40);
   const [occupied, setOccupied] = useState<string | null>(null);
+  const [emailTest, setEmailTest] = useState("");
   const [message, setMessage] = useState<string | null>(null);
 
   const charger = useCallback(async () => {
@@ -113,6 +114,27 @@ export function ProspectionClient() {
     }
   }
 
+  // ---------- Envoi de test ----------
+  async function envoyerTest() {
+    if (!emailTest.trim()) return;
+    setOccupied("test");
+    setMessage(null);
+    try {
+      const r = await fetch("/api/admin/prospection", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "test", email: emailTest }),
+      });
+      const res = await r.json();
+      if (!r.ok) throw new Error(res.error ?? "envoi impossible");
+      setMessage(`✉️ Email de test envoyé à ${res.envoye_a} (objet préfixé [TEST]) — vérifiez la boîte de réception.`);
+    } catch (e) {
+      setMessage(`❌ ${(e as Error).message}`);
+    } finally {
+      setOccupied(null);
+    }
+  }
+
   // ---------- STOP / réarmer ----------
   async function basculerStop(p: Prospect) {
     const retour = p.statut === "stop";
@@ -173,6 +195,19 @@ export function ProspectionClient() {
               {occupied === "envoi" ? "Envoi en cours…" : `Envoyer une vague →`}
             </button>
           </div>
+        </div>
+        <div className="flex flex-wrap items-end gap-3 border-t border-ligne mt-5 pt-5">
+          <div className="flex-1 min-w-[240px]">
+            <label className="label">Envoyer un email de test à une adresse</label>
+            <input className="input w-full" type="email" placeholder="votre@adresse.fr"
+              value={emailTest} onChange={(e) => setEmailTest(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && envoyerTest()} />
+          </div>
+          <button className="btn-ghost disabled:opacity-50"
+            disabled={occupied !== null || !emailTest.trim()}
+            onClick={envoyerTest}>
+            {occupied === "test" ? "Envoi…" : "Envoyer le test"}
+          </button>
         </div>
         {message && (
           <p className="font-mono text-xs text-blanc-dim border-t border-ligne mt-5 pt-4">{message}</p>

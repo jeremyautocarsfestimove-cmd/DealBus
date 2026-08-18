@@ -137,6 +137,39 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, envoyes, erreurs });
   }
 
+  // ---------- ENVOI DE TEST À UNE ADRESSE ----------
+  if (body.action === "test") {
+    if (!process.env.RESEND_API_KEY) {
+      return NextResponse.json({ error: "RESEND_API_KEY non configurée" }, { status: 500 });
+    }
+    const email = String(body.email ?? "").trim().toLowerCase();
+    if (!EMAIL_RE.test(email)) {
+      return NextResponse.json({ error: "adresse email invalide" }, { status: 400 });
+    }
+    // Échantillon réaliste : le prochain prospect de la file (sinon un exemple)
+    const { data: premier } = await admin
+      .from("prospects").select("societe, departement")
+      .eq("statut", "a_contacter").limit(1).maybeSingle();
+    const echantillon = {
+      email,
+      societe: premier?.societe ?? "Autocars Exemple",
+      departement: premier?.departement ?? "76",
+    };
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    const from = process.env.CAMPAGNE_FROM ?? process.env.RESEND_FROM ?? "Jeremy de DealBus <contact@dealbus.fr>";
+    const { error } = await resend.emails.send({
+      from,
+      to: email,
+      replyTo: "contact@dealbus.fr",
+      subject: `[TEST] ${sujetProspection(echantillon)}`,
+      text: texteProspection(echantillon),
+      html: htmlProspection(echantillon),
+      headers: { "List-Unsubscribe": "<mailto:contact@dealbus.fr?subject=STOP>" },
+    });
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ ok: true, envoye_a: email });
+  }
+
   // ---------- MARQUER STOP / RÉARMER ----------
   if (body.action === "stop") {
     const { email, retour } = body as { email?: string; retour?: boolean };
