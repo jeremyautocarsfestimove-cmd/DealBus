@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { sujetProspection, texteProspection, htmlProspection } from "@/lib/prospection";
+import { sujetProspection, texteProspection, htmlProspection, sujetRelance, texteRelance, htmlRelance } from "@/lib/prospection";
 
 export const maxDuration = 60;
 
@@ -168,6 +168,37 @@ export async function POST(req: Request) {
     });
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ ok: true, envoye_a: email });
+  }
+
+  // ---------- RELANCE INDIVIDUELLE ----------
+  if (body.action === "relance") {
+    if (!process.env.RESEND_API_KEY) {
+      return NextResponse.json({ error: "RESEND_API_KEY non configurée" }, { status: 500 });
+    }
+    const email = String(body.email ?? "").trim().toLowerCase();
+    const { data: p } = await admin
+      .from("prospects").select("id, email, societe, departement, statut, nb_relances")
+      .eq("email", email).maybeSingle();
+    if (!p) return NextResponse.json({ error: "prospect introuvable" }, { status: 404 });
+    if (p.statut !== "envoye") {
+      return NextResponse.json({ error: `relance impossible (statut : ${p.statut})` }, { status: 400 });
+    }
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    const from = process.env.CAMPAGNE_FROM ?? process.env.RESEND_FROM ?? "Jeremy de DealBus <contact@dealbus.fr>";
+    const { error } = await resend.emails.send({
+      from,
+      to: p.email,
+      replyTo: "contact@dealbus.fr",
+      subject: sujetRelance(p),
+      text: texteRelance(p),
+      html: htmlRelance(p),
+      headers: { "List-Unsubscribe": "<mailto:contact@dealbus.fr?subject=STOP>" },
+    });
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    await admin.from("prospects")
+      .update({ relance_le: new Date().toISOString(), nb_relances: (p.nb_relances ?? 0) + 1 })
+      .eq("id", p.id);
+    return NextResponse.json({ ok: true, relances: (p.nb_relances ?? 0) + 1 });
   }
 
   // ---------- MARQUER STOP / RÉARMER ----------

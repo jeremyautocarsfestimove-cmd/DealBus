@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 type Prospect = {
   id: string; email: string; societe: string | null; departement: string | null;
   statut: string; envoye_le: string | null; erreur: string | null;
+  relance_le: string | null; nb_relances: number | null;
 };
 
 const STATUTS: Record<string, { label: string; classe: string }> = {
@@ -135,6 +136,29 @@ export function ProspectionClient() {
     }
   }
 
+  // ---------- Relance individuelle ----------
+  async function relancer(p: Prospect) {
+    const dernier = p.relance_le ?? p.envoye_le;
+    const quand = dernier ? new Date(dernier).toLocaleDateString("fr-FR") : "—";
+    if (!confirm(`Relancer ${p.email} ?\nDernier contact : ${quand}${p.nb_relances ? ` · déjà ${p.nb_relances} relance(s)` : ""}`)) return;
+    setOccupied(p.id);
+    try {
+      const r = await fetch("/api/admin/prospection", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "relance", email: p.email }),
+      });
+      const res = await r.json();
+      if (!r.ok) throw new Error(res.error ?? "relance impossible");
+      setMessage(`↻ Relance envoyée à ${p.email} (n°${res.relances}).`);
+      await charger();
+    } catch (e) {
+      setMessage(`❌ ${(e as Error).message}`);
+    } finally {
+      setOccupied(null);
+    }
+  }
+
   // ---------- STOP / réarmer ----------
   async function basculerStop(p: Prospect) {
     const retour = p.statut === "stop";
@@ -253,8 +277,20 @@ export function ProspectionClient() {
                 </td>
                 <td className="px-5 py-2.5 font-mono text-[12px] text-blanc-faint">
                   {p.envoye_le ? new Date(p.envoye_le).toLocaleDateString("fr-FR") : "—"}
+                  {p.nb_relances ? (
+                    <span className="text-ambre" title={p.relance_le ? `Dernière relance le ${new Date(p.relance_le).toLocaleDateString("fr-FR")}` : undefined}>
+                      {" "}· ↻{p.nb_relances}
+                    </span>
+                  ) : null}
                 </td>
-                <td className="px-5 py-2.5 text-right">
+                <td className="px-5 py-2.5 text-right whitespace-nowrap">
+                  {p.statut === "envoye" && (
+                    <button className="btn-ghost text-[12px] py-1 px-2.5 mr-2 disabled:opacity-50"
+                      disabled={occupied !== null}
+                      onClick={() => relancer(p)}>
+                      {occupied === p.id ? "…" : "Relancer"}
+                    </button>
+                  )}
                   <button className="btn-ghost text-[12px] py-1 px-2.5" onClick={() => basculerStop(p)}>
                     {p.statut === "stop" ? "Réarmer" : "STOP"}
                   </button>
