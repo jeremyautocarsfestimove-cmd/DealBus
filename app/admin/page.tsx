@@ -22,10 +22,7 @@ export default async function AdminPage() {
       <>
         <Nav />
         <main className="max-w-2xl mx-auto px-7 py-24 text-center">
-          <div className="flex items-center justify-between flex-wrap gap-4">
           <h1 className="h-display text-4xl mb-4">Accès réservé.</h1>
-          <a href="/admin/prospection" className="btn-ghost">Prospection →</a>
-        </div>
           <p className="text-blanc-dim">Cette page est réservée à l&apos;administration DealBus.</p>
         </main>
       </>
@@ -91,7 +88,10 @@ export default async function AdminPage() {
       <Nav />
       <main className="max-w-6xl mx-auto px-7 py-14">
         <p className="eyebrow mb-4">Administration</p>
-        <h1 className="h-display text-4xl mb-10">Pilotage DealBus.</h1>
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <h1 className="h-display text-4xl mb-10">Pilotage DealBus.</h1>
+          <a href="/admin/prospection" className="btn-ghost">Prospection →</a>
+        </div>
 
         {/* ---------- KPIs ---------- */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
