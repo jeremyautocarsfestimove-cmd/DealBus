@@ -18,6 +18,32 @@ async function verifierAdmin() {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
+// GET ?preview=1 → aperçu de l'email exactement tel qu'il partira
+export async function GET(req: Request) {
+  if (!(await verifierAdmin())) {
+    return NextResponse.json({ error: "réservé à l'administration" }, { status: 403 });
+  }
+  const url = new URL(req.url);
+  if (!url.searchParams.get("preview")) {
+    return NextResponse.json({ error: "?preview=1 attendu" }, { status: 400 });
+  }
+  // Données du premier prospect à contacter (sinon un exemple)
+  const admin = createAdminClient();
+  const { data: premier } = await admin
+    .from("prospects").select("email, societe, departement")
+    .eq("statut", "a_contacter").limit(1).maybeSingle();
+  const echantillon = premier ?? { email: "contact@exemple.fr", societe: "Autocars Exemple", departement: "76" };
+  const sujet = sujetProspection(echantillon);
+  const bandeau = `<div style="background:#12151B;color:#F5F2EA;font-family:Consolas,monospace;font-size:12px;padding:12px 20px;">
+    APERÇU — Objet : <strong style="color:#E8A63D;">${sujet}</strong>
+    &nbsp;·&nbsp; Expéditeur : ${process.env.CAMPAGNE_FROM ?? process.env.RESEND_FROM ?? "Jeremy de DealBus <contact@dealbus.fr>"}
+    &nbsp;·&nbsp; Exemple : ${echantillon.email}${echantillon.departement ? ` (dépt ${echantillon.departement})` : ""}
+  </div>`;
+  return new Response(bandeau + htmlProspection(echantillon), {
+    headers: { "Content-Type": "text/html; charset=utf-8" },
+  });
+}
+
 export async function POST(req: Request) {
   if (!(await verifierAdmin())) {
     return NextResponse.json({ error: "réservé à l'administration" }, { status: 403 });

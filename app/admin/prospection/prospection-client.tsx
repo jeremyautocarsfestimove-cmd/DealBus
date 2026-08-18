@@ -158,6 +158,9 @@ export function ProspectionClient() {
             </p>
           </div>
           <div className="ml-auto flex items-end gap-3">
+            <a href="/api/admin/prospection?preview=1" target="_blank" className="btn-ghost">
+              Prévisualiser l&apos;email
+            </a>
             <div>
               <label className="label">Taille de vague</label>
               <select className="input" value={limite} onChange={(e) => setLimite(Number(e.target.value))}>
