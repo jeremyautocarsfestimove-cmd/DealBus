@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { SeoPage } from "../../_seo/SeoPage";
 import { VILLES, getVille } from "@/lib/villes";
 import { DEPARTEMENTS, getDepartement, departementDeVille } from "@/lib/departements";
+import { REGIONS, getRegion, departementsDeRegion } from "@/lib/regions";
+import { VILLES as TOUTES_VILLES } from "@/lib/villes";
 
 // Route géographique unifiée : /location-autocar/[slug]
 // résout soit une VILLE (versailles, rouen…) soit un DÉPARTEMENT (yvelines, eure…).
@@ -12,6 +14,7 @@ export function generateStaticParams() {
   return [
     ...VILLES.map((v) => ({ ville: v.slug })),
     ...DEPARTEMENTS.map((d) => ({ ville: d.slug })),
+    ...REGIONS.map((r) => ({ ville: r.slug })),
   ];
 }
 
@@ -25,6 +28,14 @@ export async function generateMetadata(
       title: `Location d'autocar avec chauffeur ${v.dans} — devis comparés | DealBus`,
       description: `Louez un autocar avec chauffeur ${v.dans} (${v.dept}) : publiez votre trajet, recevez plusieurs devis de transporteurs vérifiés, comparez et choisissez. Gratuit, sans engagement. Retours à vide ${v.depuis} à prix cassé.`,
       alternates: { canonical: `https://dealbus.fr/location-autocar/${v.slug}` },
+    };
+  }
+  const r = getRegion(ville);
+  if (r) {
+    return {
+      title: `Location d'autocar ${r.dans} — bus avec chauffeur, devis comparés | DealBus`,
+      description: `Location d'autocar avec chauffeur ${r.dans} : transporteurs vérifiés dans tous les départements de la région, devis fermes comparés, enchères et retours à vide. Gratuit côté client, sans engagement.`,
+      alternates: { canonical: `https://dealbus.fr/location-autocar/${r.slug}` },
     };
   }
   const d = getDepartement(ville);
@@ -46,6 +57,8 @@ export default async function ZonePage(
   if (v) return <PageVille v={v} />;
   const d = getDepartement(ville);
   if (d) return <PageDepartement d={d} />;
+  const r = getRegion(ville);
+  if (r) return <PageRegion r={r} />;
   notFound();
 }
 
@@ -222,6 +235,86 @@ function PageDepartement({ d }: { d: NonNullable<ReturnType<typeof getDepartemen
       ]}
       related={[
         ...voisins.map((x) => ({ href: `/location-autocar/${x.slug}`, label: `Location d'autocar — ${x.nom} (${x.code})` })),
+        { href: "/location-autocar", label: "Location d'autocar — guide complet" },
+        { href: "/reglementation", label: "Réglementation autocar" },
+      ]}
+    />
+  );
+}
+
+
+/* ============================ RÉGION ============================ */
+function PageRegion({ r }: { r: NonNullable<ReturnType<typeof getRegion>> }) {
+  const depts = departementsDeRegion(r.nom);
+  const villesPhares = TOUTES_VILLES.filter((v) => v.region === r.nom).slice(0, 6);
+  const autresRegions = REGIONS.filter((x) => x.slug !== r.slug).slice(0, 3);
+
+  return (
+    <SeoPage
+      eyebrow={`Région · ${r.nom}`}
+      h1={<>Location d&apos;autocar {r.dans}<span className="text-ambre">.</span></>}
+      intro={`Un autocar avec chauffeur ${r.dans} ? Publiez votre trajet gratuitement : les transporteurs vérifiés de la région — et des territoires limitrophes — vous répondent avec des devis fermes, ou s'affrontent en enchère si vous préférez. Comparez, choisissez, partez.`}
+      sections={[
+        { titre: `Le transport de groupe ${r.dans}`, corps: <p>{r.contexte}</p> },
+        {
+          titre: "Les départements couverts",
+          corps: (
+            <>
+              <div className="flex flex-wrap gap-2.5 mb-4">
+                {depts.map((d) => (
+                  <Link key={d.slug} href={`/location-autocar/${d.slug}`}
+                    className="card px-4 py-2 text-[13.5px] font-semibold text-ambre hover:border-ambre/50 transition">
+                    {d.nom} ({d.code}) →
+                  </Link>
+                ))}
+              </div>
+              <p>
+                Chaque page département détaille les villes desservies, les trajets typiques et les
+                spécificités locales du marché.
+              </p>
+            </>
+          ),
+        },
+        ...(villesPhares.length ? [{
+          titre: "Les villes les plus demandées",
+          corps: (
+            <div className="flex flex-wrap gap-2.5">
+              {villesPhares.map((v) => (
+                <Link key={v.slug} href={`/location-autocar/${v.slug}`}
+                  className="card px-4 py-2 text-[13.5px] text-blanc-dim hover:text-blanc hover:border-ligne-strong transition">
+                  {v.nom}
+                </Link>
+              ))}
+            </div>
+          ),
+        }] : []),
+        {
+          titre: `Les retours à vide ${r.dans}`,
+          corps: (
+            <p>
+              {r.axesRetours}{" "}
+              <Link href="/retours" className="text-ambre hover:underline">Consultez le tableau des retours à vide</Link>{" "}
+              avant toute demande classique : un autocar complet à prix réduit passe peut-être par chez vous.
+            </p>
+          ),
+        },
+      ]}
+      faq={[
+        {
+          q: `Combien coûte la location d'un autocar ${r.dans} ?`,
+          r: `Tout dépend du trajet, de la durée, de la taille du véhicule et de la saison — c'est pourquoi DealBus fait jouer la concurrence entre tous les transporteurs de la région : les écarts atteignent couramment 20 à 30 % pour une même prestation. La demande est gratuite et sans engagement.`,
+        },
+        {
+          q: `Quels transporteurs couvrent la région ${r.nom} ?`,
+          r: `Les autocaristes définissent leurs zones d'intervention par département. Votre demande est envoyée à tous les professionnels vérifiés — SIREN, licence, RC Pro contrôlés — qui couvrent votre département de départ, y compris ceux des territoires limitrophes.`,
+        },
+        {
+          q: `Comment obtenir le meilleur prix pour un bus ${r.dans} ?`,
+          r: `Trois leviers : publier tôt (2 à 4 semaines avant, davantage en haute saison), comparer plusieurs devis fermes plutôt que d'accepter le premier prix, et surveiller les retours à vide de la région — des autocars complets à une fraction du tarif normal.`,
+        },
+      ]}
+      related={[
+        ...autresRegions.map((x) => ({ href: `/location-autocar/${x.slug}`, label: `Location d'autocar ${x.dans}` })),
         { href: "/location-autocar", label: "Location d'autocar — guide complet" },
         { href: "/reglementation", label: "Réglementation autocar" },
       ]}
