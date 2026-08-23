@@ -272,6 +272,7 @@ export default function Home() {
               <Link href="/location-autocar" className="hover:text-blanc-dim">Location d&apos;autocar</Link>
               <Link href="/reserver-un-bus" className="hover:text-blanc-dim">Réserver un bus</Link>
               <Link href="/comparateur-devis-autocar" className="hover:text-blanc-dim">Comparateur de devis</Link>
+              <Link href="/reglementation" className="hover:text-blanc-dim">Réglementation autocar</Link>
               <Link href="/retours" className="hover:text-blanc-dim">Retours à vide</Link>
               <Link href="/pro" className="hover:text-blanc-dim">Devenir transporteur</Link>
             </div>
