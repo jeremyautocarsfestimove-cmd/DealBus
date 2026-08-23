@@ -208,7 +208,7 @@ export function LiveBoard() {
       {rows.map((r) => (
         <div
           key={r.key}
-          className="grid grid-cols-[90px_1fr_80px_90px] gap-3.5 items-center px-5 py-4 border-b border-ligne last:border-0 font-mono text-sm"
+          className="grid grid-cols-[auto_minmax(0,1fr)_auto] sm:grid-cols-[90px_1fr_80px_90px] gap-2.5 sm:gap-3.5 items-center px-4 sm:px-5 py-4 border-b border-ligne last:border-0 font-mono text-[13px] sm:text-sm"
         >
           <span className={
             r.mode === "enchere" ? "tag-enchere"
