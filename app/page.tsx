@@ -17,7 +17,7 @@ export default function Home() {
   return (
     <>
       <Nav />
-      <main className="motif-route relative overflow-x-clip">
+      <main className="relative overflow-x-clip">
         {/* ---------- HERO (image de fond traitée) ---------- */}
         <section className="relative overflow-hidden">
           {/* Photo de fond : /public/img/hero.jpg — autocar sur autoroute, plan large */}
@@ -53,6 +53,8 @@ export default function Home() {
             <LiveBoard />
           </div>
         </section>
+
+        <div className="motif-route">
 
         {/* ---------- STATS ---------- */}
         <section className="border-y border-ligne bg-gradient-to-r from-ambre/[0.06] via-transparent to-[#E8735D]/[0.05]">
@@ -283,6 +285,7 @@ export default function Home() {
         </section>
 
         {/* ---------- FOOTER ---------- */}
+        </div>
         <Footer />
       </main>
     </>
