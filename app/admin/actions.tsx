@@ -128,24 +128,43 @@ export function AdminTabs({
 }) {
   const [active, setActive] = useState(0);
   return (
-    <div>
-      <div className="flex gap-2 flex-wrap mb-8">
-        {labels.map((l, i) => (
-          <button
-            key={l}
-            onClick={() => setActive(i)}
-            className={`text-[13px] font-semibold px-4 py-2 rounded-sm border transition
-              ${active === i
-                ? "bg-asphalte-2 text-blanc border-ligne-strong"
-                : "text-blanc-faint border-transparent hover:text-blanc-dim"}`}
+    <div className="lg:grid lg:grid-cols-[230px_minmax(0,1fr)] lg:gap-10 lg:items-start">
+      {/* ---------- Menu latéral (barre horizontale défilante sur mobile) ---------- */}
+      <nav className="mb-8 lg:mb-0 lg:sticky lg:top-24">
+        <p className="hidden lg:block font-mono text-[10.5px] uppercase tracking-widest text-blanc-faint mb-3 px-4">
+          Pilotage
+        </p>
+        <div className="flex lg:flex-col gap-1.5 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 -mx-1 px-1
+                        lg:bg-asphalte-2/40 lg:border lg:border-ligne lg:rounded-md lg:p-2">
+          {labels.map((l, i) => (
+            <button
+              key={l}
+              onClick={() => setActive(i)}
+              className={`shrink-0 lg:w-full text-left text-[13.5px] font-semibold px-4 py-2.5 rounded-sm border transition whitespace-nowrap
+                ${active === i
+                  ? "bg-asphalte-3 text-blanc border-ligne-strong lg:border-l-2 lg:border-l-ambre"
+                  : "text-blanc-faint border-transparent hover:text-blanc-dim hover:bg-asphalte-2/60"}`}
+            >
+              {l}
+            </button>
+          ))}
+          <a
+            href="/admin/prospection"
+            className="shrink-0 lg:w-full text-left text-[13.5px] font-semibold px-4 py-2.5 rounded-sm border border-transparent
+                       text-blanc-faint hover:text-blanc-dim hover:bg-asphalte-2/60 transition whitespace-nowrap
+                       lg:mt-2 lg:border-t lg:border-t-ligne lg:rounded-none lg:pt-4"
           >
-            {l}
-          </button>
+            Prospection →
+          </a>
+        </div>
+      </nav>
+
+      {/* ---------- Contenu ---------- */}
+      <div className="min-w-0">
+        {children.map((c, i) => (
+          <div key={i} hidden={active !== i}>{c}</div>
         ))}
       </div>
-      {children.map((c, i) => (
-        <div key={i} hidden={active !== i}>{c}</div>
-      ))}
     </div>
   );
 }
