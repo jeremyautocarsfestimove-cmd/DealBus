@@ -42,6 +42,41 @@ export const REGIONS: Region[] = [
     contexte: "Premier port de croisière de France à Marseille, festivals d'Avignon et d'Aix, congrès azuréens : la région PACA brasse des flux de groupe massifs et internationaux — sur un marché méridional où comparer plusieurs offres fermes reste le levier de prix le plus efficace.",
     axesRetours: "L'axe Marseille → Paris est la référence nationale des retours à vide ; la côte génère aussi ses propres rotations événementielles.",
   },
+{
+    slug: "bretagne", nom: "Bretagne", dans: "en Bretagne",
+    contexte: "Terre de festivals (Vieilles Charrues, Interceltique, Trans Musicales) qui déplacent chaque année des milliers de cars, la Bretagne conjugue tourisme littoral, vie étudiante rennaise et un maillage d'autocaristes de proximité présents jusqu'au bout du Finistère.",
+    axesRetours: "Les grands festivals d'été et l'axe Rennes ↔ Paris produisent des flux de trajets retour massifs et saisonniers.",
+  },
+  {
+    slug: "pays-de-la-loire", nom: "Pays de la Loire", dans: "dans les Pays de la Loire",
+    contexte: "Du Puy du Fou — premier générateur de cars touristiques de l'Ouest — aux 24 Heures du Mans et à la métropole nantaise, les Pays de la Loire vivent de l'événementiel de groupe à très grande échelle, avec un littoral qui prend le relais l'été.",
+    axesRetours: "Les rotations du Puy du Fou et du circuit manceau créent des opportunités de trajets retour dans toute la moitié ouest.",
+  },
+  {
+    slug: "nouvelle-aquitaine", nom: "Nouvelle-Aquitaine", dans: "en Nouvelle-Aquitaine",
+    contexte: "Plus vaste région de France, la Nouvelle-Aquitaine étire son transport de groupe de l'œnotourisme bordelais aux pèlerinages de Lourdes voisins, en passant par le littoral charentais et basque — des marchés très différents que la mise en concurrence unifie au bénéfice des prix.",
+    axesRetours: "L'axe Bordeaux ↔ Paris et les flux du littoral atlantique offrent des trajets retour quotidiens.",
+  },
+  {
+    slug: "occitanie", nom: "Occitanie", dans: "en Occitanie",
+    contexte: "De l'aéronautique toulousaine aux plages méditerranéennes et aux stations pyrénéennes, l'Occitanie cumule trois saisons de transport de groupe — affaires, balnéaire et neige — sur l'arc très fréquenté entre Espagne et vallée du Rhône.",
+    axesRetours: "L'arc méditerranéen et les liaisons pyrénéennes regorgent de trajets retour toute l'année.",
+  },
+  {
+    slug: "grand-est", nom: "Grand Est", dans: "dans le Grand Est",
+    contexte: "Strasbourg l'européenne et son marché de Noël continental, les caves de champagne de Reims et d'Épernay, les flux transfrontaliers vers l'Allemagne, la Belgique et le Luxembourg : le Grand Est est l'une des régions les plus « autocar » d'Europe.",
+    axesRetours: "Les marchés de Noël et les circuits champagne créent des flux de trajets retour massifs, surtout en fin d'année.",
+  },
+  {
+    slug: "bourgogne-franche-comte", nom: "Bourgogne-Franche-Comté", dans: "en Bourgogne-Franche-Comté",
+    contexte: "Traversée par l'axe majeur Paris ↔ Lyon, la région conjugue œnotourisme des climats de Bourgogne, patrimoine bisontin et liaisons vers la Suisse — une terre de passage où les trajets retour sont une aubaine permanente.",
+    axesRetours: "La position sur l'A6 garantit des retours à vide quasi quotidiens entre Paris, Dijon et Lyon.",
+  },
+  {
+    slug: "corse", nom: "Corse", dans: "en Corse",
+    contexte: "Île du tourisme de groupe par excellence, la Corse vit au rythme des ferries et des croisières : circuits de l'île de Beauté, navettes ports-aéroports et scolaires insulaires font travailler des transporteurs à l'expérience locale irremplaçable.",
+    axesRetours: "Les rotations entre ports, aéroports et sites touristiques offrent des trajets retour tout au long de la saison.",
+  },
 ];
 
 export function getRegion(slug: string): Region | undefined {
