@@ -4,14 +4,21 @@ import Link from "next/link";
 import { useEffect, useLayoutEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Logo } from "./Logo";
-import { createClient } from "@/lib/supabase/client";
+import type { createClient as CreateClientType } from "@/lib/supabase/client";
+
+// Chargement différé de Supabase : la librairie (~40 Ko) sort du bundle
+// critique de la home — elle n'est téléchargée qu'après le premier rendu.
+let clientPromise: Promise<ReturnType<typeof CreateClientType>> | null = null;
+function getSupabase() {
+  clientPromise ??= import("@/lib/supabase/client").then((m) => m.createClient());
+  return clientPromise;
+}
 
 type NavState = { checked: boolean; name: string | null; role: string | null };
 const CACHE_KEY = "dealbus_nav";
 
 export function Nav() {
   const router = useRouter();
-  const supabase = createClient();
   const [state, setState] = useState<NavState>({ checked: false, name: null, role: null });
 
   // 1. Avant le premier affichage : restaurer l'état depuis le cache local (zéro saut)
@@ -27,6 +34,7 @@ export function Nav() {
   useEffect(() => {
     let active = true;
     (async () => {
+      const supabase = await getSupabase();
       const { data: { user } } = await supabase.auth.getUser();
       if (!active) return;
       if (!user) {
@@ -47,6 +55,7 @@ export function Nav() {
   }, []);
 
   async function logout() {
+    const supabase = await getSupabase();
     await supabase.auth.signOut();
     localStorage.removeItem(CACHE_KEY);
     setState({ checked: true, name: null, role: null });

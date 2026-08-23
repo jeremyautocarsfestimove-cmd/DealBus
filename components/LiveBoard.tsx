@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+
 
 type PoolItem = {
   route: string;
@@ -118,10 +118,11 @@ export function LiveBoard() {
 
   // Vraies données : demandes ouvertes + retours à vide publiés
   useEffect(() => {
-    const supabase = createClient();
     let active = true;
+    const supabasePromise = import("@/lib/supabase/client").then((m) => m.createClient());
 
     async function fetchReel() {
+      const supabase = await supabasePromise;
       const [{ data: demandes }, { data: retours }] = await Promise.all([
         supabase.from("demandes_en_direct")
           .select("*").order("created_at", { ascending: false }).limit(MAX_ROWS),
