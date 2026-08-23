@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
+import { CarteCouverture } from "@/components/CarteCouverture";
 import { LiveBoard } from "@/components/LiveBoard";
 import { QuickDemandeForm } from "@/components/QuickDemandeForm";
 
@@ -223,6 +224,27 @@ export default function Home() {
               </div>
             </div>
           </div>
+          </div>
+        </section>
+
+        {/* ---------- COUVERTURE TERRITORIALE ---------- */}
+        <section className="border-b border-ligne">
+          <div className="max-w-6xl mx-auto px-7 py-24 lg:grid lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:gap-14 lg:items-center">
+            <div className="mb-10 lg:mb-0">
+              <p className="eyebrow mb-4">Couverture en temps réel</p>
+              <h2 className="h-display text-4xl md:text-5xl mb-4">Nos transporteurs, département par département.</h2>
+              <p className="text-blanc-dim mb-6">
+                Chaque zone ambre est couverte par au moins un transporteur vérifié — la carte
+                s&apos;actualise à chaque nouvelle inscription. Survolez un département pour voir
+                le détail.
+              </p>
+              <p className="text-blanc-dim mb-8">
+                <span className="text-blanc font-semibold">Transporteur dans une zone encore libre ?</span>{" "}
+                Les premiers inscrits de chaque département recevront ses premières demandes.
+              </p>
+              <a href="/pro" className="btn-ghost">Prendre ma zone →</a>
+            </div>
+            <CarteCouverture />
           </div>
         </section>
 
