@@ -228,7 +228,7 @@ export default function Home() {
         </section>
 
         {/* ---------- COUVERTURE TERRITORIALE ---------- */}
-        <section className="border-b border-ligne">
+        <section>
           <div className="max-w-6xl mx-auto px-7 py-24 lg:grid lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:gap-14 lg:items-center">
             <div className="mb-10 lg:mb-0">
               <p className="eyebrow mb-4">Couverture en temps réel</p>
