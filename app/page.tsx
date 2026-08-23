@@ -17,7 +17,7 @@ export default function Home() {
   return (
     <>
       <Nav />
-      <main className="relative overflow-x-clip">
+      <main className="motif-route relative overflow-x-clip">
         {/* ---------- HERO (image de fond traitée) ---------- */}
         <section className="relative overflow-hidden">
           {/* Photo de fond : /public/img/hero.jpg — autocar sur autoroute, plan large */}
