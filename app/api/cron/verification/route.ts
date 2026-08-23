@@ -69,5 +69,22 @@ export async function GET(req: Request) {
     }
   }
 
+  // ---------- Expiration automatique ----------
+  // Demandes ouvertes dont la date de départ est passée → expirées
+  const hier = new Date(Date.now() - 24 * 3600 * 1000).toISOString().slice(0, 10);
+  const { data: expDemandes } = await admin
+    .from("demandes")
+    .update({ statut: "expiree" })
+    .eq("statut", "ouverte")
+    .lt("date_aller", hier)
+    .select("id");
+  // Retours à vide dont la date est passée → expirés
+  const { data: expRetours } = await admin
+    .from("retours_vide")
+    .update({ statut: "expire" })
+    .in("statut", ["publie", "demande_recue"])
+    .lt("date_dispo", hier)
+    .select("id");
+
   return NextResponse.json({ ok: true, sent });
 }
