@@ -40,5 +40,7 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
+  // Uniquement les zones nécessitant une session : les pages publiques
+  // (accueil, SEO, retours, CGU, login) sont servies sans aucun détour.
+  matcher: ["/mes-demandes/:path*", "/admin/:path*", "/pro/:path*", "/demande/:path*"],
 };
