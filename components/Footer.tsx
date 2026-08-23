@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { VILLES } from "@/lib/villes";
+import { DEPARTEMENTS } from "@/lib/departements";
 
 // Footer SEO commun — colonnes de maillage interne.
 // Les villes proviennent de lib/villes.ts : toute ville ajoutée apparaît automatiquement.
@@ -8,9 +8,9 @@ const colTitre = "font-mono text-[10.5px] uppercase tracking-widest text-blanc-f
 const colLien = "block text-[13px] text-blanc-dim hover:text-blanc transition py-1";
 
 export function Footer() {
-  const moitie = Math.ceil(VILLES.length / 2);
-  const villesA = VILLES.slice(0, moitie);
-  const villesB = VILLES.slice(moitie);
+  const moitie = Math.ceil(DEPARTEMENTS.length / 2);
+  const deptsA = DEPARTEMENTS.slice(0, moitie);
+  const deptsB = DEPARTEMENTS.slice(moitie);
 
   return (
     <footer className="border-t border-ligne mt-24">
@@ -34,18 +34,18 @@ export function Footer() {
           <Link href="/reglementation" className={colLien}>Temps de conduite &amp; amplitude</Link>
         </div>
         <div>
-          <p className={colTitre}>Location par ville</p>
-          {villesA.map((v) => (
-            <Link key={v.slug} href={`/location-autocar/${v.slug}`} className={colLien}>
-              Location autocar {v.nom}
+          <p className={colTitre}>Autocar par département</p>
+          {deptsA.map((d) => (
+            <Link key={d.slug} href={`/location-autocar/${d.slug}`} className={colLien}>
+              Autocar {d.nom} ({d.code})
             </Link>
           ))}
         </div>
         <div>
-          <p className={colTitre}>Location par ville (suite)</p>
-          {villesB.map((v) => (
-            <Link key={v.slug} href={`/location-autocar/${v.slug}`} className={colLien}>
-              Location autocar {v.nom}
+          <p className={colTitre}>Autocar par département (suite)</p>
+          {deptsB.map((d) => (
+            <Link key={d.slug} href={`/location-autocar/${d.slug}`} className={colLien}>
+              Autocar {d.nom} ({d.code})
             </Link>
           ))}
         </div>

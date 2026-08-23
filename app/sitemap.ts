@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { VILLES } from "@/lib/villes";
+import { DEPARTEMENTS } from "@/lib/departements";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = "https://dealbus.fr";
@@ -13,6 +14,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/demande`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: `${base}/pro`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: `${base}/reglementation`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+    ...DEPARTEMENTS.map((d) => ({
+      url: `${base}/location-autocar/${d.slug}`,
+      lastModified: now,
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+    })),
     ...VILLES.map((v) => ({
       url: `${base}/location-autocar/${v.slug}`,
       lastModified: now,

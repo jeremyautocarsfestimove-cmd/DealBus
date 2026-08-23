@@ -3,9 +3,16 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SeoPage } from "../../_seo/SeoPage";
 import { VILLES, getVille } from "@/lib/villes";
+import { DEPARTEMENTS, getDepartement, departementDeVille } from "@/lib/departements";
+
+// Route géographique unifiée : /location-autocar/[slug]
+// résout soit une VILLE (versailles, rouen…) soit un DÉPARTEMENT (yvelines, eure…).
 
 export function generateStaticParams() {
-  return VILLES.map((v) => ({ ville: v.slug }));
+  return [
+    ...VILLES.map((v) => ({ ville: v.slug })),
+    ...DEPARTEMENTS.map((d) => ({ ville: d.slug })),
+  ];
 }
 
 export async function generateMetadata(
@@ -13,21 +20,38 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const { ville } = await params;
   const v = getVille(ville);
-  if (!v) return {};
-  return {
-    title: `Location d'autocar avec chauffeur ${v.dans} — devis comparés | DealBus`,
-    description: `Louez un autocar avec chauffeur ${v.dans} (${v.dept}) : publiez votre trajet, recevez plusieurs devis de transporteurs vérifiés, comparez et choisissez. Gratuit, sans engagement. Retours à vide ${v.depuis} à prix cassé.`,
-    alternates: { canonical: `https://dealbus.fr/location-autocar/${v.slug}` },
-  };
+  if (v) {
+    return {
+      title: `Location d'autocar avec chauffeur ${v.dans} — devis comparés | DealBus`,
+      description: `Louez un autocar avec chauffeur ${v.dans} (${v.dept}) : publiez votre trajet, recevez plusieurs devis de transporteurs vérifiés, comparez et choisissez. Gratuit, sans engagement. Retours à vide ${v.depuis} à prix cassé.`,
+      alternates: { canonical: `https://dealbus.fr/location-autocar/${v.slug}` },
+    };
+  }
+  const d = getDepartement(ville);
+  if (d) {
+    return {
+      title: `Location d'autocar ${d.nom} (${d.code}) — bus avec chauffeur, devis comparés | DealBus`,
+      description: `Location d'autocar avec chauffeur dans ${d.code === "75" ? "" : "le département "}${d.nom} : transporteurs vérifiés, devis fermes comparés, enchères et retours à vide. Gratuit côté client. ${d.villes.slice(0, 4).map((x) => x.nom).join(", ")}…`,
+      alternates: { canonical: `https://dealbus.fr/location-autocar/${d.slug}` },
+    };
+  }
+  return {};
 }
 
-export default async function VillePage(
+export default async function ZonePage(
   { params }: { params: Promise<{ ville: string }> }
 ) {
   const { ville } = await params;
   const v = getVille(ville);
-  if (!v) notFound();
+  if (v) return <PageVille v={v} />;
+  const d = getDepartement(ville);
+  if (d) return <PageDepartement d={d} />;
+  notFound();
+}
 
+/* ============================ VILLE ============================ */
+function PageVille({ v }: { v: NonNullable<ReturnType<typeof getVille>> }) {
+  const dept = departementDeVille(v.slug);
   const voisines = VILLES.filter((x) => x.slug !== v.slug)
     .sort((a, b) => (a.region === v.region ? -1 : 0) - (b.region === v.region ? -1 : 0))
     .slice(0, 3);
@@ -38,10 +62,7 @@ export default async function VillePage(
       h1={<>Location d&apos;autocar avec chauffeur {v.dans}<span className="text-ambre">.</span></>}
       intro={`Un car pour votre association, votre école, votre entreprise ou votre mariage ${v.dans} ? Publiez votre trajet en 2 minutes : les transporteurs vérifiés qui couvrent votre secteur vous répondent avec des offres fermes — vous comparez et vous choisissez. Gratuit côté client, sans engagement.`}
       sections={[
-        {
-          titre: `Le transport de groupe ${v.dans}`,
-          corps: <p>{v.contexte}</p>,
-        },
+        { titre: `Le transport de groupe ${v.dans}`, corps: <p>{v.contexte}</p> },
         {
           titre: `Les trajets les plus demandés ${v.depuis}`,
           corps: (
@@ -56,11 +77,11 @@ export default async function VillePage(
                     </tr>
                   </thead>
                   <tbody>
-                    {v.destinations.map((d) => (
-                      <tr key={d.vers} className="border-b border-ligne/50 last:border-0">
-                        <td className="px-5 py-3 font-semibold text-blanc">{v.nom} → {d.vers}</td>
-                        <td className="px-5 py-3 text-right font-mono text-blanc-dim">≈ {d.km} km</td>
-                        <td className="px-5 py-3 text-blanc-dim hidden sm:table-cell">{d.usage}</td>
+                    {v.destinations.map((dst) => (
+                      <tr key={dst.vers} className="border-b border-ligne/50 last:border-0">
+                        <td className="px-5 py-3 font-semibold text-blanc">{v.nom} → {dst.vers}</td>
+                        <td className="px-5 py-3 text-right font-mono text-blanc-dim">≈ {dst.km} km</td>
+                        <td className="px-5 py-3 text-blanc-dim hidden sm:table-cell">{dst.usage}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -81,7 +102,7 @@ export default async function VillePage(
               Sur DealBus, les transporteurs publient ces trajets déjà planifiés à prix fixe réduit — votre groupe
               réserve l&apos;autocar complet à une fraction du tarif normal.{" "}
               <Link href="/retours" className="text-ambre hover:underline">Consultez les retours à vide disponibles</Link>{" "}
-              avant de publier une demande classique : la bonne affaire est peut-être déjà en ligne.
+              avant de publier une demande classique.
             </p>
           ),
         },
@@ -117,7 +138,90 @@ export default async function VillePage(
         },
       ]}
       related={[
-        ...voisines.map((x) => ({ href: `/location-autocar/${x.slug}`, label: `Location d'autocar ${x.dans}` })),
+        ...(dept ? [{ href: `/location-autocar/${dept.slug}`, label: `Location d'autocar — ${dept.nom} (${dept.code})` }] : []),
+        ...voisines.slice(0, 2).map((x) => ({ href: `/location-autocar/${x.slug}`, label: `Location d'autocar ${x.dans}` })),
+        { href: "/location-autocar", label: "Location d'autocar — guide complet" },
+        { href: "/reglementation", label: "Réglementation autocar" },
+      ]}
+    />
+  );
+}
+
+/* ========================= DÉPARTEMENT ========================= */
+function PageDepartement({ d }: { d: NonNullable<ReturnType<typeof getDepartement>> }) {
+  const voisins = DEPARTEMENTS.filter((x) => x.slug !== d.slug)
+    .sort((a, b) => (a.region === d.region ? -1 : 0) - (b.region === d.region ? -1 : 0))
+    .slice(0, 3);
+
+  return (
+    <SeoPage
+      eyebrow={`Département ${d.code} · ${d.region}`}
+      h1={<>Location d&apos;autocar — {d.nom} ({d.code})<span className="text-ambre">.</span></>}
+      intro={`Besoin d'un autocar avec chauffeur dans ${d.code === "75" ? "" : "le département "}${d.nom} ? Publiez votre trajet gratuitement : les transporteurs vérifiés qui couvrent le ${d.code} vous répondent avec des devis fermes — ou s'affrontent en enchère si vous préférez. Comparez, choisissez, partez.`}
+      sections={[
+        { titre: `Le transport de groupe dans ${d.code === "75" ? "" : "le "}${d.nom}`, corps: <p>{d.contexte}</p> },
+        {
+          titre: "Les principales villes desservies",
+          corps: (
+            <>
+              <div className="flex flex-wrap gap-2.5 mb-4">
+                {d.villes.map((ville) =>
+                  ville.slug ? (
+                    <Link key={ville.nom} href={`/location-autocar/${ville.slug}`}
+                      className="card px-4 py-2 text-[13.5px] font-semibold text-ambre hover:border-ambre/50 transition">
+                      {ville.nom} →
+                    </Link>
+                  ) : (
+                    <span key={ville.nom} className="card px-4 py-2 text-[13.5px] text-blanc-dim">
+                      {ville.nom}
+                    </span>
+                  )
+                )}
+              </div>
+              <p>
+                Et toutes les communes du département : les transporteurs définissent leurs zones par département
+                entier — où que vous soyez dans le {d.code}, votre demande leur parvient.
+              </p>
+            </>
+          ),
+        },
+        {
+          titre: `Les retours à vide dans le ${d.code}`,
+          corps: (
+            <p>
+              {d.axesRetours}{" "}
+              <Link href="/retours" className="text-ambre hover:underline">Consultez le tableau des retours à vide</Link>{" "}
+              avant toute demande classique : un autocar complet à prix réduit passe peut-être par chez vous.
+            </p>
+          ),
+        },
+        {
+          titre: "Des transporteurs vérifiés, un prix juste",
+          corps: (
+            <p>
+              Chaque autocariste inscrit est contrôlé — SIREN, licence de transport de personnes, assurance RC Pro —
+              avant de pouvoir répondre. Vous comparez des offres fermes sous anonymat mutuel, avec notes et avis
+              vérifiés à l&apos;appui, et le client règle le transporteur en direct : DealBus ne touche jamais votre argent.
+            </p>
+          ),
+        },
+      ]}
+      faq={[
+        {
+          q: `Combien coûte la location d'un autocar dans ${d.code === "75" ? "" : "le "}${d.nom} ?`,
+          r: `Tout dépend du trajet, de la durée et de la saison — c'est pourquoi DealBus fait jouer la concurrence entre les transporteurs du ${d.code} et des départements voisins : les écarts atteignent couramment 20 à 30 % pour une même prestation. La demande est gratuite et sans engagement.`,
+        },
+        {
+          q: `Quels transporteurs couvrent le département ${d.code} ?`,
+          r: `Les autocaristes définissent leurs zones d'intervention par département : votre demande dans le ${d.code} est envoyée à tous les professionnels vérifiés qui l'ont sélectionné — locaux comme limitrophes, ce qui élargit la concurrence.`,
+        },
+        {
+          q: `Peut-on louer un minibus ou un grand autocar dans ${d.code === "75" ? "" : "le "}${d.nom} ?`,
+          r: `Oui : du minibus 8 places au grand tourisme 63 places. Indiquez simplement la taille de votre groupe — seuls les transporteurs équipés du véhicule adapté répondront.`,
+        },
+      ]}
+      related={[
+        ...voisins.map((x) => ({ href: `/location-autocar/${x.slug}`, label: `Location d'autocar — ${x.nom} (${x.code})` })),
         { href: "/location-autocar", label: "Location d'autocar — guide complet" },
         { href: "/reglementation", label: "Réglementation autocar" },
       ]}
