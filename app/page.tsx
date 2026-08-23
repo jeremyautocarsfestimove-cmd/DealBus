@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Nav } from "@/components/Nav";
+import { Footer } from "@/components/Footer";
 import { LiveBoard } from "@/components/LiveBoard";
 import { QuickDemandeForm } from "@/components/QuickDemandeForm";
 
@@ -260,24 +261,7 @@ export default function Home() {
         </section>
 
         {/* ---------- FOOTER ---------- */}
-        <footer className="border-t border-ligne">
-          <div className="max-w-6xl mx-auto px-7 py-10 flex flex-wrap items-center justify-between gap-5">
-            <p className="font-mono text-[11.5px] text-blanc-faint">
-              © 2026 DealBus™ — Marque déposée (INPI). Tous droits réservés.
-              <a href="/cgu" className="ml-4 hover:text-blanc-dim underline underline-offset-4">CGU</a>
-              <a href="mailto:contact@dealbus.fr" className="ml-4 hover:text-blanc-dim">contact@dealbus.fr</a>
-            </p>
-            <div className="flex flex-wrap gap-x-6 gap-y-2 text-[13px] text-blanc-faint">
-              <Link href="#comment-ca-marche" className="hover:text-blanc-dim">Comment ça marche</Link>
-              <Link href="/location-autocar" className="hover:text-blanc-dim">Location d&apos;autocar</Link>
-              <Link href="/reserver-un-bus" className="hover:text-blanc-dim">Réserver un bus</Link>
-              <Link href="/comparateur-devis-autocar" className="hover:text-blanc-dim">Comparateur de devis</Link>
-              <Link href="/reglementation" className="hover:text-blanc-dim">Réglementation autocar</Link>
-              <Link href="/retours" className="hover:text-blanc-dim">Retours à vide</Link>
-              <Link href="/pro" className="hover:text-blanc-dim">Devenir transporteur</Link>
-            </div>
-          </div>
-        </footer>
+        <Footer />
       </main>
     </>
   );

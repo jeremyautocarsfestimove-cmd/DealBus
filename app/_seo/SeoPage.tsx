@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Nav } from "@/components/Nav";
+import { Footer } from "@/components/Footer";
 
 // Gabarit commun des pages d'atterrissage SEO
 export function SeoPage({
@@ -73,6 +74,7 @@ export function SeoPage({
           </div>
         </nav>
       </main>
+      <Footer />
     </>
   );
 }
