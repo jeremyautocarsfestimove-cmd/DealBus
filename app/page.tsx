@@ -54,7 +54,6 @@ export default function Home() {
           </div>
         </section>
 
-        <div className="motif-route">
 
         {/* ---------- STATS ---------- */}
         <section className="border-y border-ligne bg-gradient-to-r from-ambre/[0.06] via-transparent to-[#E8735D]/[0.05]">
@@ -67,6 +66,8 @@ export default function Home() {
             ))}
           </div>
         </section>
+
+        <div className="motif-route">
 
         {/* ---------- FORMULAIRE DE DEMANDE ---------- */}
         <section id="demande-rapide" className="relative py-24">
