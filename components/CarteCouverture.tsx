@@ -11,8 +11,7 @@ type Feature = {
   geometry: { type: "Polygon" | "MultiPolygon"; coordinates: number[][][] | number[][][][] };
 };
 
-const GEOJSON_URL =
-  "https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/departements-version-simplifiee.geojson";
+const GEOJSON_URL = "/data/departements-fr.geojson";
 
 const COS_LAT = Math.cos((46.5 * Math.PI) / 180);
 const W = 520, H = 500, PAD = 8;
@@ -23,7 +22,22 @@ export function CarteCouverture() {
   const [survol, setSurvol] = useState<{ nom: string; code: string; nb: number; x: number; y: number } | null>(null);
   const conteneur = useRef<HTMLDivElement>(null);
 
+  const [visible, setVisible] = useState(false);
+
+  // Ne rien charger tant que la section n'approche pas de l'écran
   useEffect(() => {
+    const el = conteneur.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      (entries) => { if (entries[0].isIntersecting) { setVisible(true); obs.disconnect(); } },
+      { rootMargin: "400px" }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!visible) return;
     let actif = true;
     (async () => {
       // 1. Couverture depuis Supabase (import différé — hors bundle critique)
@@ -41,7 +55,10 @@ export function CarteCouverture() {
 
       // 2. Fond de carte
       try {
-        const r = await fetch(GEOJSON_URL);
+        const ctrl = new AbortController();
+        const minuteur = setTimeout(() => ctrl.abort(), 10000);
+        const r = await fetch(GEOJSON_URL, { signal: ctrl.signal });
+        clearTimeout(minuteur);
         const geo = await r.json();
         if (!actif) return;
 
@@ -71,7 +88,7 @@ export function CarteCouverture() {
       } catch { /* réseau indisponible : pas de carte */ }
     })();
     return () => { actif = false; };
-  }, []);
+  }, [visible]);
 
   const nbCouverts = Object.keys(couverture).length;
   const teinte = (nb: number | undefined) =>
