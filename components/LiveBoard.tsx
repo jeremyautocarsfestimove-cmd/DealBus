@@ -123,7 +123,13 @@ export function LiveBoard() {
 
     async function fetchReel() {
       const supabase = await supabasePromise;
-      const [{ data: demandes }, { data: retours }] = await Promise.all([
+
+      // Garde-fou : si Supabase ne répond pas, on abandonne au bout de 5s
+      // plutôt que de laisser le spinner tourner indéfiniment.
+      const timeout = new Promise<"timeout">((resolve) =>
+        setTimeout(() => resolve("timeout"), 5000)
+      );
+      const requete = Promise.all([
         supabase.from("demandes_en_direct")
           .select("*").order("created_at", { ascending: false }).limit(MAX_ROWS),
         supabase.from("retours_vide")
@@ -131,7 +137,17 @@ export function LiveBoard() {
           .in("statut", ["publie", "demande_recue"])
           .order("created_at", { ascending: false }).limit(MAX_ROWS),
       ]);
+
+      const resultat = await Promise.race([requete, timeout]);
       if (!active) return;
+
+      if (resultat === "timeout") {
+        // Pas de données réelles cette fois : on affiche quand même les lignes
+        // de complément plutôt que de rester bloqué sur "Chargement…".
+        setLoaded(true);
+        return;
+      }
+      const [{ data: demandes }, { data: retours }] = resultat;
 
       /* eslint-disable @typescript-eslint/no-explicit-any */
       const rows: (Row & { created_at: string })[] = [
