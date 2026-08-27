@@ -69,7 +69,8 @@ const csv = ["email;nom;departement"];
 for (const [email, { nom, departement }] of lignes) {
   csv.push(`${email};${String(nom).replaceAll(";", ",")};${departement}`);
 }
-writeFileSync("prospects-mairies.csv", csv.join("\n"), "utf-8");
+// Le BOM UTF-8 en tête permet à Excel d'afficher correctement les accents.
+writeFileSync("prospects-mairies.csv", "\uFEFF" + csv.join("\n"), "utf-8");
 
 console.log(`\n${lignes.size} adresses uniques écrites dans prospects-mairies.csv`);
 console.log("Importez ce fichier sur /admin/prospection-clients.");

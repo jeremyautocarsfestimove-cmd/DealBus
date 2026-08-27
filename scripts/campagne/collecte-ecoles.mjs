@@ -4,9 +4,8 @@
 // dans /admin/prospection-clients (colonnes : email;nom;departement).
 //
 // Usage :
-//   node scripts/campagne/collecte-ecoles.mjs              (départements DealBus par défaut)
+//   node scripts/campagne/collecte-ecoles.mjs              (toute la France par défaut, compter 15-30 min)
 //   node scripts/campagne/collecte-ecoles.mjs 76 27        (départements précis)
-//   node scripts/campagne/collecte-ecoles.mjs france       (toute la France, compter 15-30 min)
 //
 // Sortie : prospects-ecoles.csv à la racine du projet.
 
@@ -16,9 +15,6 @@ import { writeFileSync } from "node:fs";
 const RID = "b22f04bf-64a8-495d-b8bb-d84dbc4c7983";
 const BASE = `https://tabular-api.data.gouv.fr/api/resources/${RID}/data/`;
 
-// Départements DealBus par défaut (mêmes que lib/prospection-clients.ts)
-const DEFAUT = ["14", "27", "28", "50", "60", "61", "76", "78", "91", "95"];
-
 // Toute la France : 01-95 (le 20 n'existe pas), 2A/2B, outre-mer 971-976
 const FRANCE = [
   ...Array.from({ length: 95 }, (_, i) => String(i + 1).padStart(2, "0")).filter((d) => d !== "20"),
@@ -26,13 +22,10 @@ const FRANCE = [
   "971", "972", "973", "974", "975", "976",
 ];
 
-const args = process.argv.slice(2);
-const departements = args.includes("france")
-  ? FRANCE
-  : (args.filter((a) => /^(\d{1,3}|2[AB])$/i.test(a)).map((a) => a.toUpperCase().padStart(2, "0"))
-      .length
-      ? args.filter((a) => /^(\d{1,3}|2[AB])$/i.test(a)).map((a) => a.toUpperCase().padStart(2, "0"))
-      : DEFAUT);
+const precis = process.argv.slice(2)
+  .filter((a) => /^(\d{1,3}|2[AB])$/i.test(a))
+  .map((a) => a.toUpperCase().padStart(2, "0"));
+const departements = precis.length ? precis : FRANCE;
 
 // Le dataset code les départements sur 3 caractères : "076", "02A", "974"…
 const codeDataset = (d) => d.padStart(3, "0");
@@ -74,7 +67,8 @@ for (const [email, { nom, departement }] of lignes) {
   // Le point-virgule est le séparateur : on le retire des noms par prudence.
   csv.push(`${email};${nom.replaceAll(";", ",")};${departement}`);
 }
-writeFileSync("prospects-ecoles.csv", csv.join("\n"), "utf-8");
+// Le BOM UTF-8 en tête permet à Excel d'afficher correctement les accents.
+writeFileSync("prospects-ecoles.csv", "\uFEFF" + csv.join("\n"), "utf-8");
 
 console.log(`\n${lignes.size} adresses uniques écrites dans prospects-ecoles.csv`);
 console.log("Importez ce fichier sur /admin/prospection-clients.");
