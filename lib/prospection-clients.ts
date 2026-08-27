@@ -27,13 +27,13 @@ Le principe : vous décrivez votre trajet en 2 minutes (départ, arrivée, date,
 
 Ce que ça change pour vous :
 
-→ Un seul formulaire au lieu de dix appels. Vos coordonnées restent anonymes tant que vous n'avez pas choisi une offre — aucun démarchage.
+→ Un seul formulaire au lieu de dix appels. Vos coordonnées restent anonymes tant que vous n'avez pas choisi une offre, aucun démarchage.
 
-→ Des prix fermes et comparables. Chaque autocariste propose un devis unique, tout compris — pas de marchandage, pas de mauvaise surprise le jour J.
+→ Des prix fermes et comparables. Chaque autocariste propose un devis unique, tout compris. Pas de marchandage, pas de mauvaise surprise le jour J.
 
 → Des transporteurs vérifiés. Titre d'exercice et assurance RC Pro contrôlés avant toute mise en relation.
 
-→ Le paiement se fait directement avec le transporteur choisi — DealBus ne prend jamais votre argent.
+→ Le paiement se fait directement avec le transporteur choisi. DealBus ne prend jamais votre argent.
 
 Décrire votre trajet ne prend que 2 minutes :
 
@@ -45,7 +45,6 @@ Bonne route,
 Jeremy, de DealBus™
 contact@dealbus.fr · https://dealbus.fr
 
-—
 Pour ne plus recevoir nos messages : répondez « STOP » et votre adresse sera retirée immédiatement.`;
 }
 
@@ -69,21 +68,21 @@ export function htmlProspectionClient(p: ProspectClient): string {
   <h1 style="margin:0 0 16px;font-size:20px;line-height:1.35;color:#12151B;">Un déplacement en car à organiser${zone ? ` depuis ${zone}` : ""} ?</h1>
   ${par(`Bonjour${p.nom ? ` <strong>${p.nom}</strong>` : ""},`)}
   ${par(`<strong>DealBus</strong> simplifie l'organisation d'un déplacement en autocar : voyage scolaire, sortie d'association, séminaire, mariage, tournoi sportif…`)}
-  ${par(`Décrivez votre trajet en 2 minutes, et des <strong>autocaristes vérifiés</strong> de votre région vous envoient directement leurs devis fermes. Vous comparez, vous choisissez — gratuit et sans engagement.`)}
-  ${bloc("Un seul formulaire", "Fini les dix appels. Vos coordonnées restent anonymes tant que vous n'avez pas choisi une offre — aucun démarchage.")}
+  ${par(`Décrivez votre trajet en 2 minutes, et des <strong>autocaristes vérifiés</strong> de votre région vous envoient directement leurs devis fermes. Vous comparez, vous choisissez, gratuitement et sans engagement.`)}
+  ${bloc("Un seul formulaire", "Fini les dix appels. Vos coordonnées restent anonymes tant que vous n'avez pas choisi une offre, aucun démarchage.")}
   ${bloc("Des prix fermes et comparables", "Chaque autocariste propose un devis unique, tout compris. Pas de marchandage, pas de mauvaise surprise le jour J.")}
   ${bloc("Des transporteurs vérifiés", "Titre d'exercice et assurance RC Pro contrôlés avant toute mise en relation. Vous payez directement le transporteur choisi.")}
   <table role="presentation" cellpadding="0" cellspacing="0" style="margin:20px 0 8px;"><tr><td style="border-radius:5px;background:#E8A63D;">
     <a href="https://dealbus.fr/reserver-un-bus" target="_blank" style="display:inline-block;padding:13px 26px;font-size:14.5px;font-weight:700;color:#12151B;text-decoration:none;font-family:Arial,sans-serif;">Décrire mon trajet &rarr;</a>
   </td></tr></table>
-  ${par(`<span style="font-size:13px;color:#6B7280;">Une question ? Répondez à cet email — c'est moi qui vous lirai.</span>`)}
+  ${par(`<span style="font-size:13px;color:#6B7280;">Une question ? Répondez à cet email, c'est moi qui vous lirai.</span>`)}
   ${par(`Bonne route,<br/><strong>Jeremy, de DealBus™</strong>`)}
 </td></tr>
 <tr><td style="padding:15px 30px;background:#F7F4EC;border-top:1px solid #E7E1D3;">
   <p style="margin:0;font-family:Consolas,Menlo,monospace;font-size:10px;letter-spacing:0.8px;color:#9AA0AB;">
-    DEALBUS™ · LA PLACE DE MARCHÉ DU TRANSPORT DE GROUPE — MARQUE DÉPOSÉE (INPI)<br/>
+    DEALBUS™ · LA PLACE DE MARCHÉ DU TRANSPORT DE GROUPE · MARQUE DÉPOSÉE (INPI)<br/>
     <a href="https://dealbus.fr" style="color:#A85D00;text-decoration:none;">dealbus.fr</a> &nbsp;·&nbsp; contact@dealbus.fr<br/><br/>
-    <span style="color:#B4B9C2;">Pour ne plus recevoir nos messages, répondez « STOP » — votre adresse sera retirée immédiatement.</span>
+    <span style="color:#B4B9C2;">Pour ne plus recevoir nos messages, répondez « STOP » et votre adresse sera retirée immédiatement.</span>
   </p>
 </td></tr>
 </table></td></tr></table></body></html>`;
@@ -95,14 +94,14 @@ export function htmlProspectionClient(p: ProspectClient): string {
 export function sujetRelanceClient(p: ProspectClient): string {
   const zone = p.departement ? DEPTS[p.departement] : undefined;
   return zone
-    ? `Re : comparer des devis autocaristes ${zone ? `en ${zone}` : ""} — 2 minutes`
+    ? `Re : comparer des devis autocaristes ${zone ? `en ${zone}` : ""} en 2 minutes`
     : `Re : comparer des devis autocaristes en 2 minutes`;
 }
 
 export function texteRelanceClient(p: ProspectClient): string {
   return `Bonjour${p.nom ? ` (${p.nom})` : ""},
 
-Je me permets de revenir vers vous — je vous avais écrit au sujet de DealBus, qui permet de comparer gratuitement des devis d'autocaristes vérifiés pour un déplacement en groupe.
+Je me permets de revenir vers vous. Je vous avais écrit au sujet de DealBus, qui permet de comparer gratuitement des devis d'autocaristes vérifiés pour un déplacement en groupe.
 
 Si un trajet est à organiser dans les semaines qui viennent, décrire votre besoin prend 2 minutes et ne vous engage à rien :
 
@@ -114,7 +113,6 @@ Bonne route,
 Jeremy, de DealBus™
 contact@dealbus.fr · https://dealbus.fr
 
-—
 Pour ne plus recevoir nos messages : répondez « STOP » et votre adresse sera retirée immédiatement.`;
 }
 
@@ -131,19 +129,19 @@ export function htmlRelanceClient(p: ProspectClient): string {
 <tr><td style="padding:28px 30px 24px;font-family:Arial,Helvetica,sans-serif;">
   <h1 style="margin:0 0 16px;font-size:20px;line-height:1.35;color:#12151B;">Comparer des devis autocaristes, ça prend 2 minutes.</h1>
   ${par(`Bonjour${p.nom ? ` <strong>${p.nom}</strong>` : ""},`)}
-  ${par(`Je me permets de revenir vers vous — je vous avais écrit au sujet de <strong>DealBus</strong>, qui permet de comparer gratuitement des devis d'autocaristes vérifiés pour un déplacement en groupe.`)}
+  ${par(`Je me permets de revenir vers vous. Je vous avais écrit au sujet de <strong>DealBus</strong>, qui permet de comparer gratuitement des devis d'autocaristes vérifiés pour un déplacement en groupe.`)}
   ${par(`Si un trajet est à organiser dans les semaines qui viennent, décrire votre besoin prend 2 minutes et ne vous engage à rien.`)}
   <table role="presentation" cellpadding="0" cellspacing="0" style="margin:20px 0 8px;"><tr><td style="border-radius:5px;background:#E8A63D;">
     <a href="https://dealbus.fr/reserver-un-bus" target="_blank" style="display:inline-block;padding:13px 26px;font-size:14.5px;font-weight:700;color:#12151B;text-decoration:none;font-family:Arial,sans-serif;">Décrire mon trajet &rarr;</a>
   </td></tr></table>
-  ${par(`<span style="font-size:13px;color:#6B7280;">Une question ? Répondez à cet email — c'est moi qui vous lirai.</span>`)}
+  ${par(`<span style="font-size:13px;color:#6B7280;">Une question ? Répondez à cet email, c'est moi qui vous lirai.</span>`)}
   ${par(`Bonne route,<br/><strong>Jeremy, de DealBus™</strong>`)}
 </td></tr>
 <tr><td style="padding:15px 30px;background:#F7F4EC;border-top:1px solid #E7E1D3;">
   <p style="margin:0;font-family:Consolas,Menlo,monospace;font-size:10px;letter-spacing:0.8px;color:#9AA0AB;">
-    DEALBUS™ · LA PLACE DE MARCHÉ DU TRANSPORT DE GROUPE — MARQUE DÉPOSÉE (INPI)<br/>
+    DEALBUS™ · LA PLACE DE MARCHÉ DU TRANSPORT DE GROUPE · MARQUE DÉPOSÉE (INPI)<br/>
     <a href="https://dealbus.fr" style="color:#A85D00;text-decoration:none;">dealbus.fr</a> &nbsp;·&nbsp; contact@dealbus.fr<br/><br/>
-    <span style="color:#B4B9C2;">Pour ne plus recevoir nos messages, répondez « STOP » — votre adresse sera retirée immédiatement.</span>
+    <span style="color:#B4B9C2;">Pour ne plus recevoir nos messages, répondez « STOP » et votre adresse sera retirée immédiatement.</span>
   </p>
 </td></tr>
 </table></td></tr></table></body></html>`;
