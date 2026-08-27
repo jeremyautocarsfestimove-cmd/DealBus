@@ -41,7 +41,7 @@ export async function POST(req: Request) {
           paragraphes: [
             `Le <strong>Transporteur #${anonyme?.numero_anonyme}</strong>${anonyme?.nb_avis ? ` (★ ${anonyme.note_moyenne}/5 · ${anonyme.nb_avis} avis)` : ""} vient de répondre à votre demande <strong>${d.depart_adresse} → ${d.arrivee_adresse}</strong>.`,
           ],
-          highlight: { label: "Son offre — ferme et définitive", value: `${Number(offre.prix_ttc).toLocaleString("fr-FR")} € TTC`, detail: "Tout compris · un seul prix par transporteur, pas de marchandage" },
+          highlight: { label: "Son offre, ferme et définitive", value: `${Number(offre.prix_ttc).toLocaleString("fr-FR")} € TTC`, detail: "Tout compris · un seul prix par transporteur, pas de marchandage" },
           cta: { label: "Comparer les offres", url: `${site}/mes-demandes/${d.id}` },
           note: "Les identités restent anonymes jusqu'à votre sélection. Prenez le temps de comparer prix, notes et conditions.",
         }),
@@ -61,18 +61,18 @@ export async function POST(req: Request) {
       if (!client?.email) return NextResponse.json({ ok: true, sent: 0 });
       await resend.emails.send({
         from, to: client.email,
-        subject: `🔨 Votre enchère a démarré — demande #${d.numero}`,
+        subject: `🔨 Votre enchère a démarré (demande #${d.numero})`,
         text: `Premier prix positionné sur ${d.depart_adresse} → ${d.arrivee_adresse}. Suivre : ${site}/mes-demandes/${d.id}`,
         html: emailHtml({
           titre: "Votre enchère a démarré 🔨",
           paragraphes: [
             `Un premier transporteur vient de positionner un prix sur votre trajet <strong>${d.depart_adresse} → ${d.arrivee_adresse}</strong>.`,
-            `À partir de maintenant, le prix ne peut que <strong>baisser</strong> — chaque relance doit être inférieure d'au moins 1 % à la meilleure.`,
+            `À partir de maintenant, le prix ne peut que <strong>baisser</strong> : chaque relance doit être inférieure d'au moins 1 % à la meilleure.`,
           ],
           cta: { label: "Suivre l'enchère en direct", url: `${site}/mes-demandes/${d.id}` },
           note: d.enchere_fin
-            ? `Clôture le ${new Date(d.enchere_fin).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}. Vous validerez (ou non) la meilleure offre à ce moment-là — rien n'est engagé avant.`
-            : "Vous validerez (ou non) la meilleure offre à la clôture — rien n'est engagé avant.",
+            ? `Clôture le ${new Date(d.enchere_fin).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}. Vous validerez (ou non) la meilleure offre à ce moment-là, rien n'est engagé avant.`
+            : "Vous validerez (ou non) la meilleure offre à la clôture, rien n'est engagé avant.",
         }),
       });
       return NextResponse.json({ ok: true, sent: 1 });
@@ -95,7 +95,7 @@ export async function POST(req: Request) {
           titre: "Quelqu'un veut votre trajet retour 🚌",
           paragraphes: [
             `Un client souhaite réserver votre retour à vide <strong>${r.depart_adresse} → ${r.arrivee_adresse}</strong> du ${new Date(r.date_dispo).toLocaleDateString("fr-FR")}.`,
-            `Le trajet lui est réservé <strong>en exclusivité</strong> le temps de votre décision — répondez vite pour ne pas laisser filer l'opportunité.`,
+            `Le trajet lui est réservé <strong>en exclusivité</strong> le temps de votre décision. Répondez vite pour ne pas laisser filer l'opportunité.`,
           ],
           highlight: { label: "Votre prix fixe", value: `${Number(r.prix_fixe).toLocaleString("fr-FR")} € TTC`, detail: "Commission réduite de 2 points sur ce type de trajet" },
           cta: { label: "Valider ou refuser", url: `${site}/pro` },
