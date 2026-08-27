@@ -396,6 +396,94 @@ export function CgvForm({
   );
 }
 
+/* ---------- Demande de suppression de compte ---------- */
+export function DemanderSuppression({
+  transporteurId,
+  dejaDemandee,
+}: {
+  transporteurId: string;
+  dejaDemandee: string | null;
+}) {
+  const router = useRouter();
+  const supabase = createClient();
+  const [busy, setBusy] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function demander() {
+    setBusy(true);
+    setError(null);
+    const { error: err } = await supabase
+      .from("transporteurs")
+      .update({ suppression_demandee_at: new Date().toISOString() })
+      .eq("id", transporteurId);
+    setBusy(false);
+    setConfirmOpen(false);
+    if (err) { setError(err.message); return; }
+    fetch("/api/notify-event", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "suppression_transporteur", id: transporteurId }),
+    }).catch(() => {});
+    router.refresh();
+  }
+
+  async function annuler() {
+    setBusy(true);
+    setError(null);
+    const { error: err } = await supabase
+      .from("transporteurs")
+      .update({ suppression_demandee_at: null })
+      .eq("id", transporteurId);
+    setBusy(false);
+    if (err) { setError(err.message); return; }
+    router.refresh();
+  }
+
+  return (
+    <div className="card border-[#E8735D]/30">
+      <p className="font-semibold text-sm mb-1.5">Supprimer mon compte</p>
+      {dejaDemandee ? (
+        <>
+          <p className="text-[12.5px] text-blanc-dim mb-4">
+            Votre demande de suppression du {new Date(dejaDemandee).toLocaleDateString("fr-FR")} est en cours
+            de traitement par notre équipe.
+          </p>
+          <button className="btn-ghost text-xs px-4 py-2 disabled:opacity-50" disabled={busy} onClick={annuler}>
+            Annuler ma demande
+          </button>
+        </>
+      ) : (
+        <>
+          <p className="text-[12.5px] text-blanc-dim mb-4">
+            Votre compte, vos coordonnées et vos justificatifs seront supprimés (l&apos;historique de vos
+            missions facturées est conservé à des fins comptables). Cette action est traitée manuellement
+            par notre équipe.
+          </p>
+          <button
+            className="btn text-xs px-4 py-2 bg-[#AE2A22] text-blanc hover:-translate-y-px disabled:opacity-50"
+            disabled={busy}
+            onClick={() => setConfirmOpen(true)}
+          >
+            Demander la suppression de mon compte
+          </button>
+        </>
+      )}
+      {error && <p className="font-mono text-xs text-[#E8735D] mt-3">{error}</p>}
+      <ConfirmModal
+        open={confirmOpen}
+        title="Supprimer mon compte"
+        message="Confirmer la demande de suppression de votre compte transporteur ? Notre équipe traitera votre demande sous peu."
+        confirmLabel="Confirmer la demande"
+        danger
+        busy={busy}
+        onConfirm={demander}
+        onCancel={() => setConfirmOpen(false)}
+      />
+    </div>
+  );
+}
+
 /* ---------- Zones de chalandise ---------- */
 export function GererZones({
   transporteurId,

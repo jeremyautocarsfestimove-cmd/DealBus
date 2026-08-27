@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 type Body = {
-  entity: "demande" | "mission" | "avis" | "retour";
+  entity: "demande" | "mission" | "avis" | "retour" | "transporteur";
   id: string;
   action: string;
 };
@@ -89,6 +89,34 @@ export async function POST(req: Request) {
     } else if (entity === "retour" && action === "retirer") {
       const { error } = await admin.from("retours_vide").update({ statut: "annule" }).eq("id", id);
       if (error) throw error;
+    } else if (entity === "transporteur" && action === "supprimer") {
+      // Suppression définitive : essaie d'abord une suppression complète (compte
+      // sans aucun historique). Si des missions/offres/avis/retours existent,
+      // ces enregistrements sont protégés (nécessaires à la comptabilité) : on
+      // anonymise alors la fiche et on bloque l'accès au compte à la place.
+      const { error: deleteErr } = await admin.auth.admin.deleteUser(id);
+      if (deleteErr) {
+        const { error: anonErr } = await admin.from("transporteurs").update({
+          raison_sociale: "Transporteur supprimé",
+          siren: "0",
+          licence_transport: "—",
+          rc_pro_url: null,
+          cgv: null,
+          statut: "suspendu",
+          suppression_demandee_at: null,
+        }).eq("id", id);
+        if (anonErr) throw anonErr;
+        await admin.from("transporteur_zones").delete().eq("transporteur_id", id);
+        await admin.from("vehicules").delete().eq("transporteur_id", id);
+        const { error: profErr } = await admin.from("profiles").update({
+          nom: "Compte supprimé",
+          telephone: null,
+          email: null,
+        }).eq("id", id);
+        if (profErr) throw profErr;
+        // Bloque définitivement la connexion (l'historique des missions est conservé).
+        await admin.auth.admin.updateUserById(id, { ban_duration: "876000h" });
+      }
     } else {
       return NextResponse.json({ error: "Action inconnue" }, { status: 400 });
     }

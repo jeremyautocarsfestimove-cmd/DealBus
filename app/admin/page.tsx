@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Nav } from "@/components/Nav";
 import { createClient } from "@/lib/supabase/server";
 import { TransporteurActions, PilotageAction, AdminTabs } from "./actions";
@@ -57,6 +58,7 @@ export default async function AdminPage() {
   const R = (retours ?? []) as any[];
 
   const enAttente = T.filter((t) => t.statut === "en_attente");
+  const suppressionsDemandees = T.filter((t) => !!t.suppression_demandee_at);
   const dossiersAnnulationLitige = M.filter(
     (m) => m.statut === "annulee" || m.statut === "litige" || !!m.annulation_motif
   );
@@ -79,6 +81,7 @@ export default async function AdminPage() {
     { num: `${M.length}`, label: "Missions confirmées" },
     { num: `${enAttente.length}`, label: "Transporteurs à valider" },
     { num: `${T.filter((t) => t.statut === "valide").length}`, label: "Transporteurs actifs" },
+    { num: `${suppressionsDemandees.length}`, label: "Suppressions demandées", accent: suppressionsDemandees.length > 0 },
     { num: `${M.filter((m) => m.statut === "litige").length} · ${M.filter((m) => m.statut === "annulee").length}`, label: "Litiges · Annulations", accent: M.some((m) => m.statut === "litige") },
     { num: D.length ? `${Math.round((M.length / D.length) * 100)} %` : "—", label: "Taux de conversion" },
   ];
@@ -104,7 +107,7 @@ export default async function AdminPage() {
         </div>
 
         <AdminTabs labels={[
-          `Transporteurs${enAttente.length ? ` (${enAttente.length} ⚠)` : ""}`,
+          `Transporteurs${enAttente.length ? ` (${enAttente.length} ⚠)` : ""}${suppressionsDemandees.length ? ` (${suppressionsDemandees.length} 🗑)` : ""}`,
           `Demandes (${D.length})`,
           `Missions & commissions (${M.length})`,
           `Annulations & litiges${dossiersATraiter.length ? ` (${dossiersATraiter.length})` : ""}`,
@@ -122,7 +125,8 @@ export default async function AdminPage() {
                       <div key={t.id} className="card border-ambre/30">
                         <div className="flex items-start justify-between gap-4 flex-wrap">
                           <div>
-                            <p className="font-semibold">{t.raison_sociale}
+                            <p className="font-semibold">
+                              <Link href={`/admin/transporteurs/${t.id}`} className="hover:underline">{t.raison_sociale}</Link>
                               <span className="ml-2.5 tag bg-bleunuit text-[#9DB3DE]">{SECTEURS[t.secteur] ?? t.secteur}</span>
                             </p>
                             <p className="font-mono text-xs text-blanc-faint mt-1.5">
@@ -134,7 +138,10 @@ export default async function AdminPage() {
                               inscrit le {new Date(t.created_at).toLocaleDateString("fr-FR")}
                             </p>
                           </div>
-                          <TransporteurActions id={t.id} statut={t.statut} />
+                          <div className="flex items-center gap-2.5 flex-wrap">
+                            <Link href={`/admin/transporteurs/${t.id}`} className="btn-ghost text-xs px-4 py-2">Fiche →</Link>
+                            <TransporteurActions id={t.id} statut={t.statut} />
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -146,17 +153,24 @@ export default async function AdminPage() {
                 {T.filter((t) => t.statut !== "en_attente").map((t) => (
                   <div key={t.id} className="card flex items-center justify-between gap-4 flex-wrap">
                     <div>
-                      <p className="font-semibold">{t.raison_sociale}
+                      <p className="font-semibold">
+                        <Link href={`/admin/transporteurs/${t.id}`} className="hover:underline">{t.raison_sociale}</Link>
                         <span className={`ml-2.5 tag ${t.statut === "valide" ? "bg-vert-dim text-vert" : "bg-[#3a2020] text-[#E8735D]"}`}>
                           {t.statut === "valide" ? "Actif" : "Suspendu"}
                         </span>
+                        {t.suppression_demandee_at && (
+                          <span className="ml-2.5 tag bg-[#3a2020] text-[#E8735D]">Suppression demandée</span>
+                        )}
                       </p>
                       <p className="font-mono text-xs text-blanc-faint mt-1.5">
                         {SECTEURS[t.secteur] ?? t.secteur} · dépt. {t.departement_siege} ·
                         ★ {t.note_moyenne ?? "—"}/5 ({t.nb_avis} avis · {t.nb_missions} missions)
                       </p>
                     </div>
-                    <TransporteurActions id={t.id} statut={t.statut} />
+                    <div className="flex items-center gap-2.5 flex-wrap">
+                      <Link href={`/admin/transporteurs/${t.id}`} className="btn-ghost text-xs px-4 py-2">Fiche →</Link>
+                      <TransporteurActions id={t.id} statut={t.statut} />
+                    </div>
                   </div>
                 ))}
                 {T.length === 0 && <p className="text-blanc-dim text-sm">Aucun transporteur.</p>}

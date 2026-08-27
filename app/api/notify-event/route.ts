@@ -132,6 +132,34 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true, sent: destinataires.length });
     }
 
+    if (type === "suppression_transporteur") {
+      const { data: t } = await admin
+        .from("transporteurs")
+        .select("raison_sociale, siren, profile:profiles!transporteurs_id_fkey(nom, telephone, email)")
+        .eq("id", id).single();
+      if (!t) return NextResponse.json({ error: "transporteur introuvable" }, { status: 404 });
+      const { data: admins } = await admin
+        .from("profiles").select("email").eq("role", "admin").not("email", "is", null);
+      const destinataires = (admins ?? []).map((a: any) => a.email).filter(Boolean);
+      if (!destinataires.length) return NextResponse.json({ ok: true, sent: 0 });
+      const p = (t as any).profile;
+      await resend.emails.send({
+        from, to: destinataires,
+        subject: `🗑️ Demande de suppression de compte : ${t.raison_sociale}`,
+        text: `${t.raison_sociale} (SIREN ${t.siren}) demande la suppression de son compte. Traiter : ${site}/admin/transporteurs/${id}`,
+        html: emailHtml({
+          titre: "Demande de suppression de compte",
+          paragraphes: [
+            `<strong>${t.raison_sociale}</strong> vient de demander la suppression de son compte transporteur.`,
+            `${p?.nom ?? ""}${p?.telephone ? ` · ${p.telephone}` : ""}${p?.email ? ` · ${p.email}` : ""}`,
+          ],
+          cta: { label: "Traiter la demande", url: `${site}/admin/transporteurs/${id}` },
+          note: "Si un historique de missions existe, la suppression anonymise la fiche et bloque le compte sans effacer la comptabilité.",
+        }),
+      });
+      return NextResponse.json({ ok: true, sent: destinataires.length });
+    }
+
     return NextResponse.json({ error: "type inconnu" }, { status: 400 });
   } catch (e) {
     return NextResponse.json({ error: (e as Error).message }, { status: 500 });

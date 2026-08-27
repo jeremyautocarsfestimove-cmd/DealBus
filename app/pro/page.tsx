@@ -4,7 +4,7 @@ import { Tabs } from "@/components/Tabs";
 import { createClient } from "@/lib/supabase/server";
 import type { Demande } from "@/lib/types";
 import { InscriptionTransporteur } from "./InscriptionTransporteur";
-import { DeclarerTerminee, ReservationActions, PublierRetour, AnnulerMission, GererVehicules, CgvForm, GererZones } from "./pro-actions";
+import { DeclarerTerminee, ReservationActions, PublierRetour, AnnulerMission, GererVehicules, CgvForm, GererZones, DemanderSuppression } from "./pro-actions";
 
 const eur = (n: number) => Number(n).toLocaleString("fr-FR") + " €";
 const dateHeure = (date: string | null, heure?: string | null) =>
@@ -49,11 +49,12 @@ export default async function ProPage() {
           <h1 className="h-display text-4xl mb-4">
             {transporteur.statut === "suspendu" ? "Compte suspendu." : "Compte en cours de validation."}
           </h1>
-          <p className="text-blanc-dim">
+          <p className="text-blanc-dim mb-8">
             {transporteur.statut === "suspendu"
               ? "Votre accès aux demandes est suspendu. Contactez-nous pour en savoir plus."
               : "Nos équipes vérifient votre titre d'exercice et votre RC Pro. Vous recevrez un email dès l'activation de votre accès aux demandes."}
           </p>
+          <DemanderSuppression transporteurId={user!.id} dejaDemandee={transporteur.suppression_demandee_at ?? null} />
         </main>
       </>
     );
@@ -530,6 +531,9 @@ export default async function ProPage() {
               <GererZones transporteurId={user!.id} zones={(zones ?? []) as any[]} />
               <GererVehicules transporteurId={user!.id} vehicules={(vehicules ?? []) as any[]} />
               <CgvForm transporteurId={user!.id} initial={transporteur.cgv ?? null} />
+              <div className="mt-5">
+                <DemanderSuppression transporteurId={user!.id} dejaDemandee={transporteur.suppression_demandee_at ?? null} />
+              </div>
             </div>,
           ]}
         </Tabs>
