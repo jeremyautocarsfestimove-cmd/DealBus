@@ -110,11 +110,19 @@ export async function POST(req: Request) {
         .select("raison_sociale, siren, secteur, departement_siege, profile:profiles!transporteurs_id_fkey(nom, telephone, email)")
         .eq("id", id).single();
       if (!t) return NextResponse.json({ error: "transporteur introuvable" }, { status: 404 });
+      const p = (t as any).profile;
+
+      // Marque le prospect correspondant comme inscrit (conversion de la campagne)
+      if (p?.email) {
+        await admin.from("prospects")
+          .update({ statut: "inscrit" })
+          .eq("email", String(p.email).trim().toLowerCase());
+      }
+
       const { data: admins } = await admin
         .from("profiles").select("email").eq("role", "admin").not("email", "is", null);
       const destinataires = (admins ?? []).map((a: any) => a.email).filter(Boolean);
       if (!destinataires.length) return NextResponse.json({ ok: true, sent: 0 });
-      const p = (t as any).profile;
       await resend.emails.send({
         from, to: destinataires,
         subject: `🆕 Transporteur à valider : ${t.raison_sociale}`,
