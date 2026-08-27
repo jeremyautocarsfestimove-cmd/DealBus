@@ -21,6 +21,7 @@ const STATUTS: Record<string, { label: string; classe: string }> = {
 export function ProspectionClient() {
   const supabase = useMemo(() => createClient(), []);
   const [prospects, setProspects] = useState<Prospect[]>([]);
+  const [stats, setStats] = useState<Record<string, number>>({ a_contacter: 0, envoye: 0, stop: 0, erreur: 0, inscrit: 0 });
   const [filtre, setFiltre] = useState<string>("tous");
   const [recherche, setRecherche] = useState("");
   const [limite, setLimite] = useState(40);
@@ -29,31 +30,44 @@ export function ProspectionClient() {
   const [emailTest, setEmailTest] = useState("");
   const [message, setMessage] = useState<string | null>(null);
 
-  const charger = useCallback(async () => {
-    const { data } = await supabase
-      .from("prospects").select("*")
-      .order("created_at", { ascending: true });
-    setProspects((data ?? []) as Prospect[]);
+  // Compteurs calculés côté serveur : le chargement complet dans le navigateur
+  // est plafonné à 1000 lignes, ce qui faussait les statistiques.
+  const chargerStats = useCallback(async () => {
+    const statuts = ["a_contacter", "envoye", "stop", "erreur", "inscrit"] as const;
+    const counts = await Promise.all(
+      statuts.map((s) =>
+        supabase.from("prospects").select("*", { count: "exact", head: true }).eq("statut", s)
+      )
+    );
+    const s: Record<string, number> = {};
+    statuts.forEach((k, i) => { s[k] = counts[i].count ?? 0; });
+    setStats(s);
   }, [supabase]);
 
-  useEffect(() => { charger(); }, [charger]);
-
-  const stats = useMemo(() => {
-    const s: Record<string, number> = { a_contacter: 0, envoye: 0, stop: 0, erreur: 0, inscrit: 0 };
-    prospects.forEach((p) => { s[p.statut] = (s[p.statut] ?? 0) + 1; });
-    return s;
-  }, [prospects]);
-
-  const visibles = useMemo(() => {
-    let liste = prospects;
-    if (filtre !== "tous") liste = liste.filter((p) => p.statut === filtre);
-    if (recherche.trim()) {
-      const q = recherche.trim().toLowerCase();
-      liste = liste.filter((p) =>
-        p.email.includes(q) || (p.societe ?? "").toLowerCase().includes(q) || (p.departement ?? "").includes(q));
+  // Liste filtrée côté serveur (200 lignes maximum affichées).
+  const chargerListe = useCallback(async () => {
+    let q = supabase.from("prospects").select("*");
+    if (filtre !== "tous") q = q.eq("statut", filtre);
+    const terme = recherche.trim();
+    if (terme) {
+      const t = terme.replaceAll("%", "").replaceAll(",", " ");
+      q = q.or(`email.ilike.%${t}%,societe.ilike.%${t}%,departement.ilike.%${t}%`);
     }
-    return liste.slice(0, 200);
-  }, [prospects, filtre, recherche]);
+    const { data } = await q.order("created_at", { ascending: true }).limit(200);
+    setProspects((data ?? []) as Prospect[]);
+  }, [supabase, filtre, recherche]);
+
+  const charger = useCallback(async () => {
+    await Promise.all([chargerStats(), chargerListe()]);
+  }, [chargerStats, chargerListe]);
+
+  useEffect(() => { chargerStats(); }, [chargerStats]);
+  useEffect(() => {
+    const t = setTimeout(chargerListe, 300);
+    return () => clearTimeout(t);
+  }, [chargerListe]);
+
+  const visibles = prospects;
 
   // ---------- Import CSV ----------
   async function importer(file: File) {
@@ -78,14 +92,24 @@ export function ProspectionClient() {
           departement: idx.dept >= 0 ? c[idx.dept] : "",
         };
       });
-      const r = await fetch("/api/admin/prospection", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "import", contacts }),
-      });
-      const res = await r.json();
-      if (!r.ok) throw new Error(res.error ?? "import impossible");
-      setMessage(`Import : ${res.valides} adresses valides · ${res.nouveaux} nouvelles · ${res.deja_connus} déjà connues.`);
+      // Envoi par lots de 2000 : les gros fichiers dépassent la limite de
+      // taille de requête du serveur (Request Entity Too Large).
+      const totaux = { valides: 0, nouveaux: 0, deja_connus: 0 };
+      for (let i = 0; i < contacts.length; i += 2000) {
+        const lot = contacts.slice(i, i + 2000);
+        setMessage(`Import en cours… ${Math.min(i + 2000, contacts.length)} / ${contacts.length} lignes envoyées.`);
+        const r = await fetch("/api/admin/prospection", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "import", contacts: lot }),
+        });
+        const res = await r.json();
+        if (!r.ok) throw new Error(res.error ?? "import impossible");
+        totaux.valides += res.valides ?? 0;
+        totaux.nouveaux += res.nouveaux ?? 0;
+        totaux.deja_connus += res.deja_connus ?? 0;
+      }
+      setMessage(`Import : ${totaux.valides} adresses valides · ${totaux.nouveaux} nouvelles · ${totaux.deja_connus} déjà connues.`);
       await charger();
     } catch (e) {
       setMessage(`❌ ${(e as Error).message}`);
@@ -195,7 +219,10 @@ export function ProspectionClient() {
           <p className="eyebrow mb-3">Administration</p>
           <h1 className="h-display text-4xl">Prospection transporteurs.</h1>
         </div>
-        <Link href="/admin" className="btn-ghost">← Back-office</Link>
+        <div className="flex gap-2.5">
+          <Link href="/admin" className="btn-ghost">← Back-office</Link>
+          <Link href="/admin/prospection-clients" className="btn-ghost">Prospection clients →</Link>
+        </div>
       </div>
 
       {/* ---------- Stats ---------- */}
