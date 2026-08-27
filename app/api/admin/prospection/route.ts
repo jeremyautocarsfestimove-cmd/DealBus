@@ -27,19 +27,20 @@ export async function GET(req: Request) {
   if (!url.searchParams.get("preview")) {
     return NextResponse.json({ error: "?preview=1 attendu" }, { status: 400 });
   }
+  const enRelance = url.searchParams.get("preview") === "relance";
   // Données du premier prospect à contacter (sinon un exemple)
   const admin = createAdminClient();
   const { data: premier } = await admin
     .from("prospects").select("email, societe, departement")
-    .eq("statut", "a_contacter").limit(1).maybeSingle();
+    .eq("statut", enRelance ? "envoye" : "a_contacter").limit(1).maybeSingle();
   const echantillon = premier ?? { email: "contact@exemple.fr", societe: "Autocars Exemple", departement: "76" };
-  const sujet = sujetProspection(echantillon);
+  const sujet = enRelance ? sujetRelance(echantillon) : sujetProspection(echantillon);
   const bandeau = `<div style="background:#12151B;color:#F5F2EA;font-family:Consolas,monospace;font-size:12px;padding:12px 20px;">
-    APERÇU — Objet : <strong style="color:#E8A63D;">${sujet}</strong>
+    APERÇU${enRelance ? " (RELANCE)" : ""} — Objet : <strong style="color:#E8A63D;">${sujet}</strong>
     &nbsp;·&nbsp; Expéditeur : ${process.env.CAMPAGNE_FROM ?? process.env.RESEND_FROM ?? "Jeremy de DealBus <contact@dealbus.fr>"}
     &nbsp;·&nbsp; Exemple : ${echantillon.email}${echantillon.departement ? ` (dépt ${echantillon.departement})` : ""}
   </div>`;
-  return new Response(bandeau + htmlProspection(echantillon), {
+  return new Response(bandeau + (enRelance ? htmlRelance(echantillon) : htmlProspection(echantillon)), {
     headers: { "Content-Type": "text/html; charset=utf-8" },
   });
 }
@@ -164,6 +165,97 @@ export async function POST(req: Request) {
       subject: `[TEST] ${sujetProspection(echantillon)}`,
       text: texteProspection(echantillon),
       html: htmlProspection(echantillon),
+      headers: { "List-Unsubscribe": "<mailto:contact@dealbus.fr?subject=STOP>" },
+    });
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ ok: true, envoye_a: email });
+  }
+
+  // ---------- RELANCE EN MASSE ----------
+  // Relance les prospects contactés il y a plus de 7 jours, jamais relancés
+  // (ou relancés il y a plus de 14 jours), 2 relances maximum par prospect.
+  if (body.action === "relance_masse") {
+    if (!process.env.RESEND_API_KEY) {
+      return NextResponse.json({ error: "RESEND_API_KEY non configurée" }, { status: 500 });
+    }
+    const limite = Math.min(Math.max(Number(body.limite) || 40, 1), 100);
+    const il_y_a_7j = new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString();
+    const il_y_a_14j = new Date(Date.now() - 14 * 24 * 3600 * 1000).toISOString();
+
+    const { data: cibles } = await admin
+      .from("prospects")
+      .select("id, email, societe, departement, nb_relances")
+      .eq("statut", "envoye")
+      .lt("envoye_le", il_y_a_7j)
+      .lt("nb_relances", 2)
+      .or(`relance_le.is.null,relance_le.lt.${il_y_a_14j}`)
+      .order("envoye_le", { ascending: true })
+      .limit(limite);
+
+    if (!cibles?.length) {
+      return NextResponse.json({ ok: true, envoyes: 0, note: "aucun prospect éligible (contactés il y a moins de 7 jours, déjà relancés 2 fois, ou relancés il y a moins de 14 jours)" });
+    }
+
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    const from = process.env.CAMPAGNE_FROM ?? process.env.RESEND_FROM ?? "Jeremy de DealBus <contact@dealbus.fr>";
+    let envoyes = 0, erreurs = 0;
+
+    for (let i = 0; i < cibles.length; i += 20) {
+      const lot = cibles.slice(i, i + 20);
+      try {
+        const { error } = await resend.batch.send(
+          lot.map((p: any) => ({
+            from,
+            to: p.email,
+            replyTo: "contact@dealbus.fr",
+            subject: sujetRelance(p),
+            text: texteRelance(p),
+            html: htmlRelance(p),
+            headers: { "List-Unsubscribe": "<mailto:contact@dealbus.fr?subject=STOP>" },
+          }))
+        );
+        if (error) throw new Error(error.message);
+        const maintenant = new Date().toISOString();
+        await Promise.all(lot.map((p: any) =>
+          admin.from("prospects")
+            .update({ relance_le: maintenant, nb_relances: (p.nb_relances ?? 0) + 1 })
+            .eq("id", p.id)
+        ));
+        envoyes += lot.length;
+      } catch (e) {
+        erreurs += lot.length;
+        void e;
+      }
+    }
+    return NextResponse.json({ ok: true, envoyes, erreurs });
+  }
+
+  // ---------- ENVOI DE TEST DE LA RELANCE À UNE ADRESSE ----------
+  if (body.action === "test_relance") {
+    if (!process.env.RESEND_API_KEY) {
+      return NextResponse.json({ error: "RESEND_API_KEY non configurée" }, { status: 500 });
+    }
+    const email = String(body.email ?? "").trim().toLowerCase();
+    if (!EMAIL_RE.test(email)) {
+      return NextResponse.json({ error: "adresse email invalide" }, { status: 400 });
+    }
+    const { data: premier } = await admin
+      .from("prospects").select("societe, departement")
+      .eq("statut", "envoye").limit(1).maybeSingle();
+    const echantillon = {
+      email,
+      societe: premier?.societe ?? "Autocars Exemple",
+      departement: premier?.departement ?? "76",
+    };
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    const from = process.env.CAMPAGNE_FROM ?? process.env.RESEND_FROM ?? "Jeremy de DealBus <contact@dealbus.fr>";
+    const { error } = await resend.emails.send({
+      from,
+      to: email,
+      replyTo: "contact@dealbus.fr",
+      subject: `[TEST] ${sujetRelance(echantillon)}`,
+      text: texteRelance(echantillon),
+      html: htmlRelance(echantillon),
       headers: { "List-Unsubscribe": "<mailto:contact@dealbus.fr?subject=STOP>" },
     });
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });

@@ -147,8 +147,42 @@ export function ProspectionClient() {
     }
   }
 
+  // ---------- Relance en masse ----------
+  function demanderRelanceMasse() {
+    setDialogue({
+      titre: "Relancer une vague ?",
+      lignes: [
+        `L'email de relance (argument : 100 000 organisateurs contactés) partira aux ${limite} prospects « Envoyé » les plus anciens.`,
+        "Garde-fous : contactés il y a plus de 7 jours, 2 relances maximum par prospect, 14 jours minimum entre deux relances.",
+      ],
+      action: envoyerRelanceMasse,
+    });
+  }
+
+  async function envoyerRelanceMasse() {
+    setOccupied("relance_masse");
+    setMessage(null);
+    try {
+      const r = await fetch("/api/admin/prospection", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "relance_masse", limite }),
+      });
+      const res = await r.json();
+      if (!r.ok) throw new Error(res.error ?? "relance impossible");
+      setMessage(res.envoyes
+        ? `Relances envoyées : ${res.envoyes}${res.erreurs ? ` · ${res.erreurs} erreur(s)` : ""}.`
+        : `Aucune relance envoyée : ${res.note ?? "aucun prospect éligible"}.`);
+      await charger();
+    } catch (e) {
+      setMessage(`❌ ${(e as Error).message}`);
+    } finally {
+      setOccupied(null);
+    }
+  }
+
   // ---------- Envoi de test ----------
-  async function envoyerTest() {
+  async function envoyerTest(relance = false) {
     if (!emailTest.trim()) return;
     setOccupied("test");
     setMessage(null);
@@ -156,11 +190,11 @@ export function ProspectionClient() {
       const r = await fetch("/api/admin/prospection", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "test", email: emailTest }),
+        body: JSON.stringify({ action: relance ? "test_relance" : "test", email: emailTest }),
       });
       const res = await r.json();
       if (!r.ok) throw new Error(res.error ?? "envoi impossible");
-      setMessage(`✉️ Email de test envoyé à ${res.envoye_a} (objet préfixé [TEST]) — vérifiez la boîte de réception.`);
+      setMessage(`✉️ Email de test ${relance ? "(relance) " : ""}envoyé à ${res.envoye_a} (objet préfixé [TEST]) — vérifiez la boîte de réception.`);
     } catch (e) {
       setMessage(`❌ ${(e as Error).message}`);
     } finally {
@@ -248,9 +282,12 @@ export function ProspectionClient() {
               Colonnes détectées automatiquement : email (obligatoire), société, département.
             </p>
           </div>
-          <div className="ml-auto flex items-end gap-3">
+          <div className="ml-auto flex items-end gap-3 flex-wrap">
             <a href="/api/admin/prospection?preview=1" target="_blank" className="btn-ghost">
               Prévisualiser l&apos;email
+            </a>
+            <a href="/api/admin/prospection?preview=relance" target="_blank" className="btn-ghost">
+              Prévisualiser la relance
             </a>
             <div>
               <label className="label">Taille de vague</label>
@@ -263,6 +300,11 @@ export function ProspectionClient() {
               onClick={demanderVague}>
               {occupied === "envoi" ? "Envoi en cours…" : `Envoyer une vague →`}
             </button>
+            <button className="btn-ghost disabled:opacity-50"
+              disabled={occupied !== null || !stats.envoye}
+              onClick={demanderRelanceMasse}>
+              {occupied === "relance_masse" ? "Relance en cours…" : `Relancer une vague ↻`}
+            </button>
           </div>
         </div>
         <div className="flex flex-wrap items-end gap-3 border-t border-ligne mt-5 pt-5">
@@ -274,8 +316,13 @@ export function ProspectionClient() {
           </div>
           <button className="btn-ghost disabled:opacity-50"
             disabled={occupied !== null || !emailTest.trim()}
-            onClick={envoyerTest}>
-            {occupied === "test" ? "Envoi…" : "Envoyer le test"}
+            onClick={() => envoyerTest(false)}>
+            {occupied === "test" ? "Envoi…" : "Tester l'email"}
+          </button>
+          <button className="btn-ghost disabled:opacity-50"
+            disabled={occupied !== null || !emailTest.trim()}
+            onClick={() => envoyerTest(true)}>
+            {occupied === "test" ? "Envoi…" : "Tester la relance"}
           </button>
         </div>
         {message && (

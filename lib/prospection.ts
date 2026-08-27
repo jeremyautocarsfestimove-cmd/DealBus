@@ -94,8 +94,8 @@ export function htmlProspection(p: Prospect): string {
 export function sujetRelance(p: Prospect): string {
   const zone = p.departement ? DEPTS[p.departement] : undefined;
   return zone
-    ? `Re : les premières demandes de ${zone} arrivent`
-    : `Re : votre place de partenaire fondateur DealBus`;
+    ? `Re : 100 000 organisateurs de voyages contactés, dont ${zone}`
+    : `Re : 100 000 organisateurs de voyages en cours de contact`;
 }
 
 export function texteRelance(p: Prospect): string {
