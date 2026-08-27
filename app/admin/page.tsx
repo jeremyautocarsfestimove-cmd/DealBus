@@ -93,7 +93,10 @@ export default async function AdminPage() {
         <p className="eyebrow mb-4">Administration</p>
         <div className="flex items-center justify-between flex-wrap gap-4">
           <h1 className="h-display text-4xl mb-10">Pilotage DealBus.</h1>
-          <a href="/admin/prospection" className="btn-ghost">Prospection →</a>
+          <div className="flex gap-2.5">
+            <a href="/admin/prospection" className="btn-ghost">Prospection transporteurs →</a>
+            <a href="/admin/prospection-clients" className="btn-ghost">Prospection clients →</a>
+          </div>
         </div>
 
         {/* ---------- KPIs ---------- */}

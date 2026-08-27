@@ -154,7 +154,14 @@ export function AdminTabs({
                        text-blanc-faint hover:text-blanc-dim hover:bg-asphalte-2/60 transition whitespace-nowrap
                        lg:mt-2 lg:border-t lg:border-t-ligne lg:rounded-none lg:pt-4"
           >
-            Prospection →
+            Prospection transporteurs →
+          </a>
+          <a
+            href="/admin/prospection-clients"
+            className="shrink-0 lg:w-full text-left text-[13.5px] font-semibold px-4 py-2.5 rounded-sm border border-transparent
+                       text-blanc-faint hover:text-blanc-dim hover:bg-asphalte-2/60 transition whitespace-nowrap"
+          >
+            Prospection clients →
           </a>
         </div>
       </nav>
