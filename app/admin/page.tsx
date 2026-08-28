@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Nav } from "@/components/Nav";
 import { createClient } from "@/lib/supabase/server";
-import { TransporteurActions, PilotageAction, AdminTabs } from "./actions";
+import { TransporteurActions, PilotageAction, AdminTabs, EnvoyerEmailTransporteur } from "./actions";
 
 const SECTEURS: Record<string, string> = {
   autocariste: "Autocariste", vtc: "VTC", taxi: "Taxi", loti: "LOTI",
@@ -143,6 +143,7 @@ export default async function AdminPage() {
                           </div>
                           <div className="flex items-center gap-2.5 flex-wrap">
                             <Link href={`/admin/transporteurs/${t.id}`} className="btn-ghost text-xs px-4 py-2">Fiche →</Link>
+                            <EnvoyerEmailTransporteur id={t.id} raisonSociale={t.raison_sociale} />
                             <TransporteurActions id={t.id} statut={t.statut} />
                           </div>
                         </div>
@@ -172,6 +173,7 @@ export default async function AdminPage() {
                     </div>
                     <div className="flex items-center gap-2.5 flex-wrap">
                       <Link href={`/admin/transporteurs/${t.id}`} className="btn-ghost text-xs px-4 py-2">Fiche →</Link>
+                      <EnvoyerEmailTransporteur id={t.id} raisonSociale={t.raison_sociale} />
                       <TransporteurActions id={t.id} statut={t.statut} />
                     </div>
                   </div>

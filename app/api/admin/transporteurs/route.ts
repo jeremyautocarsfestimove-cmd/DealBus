@@ -24,7 +24,52 @@ export async function POST(req: Request) {
   }
 
   // 2. Action demandée
-  const { id, action } = (await req.json()) as { id: string; action: keyof typeof ACTIONS };
+  const body = (await req.json()) as { id: string; action: keyof typeof ACTIONS | "email"; sujet?: string; message?: string };
+  const { id, action } = body;
+
+  // ---------- Email manuel au transporteur (anomalie, demande de précision…) ----------
+  if (action === "email") {
+    if (!id) return NextResponse.json({ error: "Requête invalide" }, { status: 400 });
+    const sujet = (body.sujet ?? "").trim();
+    const message = (body.message ?? "").trim();
+    if (!sujet || !message) {
+      return NextResponse.json({ error: "Objet et message requis" }, { status: 400 });
+    }
+    if (!process.env.RESEND_API_KEY) {
+      return NextResponse.json({ error: "RESEND_API_KEY non configurée" }, { status: 500 });
+    }
+    const admin = createAdminClient();
+    const { data: t } = await admin
+      .from("transporteurs")
+      .select("raison_sociale, profile:profiles!transporteurs_id_fkey(email, nom)")
+      .eq("id", id).maybeSingle();
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+    const email = (t as any)?.profile?.email;
+    if (!t || !email) {
+      return NextResponse.json({ error: "Transporteur ou email introuvable" }, { status: 404 });
+    }
+    // Le message admin est du texte libre : échappé puis mis en paragraphes.
+    const echappe = message
+      .replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+    const paragraphes = echappe.split(/\n{2,}/).map((p) => p.replaceAll("\n", "<br/>"));
+
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    const { error: envoiErr } = await resend.emails.send({
+      from: process.env.RESEND_FROM ?? "DealBus <onboarding@resend.dev>",
+      to: email,
+      replyTo: "contact@dealbus.fr",
+      subject: sujet,
+      text: message + `\n\nJeremy, de DealBus™\ncontact@dealbus.fr`,
+      html: emailHtml({
+        titre: sujet,
+        paragraphes: [...paragraphes, `Jeremy, de DealBus™`],
+        note: "Vous pouvez répondre directement à cet email, c'est moi qui vous lirai.",
+      }),
+    });
+    if (envoiErr) return NextResponse.json({ error: envoiErr.message }, { status: 500 });
+    return NextResponse.json({ ok: true, envoye_a: email });
+  }
+
   if (!id || !ACTIONS[action]) {
     return NextResponse.json({ error: "Requête invalide" }, { status: 400 });
   }

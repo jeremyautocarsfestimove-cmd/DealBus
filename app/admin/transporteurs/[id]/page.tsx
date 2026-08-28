@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Nav } from "@/components/Nav";
 import { BackButton } from "@/components/BackButton";
 import { createClient } from "@/lib/supabase/server";
-import { TransporteurActions, PilotageAction } from "../../actions";
+import { TransporteurActions, PilotageAction, EnvoyerEmailTransporteur } from "../../actions";
 
 const SECTEURS: Record<string, string> = {
   autocariste: "Autocariste", vtc: "VTC", taxi: "Taxi", loti: "LOTI",
@@ -118,7 +118,10 @@ export default async function FicheTransporteurPage({
               <span className="font-mono text-xs text-blanc-faint">Transporteur #{t.numero_anonyme}</span>
             </div>
           </div>
-          <TransporteurActions id={t.id} statut={t.statut} />
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <EnvoyerEmailTransporteur id={t.id} raisonSociale={t.raison_sociale} />
+            <TransporteurActions id={t.id} statut={t.statut} />
+          </div>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">

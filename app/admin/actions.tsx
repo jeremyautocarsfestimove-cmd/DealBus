@@ -55,6 +55,74 @@ export function TransporteurActions({
   );
 }
 
+export function EnvoyerEmailTransporteur({
+  id,
+  raisonSociale,
+}: {
+  id: string;
+  raisonSociale?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [envoye, setEnvoye] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [sujet, setSujet] = useState("Votre inscription DealBus : une précision à apporter");
+  const [message, setMessage] = useState(
+    `Bonjour,\n\nMerci pour votre inscription${raisonSociale ? ` de ${raisonSociale}` : ""} sur DealBus.\n\nEn vérifiant votre dossier, j'ai relevé un point à clarifier avant de pouvoir activer votre compte :\n\n(précisez ici l'anomalie constatée : SIREN, titre d'exercice, RC Pro…)\n\nPouvez-vous me transmettre l'information corrigée en répondant simplement à cet email ? Votre compte sera activé dans la foulée.\n\nBonne route,\nJeremy, de DealBus`
+  );
+
+  async function envoyer() {
+    setBusy(true);
+    setError(null);
+    const res = await fetch("/api/admin/transporteurs", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, action: "email", sujet, message }),
+    });
+    const body = await res.json().catch(() => ({}));
+    setBusy(false);
+    if (!res.ok) { setError(body.error ?? "Erreur d'envoi"); return; }
+    setEnvoye(body.envoye_a ?? "ok");
+    setTimeout(() => { setOpen(false); setEnvoye(null); }, 1800);
+  }
+
+  return (
+    <>
+      <button className="btn-ghost text-xs px-4 py-2" onClick={() => setOpen(true)}>
+        Email ✉
+      </button>
+      {open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6" onClick={() => !busy && setOpen(false)}>
+          <div className="absolute inset-0 bg-asphalte/80 backdrop-blur-sm" />
+          <div className="relative card max-w-xl w-full border-ligne-strong shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <p className="eyebrow mb-4">Email au transporteur</p>
+            <h2 className="h-display text-2xl mb-5">{raisonSociale ?? "Contacter ce transporteur"}</h2>
+            <label className="label">Objet</label>
+            <input className="input w-full mb-4" value={sujet} onChange={(e) => setSujet(e.target.value)} />
+            <label className="label">Message</label>
+            <textarea className="input w-full min-h-[260px] font-normal leading-relaxed"
+              value={message} onChange={(e) => setMessage(e.target.value)} />
+            <p className="font-mono text-[10.5px] text-blanc-faint mt-2">
+              Envoyé depuis l&apos;adresse DealBus officielle, avec la charte email de la plateforme.
+              Les réponses arrivent sur contact@dealbus.fr.
+            </p>
+            {error && <p className="font-mono text-xs text-[#E8735D] mt-3">{error}</p>}
+            {envoye && <p className="font-mono text-xs text-vert mt-3">✓ Email envoyé à {envoye}</p>}
+            <div className="flex justify-end gap-3 mt-6">
+              <button className="btn-ghost" disabled={busy} onClick={() => setOpen(false)}>Annuler</button>
+              <button className="btn-primary disabled:opacity-50"
+                disabled={busy || !sujet.trim() || !message.trim()}
+                onClick={envoyer}>
+                {busy ? "Envoi…" : "Envoyer l'email →"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
 export function PilotageAction({
   entity,
   id,
