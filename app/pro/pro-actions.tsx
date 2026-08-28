@@ -396,6 +396,145 @@ export function CgvForm({
   );
 }
 
+/* ---------- Modification des informations légales et de contact ---------- */
+export function ModifierProfilTransporteur({
+  transporteurId,
+  initial,
+}: {
+  transporteurId: string;
+  initial: {
+    raison_sociale: string;
+    siren: string;
+    licence_transport: string;
+    departement_siege: string;
+    secteur: string;
+    nom: string | null;
+    telephone: string | null;
+    email: string | null;
+  };
+}) {
+  const router = useRouter();
+  const supabase = createClient();
+  const [form, setForm] = useState({
+    raison_sociale: initial.raison_sociale ?? "",
+    siren: initial.siren ?? "",
+    licence_transport: initial.licence_transport ?? "",
+    departement_siege: initial.departement_siege ?? "",
+    secteur: initial.secteur ?? "autocariste",
+    nom: initial.nom ?? "",
+    telephone: initial.telephone ?? "",
+    email: initial.email ?? "",
+  });
+  const [busy, setBusy] = useState(false);
+  const [ok, setOk] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const set = (k: keyof typeof form, v: string) => setForm((f) => ({ ...f, [k]: v }));
+
+  async function enregistrer() {
+    setError(null);
+    setOk(null);
+
+    const siren = form.siren.replace(/\s/g, "").slice(0, 9);
+    if (!/^\d{9}$/.test(siren)) { setError("SIREN invalide (9 chiffres). Un SIRET saisi est ramené à ses 9 premiers chiffres."); return; }
+    const dept = form.departement_siege.trim().toUpperCase();
+    if (!/^(\d{2,3}|2A|2B)$/.test(dept)) { setError("Département du siège invalide (ex. 76, 2A, 974)."); return; }
+    if (!form.raison_sociale.trim()) { setError("La raison sociale est obligatoire."); return; }
+    if (!form.licence_transport.trim()) { setError("Le titre d'exercice est obligatoire."); return; }
+    if (!form.nom.trim()) { setError("Le nom du contact est obligatoire."); return; }
+    const email = form.email.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { setError("Adresse email invalide."); return; }
+
+    setBusy(true);
+    const { error: e1 } = await supabase.from("transporteurs").update({
+      raison_sociale: form.raison_sociale.trim(),
+      siren,
+      licence_transport: form.licence_transport.trim(),
+      departement_siege: dept,
+      secteur: form.secteur,
+    }).eq("id", transporteurId);
+    if (e1) { setError(e1.message); setBusy(false); return; }
+
+    const { error: e2 } = await supabase.from("profiles").update({
+      nom: form.nom.trim(),
+      telephone: form.telephone.trim() || null,
+      email,
+    }).eq("id", transporteurId);
+    if (e2) { setError(e2.message); setBusy(false); return; }
+
+    let noteEmail = "";
+    if (email !== (initial.email ?? "").toLowerCase()) {
+      // L'email de connexion suit : Supabase envoie un lien de confirmation.
+      const { error: e3 } = await supabase.auth.updateUser({ email });
+      noteEmail = e3
+        ? " Votre email de notifications est à jour, mais l'email de connexion n'a pas pu être modifié : " + e3.message
+        : " Un lien de confirmation vient d'être envoyé à votre nouvelle adresse pour valider l'email de connexion.";
+    }
+
+    setBusy(false);
+    setOk("Informations enregistrées." + noteEmail);
+    router.refresh();
+  }
+
+  return (
+    <div className="card mb-5">
+      <p className="font-semibold text-sm mb-1.5">Mes informations</p>
+      <p className="text-[12.5px] text-blanc-dim mb-5">
+        Informations légales de votre société et coordonnées de contact.
+        Elles sont utilisées pour la facturation, les notifications et la mise en relation.
+      </p>
+      <div className="grid sm:grid-cols-2 gap-4">
+        <div className="sm:col-span-2">
+          <label className="label">Raison sociale</label>
+          <input className="input w-full" value={form.raison_sociale} onChange={(e) => set("raison_sociale", e.target.value)} />
+        </div>
+        <div>
+          <label className="label">SIREN</label>
+          <input className="input w-full font-mono" placeholder="9 chiffres" value={form.siren} onChange={(e) => set("siren", e.target.value)} />
+        </div>
+        <div>
+          <label className="label">Titre d&apos;exercice (licence)</label>
+          <input className="input w-full font-mono" value={form.licence_transport} onChange={(e) => set("licence_transport", e.target.value)} />
+        </div>
+        <div>
+          <label className="label">Département du siège</label>
+          <input className="input w-full font-mono" placeholder="ex. 76, 2A, 974" value={form.departement_siege} onChange={(e) => set("departement_siege", e.target.value)} />
+        </div>
+        <div>
+          <label className="label">Secteur</label>
+          <select className="input w-full" value={form.secteur} onChange={(e) => set("secteur", e.target.value)}>
+            <option value="autocariste">Autocariste</option>
+            <option value="vtc">VTC</option>
+            <option value="taxi">Taxi</option>
+            <option value="loti">LOTI</option>
+          </select>
+        </div>
+        <div>
+          <label className="label">Nom du contact</label>
+          <input className="input w-full" value={form.nom} onChange={(e) => set("nom", e.target.value)} />
+        </div>
+        <div>
+          <label className="label">Téléphone</label>
+          <input className="input w-full font-mono" value={form.telephone} onChange={(e) => set("telephone", e.target.value)} />
+        </div>
+        <div className="sm:col-span-2">
+          <label className="label">Email</label>
+          <input className="input w-full font-mono" type="email" value={form.email} onChange={(e) => set("email", e.target.value)} />
+          <p className="font-mono text-[10.5px] text-blanc-faint mt-1.5">
+            En cas de changement, un lien de confirmation est envoyé à la nouvelle adresse pour l&apos;email de connexion.
+          </p>
+        </div>
+      </div>
+      {error && <p className="font-mono text-xs text-[#E8735D] mt-4">{error}</p>}
+      {ok && <p className="font-mono text-xs text-vert mt-4">✓ {ok}</p>}
+      <div className="flex justify-end mt-5">
+        <button className="btn-primary disabled:opacity-50" disabled={busy} onClick={enregistrer}>
+          {busy ? "Enregistrement…" : "Enregistrer mes informations"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 /* ---------- Demande de suppression de compte ---------- */
 export function DemanderSuppression({
   transporteurId,

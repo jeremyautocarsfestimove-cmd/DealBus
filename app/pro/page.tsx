@@ -4,7 +4,7 @@ import { Tabs } from "@/components/Tabs";
 import { createClient } from "@/lib/supabase/server";
 import type { Demande } from "@/lib/types";
 import { InscriptionTransporteur } from "./InscriptionTransporteur";
-import { DeclarerTerminee, ReservationActions, PublierRetour, AnnulerMission, GererVehicules, CgvForm, GererZones, DemanderSuppression } from "./pro-actions";
+import { DeclarerTerminee, ReservationActions, PublierRetour, AnnulerMission, GererVehicules, CgvForm, GererZones, DemanderSuppression, ModifierProfilTransporteur } from "./pro-actions";
 
 const eur = (n: number) => Number(n).toLocaleString("fr-FR") + " €";
 const dateHeure = (date: string | null, heure?: string | null) =>
@@ -61,6 +61,8 @@ export default async function ProPage() {
   }
 
   // ---------- Données du tableau de bord ----------
+  const { data: monProfil } = await supabase
+    .from("profiles").select("nom, telephone, email").eq("id", user!.id).maybeSingle();
   const [{ data: leads }, { data: offres }, { data: mesBids }, { data: missions }, { data: retours }, { data: avis }] =
     await Promise.all([
       supabase.from("demandes").select("*").eq("statut", "ouverte").order("created_at", { ascending: false }),
@@ -528,6 +530,19 @@ export default async function ProPage() {
 
             /* ---------- MON PROFIL ---------- */
             <div key="p">
+              <ModifierProfilTransporteur
+                transporteurId={user!.id}
+                initial={{
+                  raison_sociale: transporteur.raison_sociale,
+                  siren: transporteur.siren,
+                  licence_transport: transporteur.licence_transport,
+                  departement_siege: transporteur.departement_siege,
+                  secteur: transporteur.secteur,
+                  nom: monProfil?.nom ?? null,
+                  telephone: monProfil?.telephone ?? null,
+                  email: monProfil?.email ?? null,
+                }}
+              />
               <GererZones transporteurId={user!.id} zones={(zones ?? []) as any[]} />
               <GererVehicules transporteurId={user!.id} vehicules={(vehicules ?? []) as any[]} />
               <CgvForm transporteurId={user!.id} initial={transporteur.cgv ?? null} />
