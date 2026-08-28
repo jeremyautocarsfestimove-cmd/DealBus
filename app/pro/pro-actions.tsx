@@ -508,7 +508,7 @@ export function GererZones({
 
   async function ajouter() {
     setError(null);
-    const deps = saisie.split(/[,\s;]+/).map((d) => d.trim().toUpperCase()).filter(Boolean);
+    const deps = saisie.split(/[,\s;/|]+/).map((d) => d.trim().toUpperCase()).filter(Boolean);
     if (!deps.length) return;
     const invalides = deps.filter((d) => !valide(d));
     if (invalides.length) {

@@ -46,8 +46,16 @@ export function InscriptionTransporteur() {
       setError("SIREN (9 chiffres) ou SIRET (14 chiffres) invalide.");
       return;
     }
-    const zones = form.zones.split(",").map((z) => z.trim()).filter(Boolean);
-    if (zones.length === 0) { setError("Indiquez au moins un département de prise en charge."); return; }
+    // Découpe sur virgule, espace, point-virgule ou barre oblique, valide le
+    // format département (01-95, 2A/2B, 971-976) et dédoublonne.
+    const zones = [...new Set(
+      form.zones.split(/[,\s;/|]+/)
+        .map((z) => z.trim().toUpperCase())
+        .filter(Boolean)
+        .map((z) => (/^\d$/.test(z) ? `0${z}` : z))
+        .filter((z) => /^(\d{2,3}|2A|2B)$/.test(z))
+    )];
+    if (zones.length === 0) { setError("Indiquez au moins un département de prise en charge valide (ex. 76, 2A, 974)."); return; }
     if (form.password.length < 6) { setError("Mot de passe : 6 caractères minimum."); return; }
 
     setSaving(true);
@@ -91,7 +99,7 @@ export function InscriptionTransporteur() {
       id: userId,
       secteur: form.secteur,
       raison_sociale: form.raison_sociale,
-      siren: form.siren.replace(/\s/g, ""),
+      siren: form.siren.replace(/\s/g, "").slice(0, 9), // un SIRET saisi est ramené à son SIREN
       licence_transport: form.licence_transport,
       departement_siege: form.departement_siege || form.code_postal.slice(0, 2),
     });
