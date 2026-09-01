@@ -92,7 +92,7 @@ export async function POST(req: Request) {
     if (!process.env.RESEND_API_KEY) {
       return NextResponse.json({ error: "RESEND_API_KEY non configurée" }, { status: 500 });
     }
-    const limite = Math.min(Math.max(Number(body.limite) || 40, 1), 100);
+    const limite = Math.min(Math.max(Number(body.limite) || 40, 1), 1000);
     const { data: cibles } = await admin
       .from("prospects")
       .select("id, email, societe, departement")
@@ -107,8 +107,8 @@ export async function POST(req: Request) {
     let envoyes = 0, erreurs = 0;
 
     // Envoi par lots de 20 via l'API batch (évite les timeouts serverless)
-    for (let i = 0; i < cibles.length; i += 20) {
-      const lot = cibles.slice(i, i + 20);
+    for (let i = 0; i < cibles.length; i += 50) {
+      const lot = cibles.slice(i, i + 50);
       try {
         const { data, error } = await resend.batch.send(
           lot.map((p: any) => ({
@@ -178,7 +178,7 @@ export async function POST(req: Request) {
     if (!process.env.RESEND_API_KEY) {
       return NextResponse.json({ error: "RESEND_API_KEY non configurée" }, { status: 500 });
     }
-    const limite = Math.min(Math.max(Number(body.limite) || 40, 1), 100);
+    const limite = Math.min(Math.max(Number(body.limite) || 40, 1), 1000);
     const il_y_a_7j = new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString();
     const il_y_a_14j = new Date(Date.now() - 14 * 24 * 3600 * 1000).toISOString();
 
@@ -200,8 +200,8 @@ export async function POST(req: Request) {
     const from = process.env.CAMPAGNE_FROM ?? process.env.RESEND_FROM ?? "Jeremy de DealBus <contact@dealbus.fr>";
     let envoyes = 0, erreurs = 0;
 
-    for (let i = 0; i < cibles.length; i += 20) {
-      const lot = cibles.slice(i, i + 20);
+    for (let i = 0; i < cibles.length; i += 50) {
+      const lot = cibles.slice(i, i + 50);
       try {
         const { error } = await resend.batch.send(
           lot.map((p: any) => ({

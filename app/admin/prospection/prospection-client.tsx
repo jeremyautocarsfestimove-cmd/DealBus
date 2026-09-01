@@ -291,9 +291,24 @@ export function ProspectionClient() {
             </a>
             <div>
               <label className="label">Taille de vague</label>
-              <select className="input" value={limite} onChange={(e) => setLimite(Number(e.target.value))}>
-                {[20, 30, 40, 50].map((n) => <option key={n} value={n}>{n} emails</option>)}
-              </select>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number" min={1} max={1000} step={1}
+                  className="input w-28"
+                  value={limite}
+                  onChange={(e) => setLimite(Math.min(Math.max(Number(e.target.value) || 1, 1), 1000))}
+                />
+                <div className="flex gap-1">
+                  {[30, 50, 100, 250, 500].map((n) => (
+                    <button key={n} type="button"
+                      onClick={() => setLimite(n)}
+                      className={`font-mono text-[11px] px-2 py-1 rounded-sm border transition
+                        ${limite === n ? "border-ambre text-ambre" : "border-ligne text-blanc-faint hover:text-blanc-dim"}`}>
+                      {n}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
             <button className="btn-primary disabled:opacity-50"
               disabled={occupied !== null || !stats.a_contacter}
