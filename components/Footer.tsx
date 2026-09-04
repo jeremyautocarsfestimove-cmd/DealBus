@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { DEPARTEMENTS } from "@/lib/departements";
 import { REGIONS } from "@/lib/regions";
-import { getReseauxActifs, type ReseauCle } from "@/lib/reseaux";
+import { getReseauxActifs } from "@/lib/reseaux";
+import type { ReseauCle } from "@/lib/reseaux-def";
 
 // Footer SEO commun — colonnes de maillage interne.
 // Les villes proviennent de lib/villes.ts : toute ville ajoutée apparaît automatiquement.

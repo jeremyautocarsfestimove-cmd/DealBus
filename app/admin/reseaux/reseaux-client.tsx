@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { RESEAUX_DEF, type ReseauCle } from "@/lib/reseaux";
+import { RESEAUX_DEF, type ReseauCle } from "@/lib/reseaux-def";
 
 export function ReseauxForm({ initial }: { initial: Record<ReseauCle, string> }) {
   const router = useRouter();

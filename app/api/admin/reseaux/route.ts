@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { RESEAUX_DEF } from "@/lib/reseaux";
+import { RESEAUX_DEF } from "@/lib/reseaux-def";
 
 const CLES = new Set<string>(RESEAUX_DEF.map((r) => r.cle));
 
