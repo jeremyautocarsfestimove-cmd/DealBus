@@ -96,6 +96,7 @@ export default async function AdminPage() {
           <div className="flex gap-2.5">
             <a href="/admin/prospection" className="btn-ghost">Prospection transporteurs →</a>
             <a href="/admin/prospection-clients" className="btn-ghost">Prospection clients →</a>
+            <a href="/admin/reseaux" className="btn-ghost">Réseaux sociaux →</a>
           </div>
         </div>
 
