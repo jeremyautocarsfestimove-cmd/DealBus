@@ -2,8 +2,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
+import { HeroMockup } from "@/components/HeroMockup";
 import { CarteCouverture } from "@/components/CarteCouverture";
-import { LiveBoard } from "@/components/LiveBoard";
 import { QuickDemandeForm } from "@/components/QuickDemandeForm";
 
 const STATS = [
@@ -50,7 +50,7 @@ export default function Home() {
               </div>
             </div>
 
-            <LiveBoard />
+            <HeroMockup />
           </div>
         </section>
 
