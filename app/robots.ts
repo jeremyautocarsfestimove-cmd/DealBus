@@ -6,9 +6,19 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/admin", "/api/", "/mes-demandes", "/pro/leads", "/pro/missions"],
+        // Barres obliques finales : "/admin" seul bloque aussi une éventuelle
+        // page publique commençant par ces caractères. On cible les répertoires.
+        disallow: [
+          "/admin/",
+          "/api/",
+          "/mes-demandes/",
+          "/pro/leads",
+          "/pro/missions",
+          "/login",
+        ],
       },
     ],
     sitemap: "https://dealbus.fr/sitemap.xml",
+    host: "https://dealbus.fr",
   };
 }
