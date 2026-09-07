@@ -2,9 +2,14 @@ import Link from "next/link";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 
-// Gabarit commun des pages d'atterrissage SEO
+export type Fil = { href: string; label: string };
+
+// Gabarit commun des pages d'atterrissage SEO.
+// Émet FAQPage + BreadcrumbList et affiche un fil d'Ariane cliquable :
+// le fil est à la fois un signal de structure pour Google et un chemin de
+// remontée région → département → ville pour le visiteur.
 export function SeoPage({
-  eyebrow, h1, intro, sections, faq, related,
+  eyebrow, h1, intro, sections, faq, related, fil = [],
 }: {
   eyebrow: string;
   h1: React.ReactNode;
@@ -12,23 +17,54 @@ export function SeoPage({
   sections: { titre: string; corps: React.ReactNode }[];
   faq: { q: string; r: string }[];
   related: { href: string; label: string }[];
+  fil?: Fil[];
 }) {
+  const filComplet: Fil[] = [{ href: "/", label: "Accueil" }, ...fil];
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify({
           "@context": "https://schema.org",
-          "@type": "FAQPage",
-          mainEntity: faq.map((f) => ({
-            "@type": "Question",
-            name: f.q,
-            acceptedAnswer: { "@type": "Answer", text: f.r },
-          })),
+          "@graph": [
+            {
+              "@type": "FAQPage",
+              mainEntity: faq.map((f) => ({
+                "@type": "Question",
+                name: f.q,
+                acceptedAnswer: { "@type": "Answer", text: f.r },
+              })),
+            },
+            {
+              "@type": "BreadcrumbList",
+              itemListElement: filComplet.map((f, i) => ({
+                "@type": "ListItem",
+                position: i + 1,
+                name: f.label,
+                item: `https://dealbus.fr${f.href === "/" ? "" : f.href}`,
+              })),
+            },
+          ],
         }) }}
       />
       <Nav />
       <main className="max-w-3xl mx-auto px-7 py-16">
+        {fil.length > 0 && (
+          <nav aria-label="Fil d'Ariane" className="mb-6 text-[12.5px] text-blanc-faint flex flex-wrap gap-x-2 gap-y-1">
+            {filComplet.map((f, i) => (
+              <span key={f.href} className="flex gap-2">
+                {i < filComplet.length - 1 ? (
+                  <Link href={f.href} className="hover:text-blanc transition">{f.label}</Link>
+                ) : (
+                  <span className="text-blanc-dim">{f.label}</span>
+                )}
+                {i < filComplet.length - 1 && <span aria-hidden="true">/</span>}
+              </span>
+            ))}
+          </nav>
+        )}
+
         <p className="eyebrow mb-4">{eyebrow}</p>
         <h1 className="h-display text-4xl md:text-5xl mb-5 leading-[1.05]">{h1}</h1>
         <p className="text-lg text-blanc-dim leading-relaxed mb-8">{intro}</p>

@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { SeoPage } from "../_seo/SeoPage";
+import { REGIONS, departementsDeRegion } from "@/lib/regions";
+import { VILLES } from "@/lib/villes";
+import { TRAJETS } from "@/lib/trajets";
 
 export const metadata: Metadata = {
   title: "Location d'autocar avec chauffeur au meilleur prix",
@@ -8,9 +12,13 @@ export const metadata: Metadata = {
   alternates: { canonical: "/location-autocar" },
 };
 
+const chip = "card px-3.5 py-1.5 text-[13px] text-blanc-dim hover:text-blanc hover:border-ligne-strong transition";
+const chipFort = "card px-3.5 py-1.5 text-[13px] font-semibold text-ambre hover:border-ambre/50 transition";
+
 export default function Page() {
   return (
     <SeoPage
+      fil={[{ href: "/location-autocar", label: "Location d'autocar" }]}
       eyebrow="Location d'autocar avec chauffeur"
       h1={<>Louer un autocar avec chauffeur, <span className="text-ambre">sans courir après les devis.</span></>}
       intro="Sortie de club, séminaire d'entreprise, mariage, voyage scolaire, déplacement de supporters : dès qu'un groupe se déplace, la location d'un autocar avec chauffeur est la solution la plus simple et la plus économique par personne. DealBus vous évite la partie pénible : trouver, comparer et négocier avec les transporteurs."
@@ -39,7 +47,62 @@ export default function Page() {
           corps: (
             <>
               <p>Le prix dépend de la distance, de la durée de mise à disposition, de la période (les samedis de mai à septembre sont les plus demandés) et de l&apos;amplitude horaire du conducteur, encadrée par la réglementation. C&apos;est précisément pourquoi les simulateurs en ligne donnent des chiffres peu fiables : seul un professionnel qui connaît ses coûts et son planning peut établir un vrai prix.</p>
-              <p>Notre conviction : la meilleure estimation, ce sont plusieurs offres fermes qui se comparent. Et pour les budgets serrés, deux leviers uniques à DealBus : l&apos;enchère en direct, où les transporteurs font baisser le prix entre eux, et les retours à vide — des trajets déjà programmés, proposés à une fraction du prix normal.</p>
+              <p>Nos pages liaison publient malgré tout des ordres de grandeur, trajet par trajet, pour que vous sachiez si une offre reçue est dans le marché. Mais la meilleure estimation reste plusieurs offres fermes qui se comparent. Pour les budgets serrés, deux leviers uniques à DealBus : l&apos;enchère en direct, où les transporteurs font baisser le prix entre eux, et les retours à vide — des trajets déjà programmés, proposés à une fraction du prix normal.</p>
+            </>
+          ),
+        },
+        {
+          titre: "Les liaisons les plus demandées",
+          corps: (
+            <>
+              <div className="flex flex-wrap gap-2.5 mb-4">
+                {TRAJETS.map((t) => (
+                  <Link key={t.slug} href={`/location-autocar/trajet/${t.slug}`} className={chipFort}>
+                    {t.depart} → {t.arrivee}
+                  </Link>
+                ))}
+              </div>
+              <p>Distance, temps de route, ordre de prix constaté et contraintes propres à chaque trajet.</p>
+            </>
+          ),
+        },
+        {
+          titre: "Louer un autocar près de chez vous",
+          corps: (
+            <>
+              <p className="mb-5">
+                Les autocaristes définissent leurs zones d&apos;intervention par département. Retrouvez ci-dessous
+                les pages de votre région, de votre département et de votre ville — chacune détaille le marché
+                local, les trajets types et la saisonnalité des prix.
+              </p>
+              <div className="space-y-6">
+                {REGIONS.map((r) => (
+                  <div key={r.slug}>
+                    <h3 className="text-[15px] font-semibold text-blanc mb-2">
+                      <Link href={`/location-autocar/${r.slug}`} className="text-ambre hover:underline underline-offset-4">
+                        Autocar {r.nom}
+                      </Link>
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {departementsDeRegion(r.nom).map((d) => (
+                        <Link key={d.slug} href={`/location-autocar/${d.slug}`} className={chip}>
+                          {d.nom} ({d.code})
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-7 pt-6 border-t border-ligne">
+                <p className="font-mono text-[11px] uppercase tracking-wider text-blanc-faint mb-3">Nos pages villes</p>
+                <div className="flex flex-wrap gap-2">
+                  {VILLES.map((v) => (
+                    <Link key={v.slug} href={`/location-autocar/${v.slug}`} className={chipFort}>
+                      {v.nom}
+                    </Link>
+                  ))}
+                </div>
+              </div>
             </>
           ),
         },
@@ -55,6 +118,7 @@ export default function Page() {
         { href: "/reserver-un-bus", label: "Réserver un bus : le guide" },
         { href: "/comparateur-devis-autocar", label: "Comparer les devis d'autocar" },
         { href: "/retours", label: "Les retours à vide du moment" },
+        { href: "/reglementation", label: "Temps de conduite & amplitude" },
       ]}
     />
   );

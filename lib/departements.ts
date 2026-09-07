@@ -8,6 +8,7 @@ export type Departement = {
   region: string;
   contexte: string;                                  // paragraphe unique
   villes: { nom: string; slug?: string }[];          // slug = page ville existante
+  trajets: { vers: string; km: number; usage: string }[]; // trajets types au départ du département
   axesRetours: string;
 };
 
@@ -20,6 +21,11 @@ export const DEPARTEMENTS: Departement[] = [
       { nom: "Saint-Germain-en-Laye", slug: "saint-germain-en-laye" }, { nom: "Sartrouville" },
       { nom: "Poissy" }, { nom: "Rambouillet" }, { nom: "Trappes" }, { nom: "Conflans-Sainte-Honorine" },
     ],
+    trajets: [
+      { vers: "Parc Astérix", km: 80, usage: "sorties scolaires de fin d'année" },
+      { vers: "Mont-Saint-Michel", km: 330, usage: "voyages d'associations et clubs d'aînés" },
+      { vers: "Amsterdam", km: 520, usage: "voyages scolaires et séjours linguistiques" },
+    ],
     axesRetours: "L'axe A13 Paris ↔ Normandie qui traverse le département est l'un des plus riches en retours à vide de France.",
   },
   {
@@ -28,6 +34,11 @@ export const DEPARTEMENTS: Departement[] = [
     villes: [
       { nom: "Évreux", slug: "evreux" }, { nom: "Vernon", slug: "vernon" }, { nom: "Louviers" },
       { nom: "Val-de-Reuil" }, { nom: "Gisors" }, { nom: "Bernay" }, { nom: "Pont-Audemer" },
+    ],
+    trajets: [
+      { vers: "Paris", km: 100, usage: "sorties culturelles, salons, spectacles" },
+      { vers: "Mont-Saint-Michel", km: 240, usage: "excursions à la journée" },
+      { vers: "Deauville", km: 110, usage: "séminaires et sorties de CSE" },
     ],
     axesRetours: "Les navettes touristiques de Giverny et les flux vers Rouen créent des retours à vide réguliers d'avril à octobre.",
   },
@@ -38,6 +49,11 @@ export const DEPARTEMENTS: Departement[] = [
       { nom: "Rouen", slug: "rouen" }, { nom: "Le Havre", slug: "le-havre" }, { nom: "Dieppe" },
       { nom: "Fécamp" }, { nom: "Étretat" }, { nom: "Elbeuf" }, { nom: "Yvetot" },
     ],
+    trajets: [
+      { vers: "Paris", km: 135, usage: "sorties culturelles et congrès" },
+      { vers: "Lille", km: 230, usage: "déplacements sportifs et compétitions" },
+      { vers: "Bruxelles", km: 330, usage: "voyages scolaires et séjours linguistiques" },
+    ],
     axesRetours: "Rouen ↔ Paris et les transferts croisiéristes du Havre produisent des retours à vide quasi quotidiens en saison.",
   },
   {
@@ -46,6 +62,11 @@ export const DEPARTEMENTS: Departement[] = [
     villes: [
       { nom: "Cergy-Pontoise", slug: "cergy-pontoise" }, { nom: "Argenteuil" }, { nom: "Sarcelles" },
       { nom: "Garges-lès-Gonesse" }, { nom: "Franconville" }, { nom: "Goussainville" }, { nom: "Pontoise" },
+    ],
+    trajets: [
+      { vers: "Roissy-CDG", km: 30, usage: "transferts de groupes et navettes aéroport" },
+      { vers: "Baie de Somme", km: 180, usage: "sorties nature et journées associatives" },
+      { vers: "Londres", km: 350, usage: "voyages scolaires via le shuttle" },
     ],
     axesRetours: "Les dessertes de Roissy et l'axe A15 vers la Normandie alimentent un flux constant de trajets retour.",
   },
@@ -56,6 +77,11 @@ export const DEPARTEMENTS: Departement[] = [
       { nom: "Chartres", slug: "chartres" }, { nom: "Dreux" }, { nom: "Lucé" },
       { nom: "Châteaudun" }, { nom: "Nogent-le-Rotrou" }, { nom: "Vernouillet" },
     ],
+    trajets: [
+      { vers: "Paris", km: 90, usage: "sorties culturelles et déplacements d'entreprise" },
+      { vers: "Châteaux de la Loire", km: 140, usage: "circuits patrimoniaux à la journée" },
+      { vers: "Puy du Fou", km: 380, usage: "séjours de deux jours en association" },
+    ],
     axesRetours: "Les flux de pèlerinage Paris-Chartres et les liaisons vers les châteaux de la Loire créent des opportunités saisonnières.",
   },
   {
@@ -64,6 +90,11 @@ export const DEPARTEMENTS: Departement[] = [
     villes: [
       { nom: "Caen", slug: "caen" }, { nom: "Lisieux" }, { nom: "Bayeux" },
       { nom: "Deauville" }, { nom: "Honfleur" }, { nom: "Vire" },
+    ],
+    trajets: [
+      { vers: "Plages du Débarquement", km: 30, usage: "circuits mémoriels et voyages scolaires" },
+      { vers: "Mont-Saint-Michel", km: 130, usage: "excursions à la journée" },
+      { vers: "Paris", km: 230, usage: "déplacements sportifs et sorties culturelles" },
     ],
     axesRetours: "Les circuits mémoriels et les liaisons Paris ↔ côte normande génèrent des retours à vide constants.",
   },
@@ -74,6 +105,11 @@ export const DEPARTEMENTS: Departement[] = [
       { nom: "Alençon" }, { nom: "Flers" }, { nom: "Argentan" },
       { nom: "L'Aigle" }, { nom: "Mortagne-au-Perche" },
     ],
+    trajets: [
+      { vers: "Le Mans", km: 50, usage: "24 Heures, compétitions et déplacements de clubs" },
+      { vers: "Deauville", km: 120, usage: "sorties d'aînés et journées associatives" },
+      { vers: "Paris", km: 200, usage: "salons, spectacles et sorties scolaires" },
+    ],
     axesRetours: "Les liaisons vers Caen, Le Mans et Paris offrent des trajets retour à saisir pour les groupes flexibles.",
   },
   {
@@ -82,6 +118,11 @@ export const DEPARTEMENTS: Departement[] = [
     villes: [
       { nom: "Cherbourg-en-Cotentin" }, { nom: "Saint-Lô" }, { nom: "Granville" },
       { nom: "Avranches" }, { nom: "Coutances" },
+    ],
+    trajets: [
+      { vers: "Mont-Saint-Michel", km: 130, usage: "excursions et voyages scolaires" },
+      { vers: "Caen", km: 120, usage: "déplacements sportifs et administratifs" },
+      { vers: "Paris", km: 350, usage: "voyages de fin d'année et congrès" },
     ],
     axesRetours: "Les rotations du Mont-Saint-Michel produisent des retours à vide réguliers vers Caen, Rennes et Paris.",
   },
@@ -92,6 +133,11 @@ export const DEPARTEMENTS: Departement[] = [
       { nom: "Beauvais" }, { nom: "Compiègne" }, { nom: "Creil" },
       { nom: "Senlis" }, { nom: "Chantilly" }, { nom: "Noyon" },
     ],
+    trajets: [
+      { vers: "Parc Astérix", km: 60, usage: "sorties scolaires et arbres de Noël de CSE" },
+      { vers: "Aéroport de Beauvais", km: 15, usage: "transferts de groupes sur vols low-cost" },
+      { vers: "Baie de Somme", km: 110, usage: "sorties nature et clubs de randonnée" },
+    ],
     axesRetours: "Les dessertes de l'aéroport de Beauvais et du Parc Astérix alimentent un flux permanent de trajets retour.",
   },
   {
@@ -101,12 +147,22 @@ export const DEPARTEMENTS: Departement[] = [
       { nom: "Évry-Courcouronnes" }, { nom: "Corbeil-Essonnes" }, { nom: "Massy" },
       { nom: "Savigny-sur-Orge" }, { nom: "Palaiseau" }, { nom: "Étampes" },
     ],
+    trajets: [
+      { vers: "Paris", km: 30, usage: "congrès, salons et sorties culturelles" },
+      { vers: "Châteaux de la Loire", km: 180, usage: "voyages scolaires patrimoine" },
+      { vers: "Futuroscope", km: 340, usage: "séjours de deux jours en établissement" },
+    ],
     axesRetours: "L'axe A6 vers le sud et les liaisons aéroport d'Orly offrent des trajets retour fréquents.",
   },
   {
     slug: "paris-75", nom: "Paris", code: "75", region: "Île-de-France",
     contexte: "Premier marché français du transport de groupe, Paris concentre CSE, agences événementielles, fédérations et écoles — mais aussi les écarts de prix les plus spectaculaires : pour un même trajet, les offres varient couramment de 30 %. C'est ici que la mise en concurrence rapporte le plus.",
     villes: [{ nom: "Paris", slug: "paris" }],
+    trajets: [
+      { vers: "Disneyland Paris", km: 40, usage: "sorties de CSE et arbres de Noël" },
+      { vers: "Reims et Épernay", km: 145, usage: "circuits champagne et incentives d'entreprise" },
+      { vers: "Bruges", km: 300, usage: "voyages scolaires et séjours culturels" },
+    ],
     axesRetours: "Tous les axes de retours à vide de France convergent vers la capitale — le tableau en direct est à consulter avant toute demande.",
   },
   {
@@ -115,6 +171,11 @@ export const DEPARTEMENTS: Departement[] = [
     villes: [
       { nom: "Nanterre" }, { nom: "Boulogne-Billancourt" }, { nom: "Courbevoie" },
       { nom: "Colombes" }, { nom: "Rueil-Malmaison" }, { nom: "Levallois-Perret" },
+    ],
+    trajets: [
+      { vers: "La Défense ↔ sièges sociaux", km: 10, usage: "navettes d'entreprise et séminaires" },
+      { vers: "Stade de France", km: 20, usage: "supporters, concerts et événements" },
+      { vers: "Deauville", km: 200, usage: "séminaires et sorties de direction" },
     ],
     axesRetours: "Les flux d'affaires vers les aéroports et les grandes métropoles régionales créent des trajets retour quotidiens.",
   },
@@ -125,6 +186,11 @@ export const DEPARTEMENTS: Departement[] = [
       { nom: "Meaux" }, { nom: "Chelles" }, { nom: "Melun" },
       { nom: "Fontainebleau" }, { nom: "Provins" }, { nom: "Torcy" },
     ],
+    trajets: [
+      { vers: "Disneyland Paris", km: 30, usage: "sorties scolaires et comités d'entreprise" },
+      { vers: "Provins", km: 60, usage: "sorties patrimoine et journées associatives" },
+      { vers: "Paris", km: 45, usage: "spectacles, musées et salons" },
+    ],
     axesRetours: "Les rotations Disneyland créent chaque jour des retours à vide vers Paris et toute l'Île-de-France.",
   },
   {
@@ -133,6 +199,11 @@ export const DEPARTEMENTS: Departement[] = [
     villes: [
       { nom: "Saint-Denis" }, { nom: "Montreuil" }, { nom: "Aubervilliers" },
       { nom: "Aulnay-sous-Bois" }, { nom: "Le Bourget" }, { nom: "Villepinte" },
+    ],
+    trajets: [
+      { vers: "Stade de France", km: 8, usage: "supporters, concerts et grands événements" },
+      { vers: "Roissy-CDG", km: 20, usage: "transferts de groupes" },
+      { vers: "Parc Astérix", km: 45, usage: "sorties scolaires et centres de loisirs" },
     ],
     axesRetours: "Les navettes d'événements et les dessertes de Roissy toute proche alimentent un flux continu de trajets retour.",
   },
@@ -143,6 +214,11 @@ export const DEPARTEMENTS: Departement[] = [
       { nom: "Créteil" }, { nom: "Vitry-sur-Seine" }, { nom: "Champigny-sur-Marne" },
       { nom: "Saint-Maur-des-Fossés" }, { nom: "Ivry-sur-Seine" }, { nom: "Villejuif" },
     ],
+    trajets: [
+      { vers: "Aéroport d'Orly", km: 15, usage: "transferts de groupes et navettes" },
+      { vers: "Fontainebleau", km: 55, usage: "sorties patrimoine et séminaires" },
+      { vers: "Paris", km: 15, usage: "sorties culturelles et compétitions" },
+    ],
     axesRetours: "Les dessertes d'Orly et l'axe A6/A86 offrent des trajets retour réguliers dans toutes les directions.",
   },
   {
@@ -151,6 +227,11 @@ export const DEPARTEMENTS: Departement[] = [
     villes: [
       { nom: "Lyon", slug: "lyon" }, { nom: "Villeurbanne" }, { nom: "Vénissieux" },
       { nom: "Caluire-et-Cuire" }, { nom: "Bron" },
+    ],
+    trajets: [
+      { vers: "Stations des Alpes", km: 200, usage: "transferts neige de décembre à avril" },
+      { vers: "Annecy", km: 140, usage: "séminaires et sorties d'entreprise" },
+      { vers: "Paris", km: 465, usage: "congrès et voyages scolaires" },
     ],
     axesRetours: "Les rotations vers les stations alpines produisent chaque hiver des centaines de trajets retour à prix cassé.",
   },
@@ -161,6 +242,11 @@ export const DEPARTEMENTS: Departement[] = [
       { nom: "Marseille", slug: "marseille" }, { nom: "Aix-en-Provence" }, { nom: "Arles" },
       { nom: "Martigues" }, { nom: "Aubagne" }, { nom: "Salon-de-Provence" },
     ],
+    trajets: [
+      { vers: "Aix-en-Provence", km: 35, usage: "navettes événementielles et congrès" },
+      { vers: "Calanques de Cassis", km: 30, usage: "sorties nature et colonies" },
+      { vers: "Barcelone", km: 500, usage: "voyages scolaires et séjours linguistiques" },
+    ],
     axesRetours: "L'axe Marseille → Paris est la référence des retours à vide : des autocars complets à une fraction du prix, chaque semaine.",
   },
 /* ---------- Bretagne ---------- */
@@ -168,18 +254,33 @@ export const DEPARTEMENTS: Departement[] = [
     slug: "ille-et-vilaine", nom: "Ille-et-Vilaine", code: "35", region: "Bretagne",
     contexte: "Rennes l'universitaire et ses festivals (Trans Musicales, Route du Rock à deux pas) font de l'Ille-et-Vilaine le premier bassin breton du transport de groupe — étudiants, supporters du Roazhon Park et scolaires du pays de Saint-Malo mobilisent les autocaristes bretilliens toute l'année.",
     villes: [{ nom: "Rennes" }, { nom: "Saint-Malo" }, { nom: "Fougères" }, { nom: "Vitré" }, { nom: "Redon" }],
+    trajets: [
+      { vers: "Mont-Saint-Michel", km: 65, usage: "excursions à la journée" },
+      { vers: "Saint-Malo", km: 70, usage: "sorties scolaires et clubs" },
+      { vers: "Paris", km: 350, usage: "compétitions et voyages de fin d'année" },
+    ],
     axesRetours: "L'axe Rennes ↔ Paris et les navettes du Mont-Saint-Michel tout proche génèrent des trajets retour réguliers.",
   },
   {
     slug: "finistere", nom: "Finistère", code: "29", region: "Bretagne",
     contexte: "Du bout du monde aux grands festivals — Vieilles Charrues en tête, qui déplace des centaines de cars chaque été — le Finistère vit un transport de groupe rythmé par les événements et les liaisons maritimes de Brest et Roscoff.",
     villes: [{ nom: "Brest" }, { nom: "Quimper" }, { nom: "Concarneau" }, { nom: "Morlaix" }, { nom: "Carhaix" }],
+    trajets: [
+      { vers: "Pointe du Raz", km: 100, usage: "sorties nature et journées associatives" },
+      { vers: "Océanopolis Brest", km: 20, usage: "voyages scolaires" },
+      { vers: "Paris", km: 590, usage: "voyages de fin d'année et compétitions" },
+    ],
     axesRetours: "Les rotations des festivals d'été et les liaisons vers Rennes et Nantes offrent des retours à vide saisonniers.",
   },
   {
     slug: "morbihan", nom: "Morbihan", code: "56", region: "Bretagne",
     contexte: "Entre le Festival Interceltique de Lorient, les embarquements vers Belle-Île et les alignements de Carnac, le Morbihan brasse des groupes touristiques d'avril à octobre — pendant que clubs et scolaires font vivre les autocaristes morbihannais à l'année.",
     villes: [{ nom: "Vannes" }, { nom: "Lorient" }, { nom: "Pontivy" }, { nom: "Auray" }, { nom: "Ploërmel" }],
+    trajets: [
+      { vers: "Alignements de Carnac", km: 30, usage: "sorties patrimoine et scolaires" },
+      { vers: "Quiberon", km: 50, usage: "colonies et clubs de voile" },
+      { vers: "Nantes", km: 110, usage: "spectacles, salons et compétitions" },
+    ],
     axesRetours: "Les flux estivaux vers les ports et plages créent des trajets retour fréquents vers Rennes et Nantes.",
   },
   /* ---------- Pays de la Loire ---------- */
@@ -187,18 +288,33 @@ export const DEPARTEMENTS: Departement[] = [
     slug: "loire-atlantique", nom: "Loire-Atlantique", code: "44", region: "Pays de la Loire",
     contexte: "Nantes, métropole créative en plein essor, et son littoral de La Baule à Pornic font de la Loire-Atlantique un marché de groupe complet : congrès, enterrements de vie de garçon, scolaires vers les Machines de l'île et supporters de la Beaujoire s'y partagent les autocars.",
     villes: [{ nom: "Nantes" }, { nom: "Saint-Nazaire" }, { nom: "La Baule" }, { nom: "Châteaubriant" }, { nom: "Pornic" }],
+    trajets: [
+      { vers: "Puy du Fou", km: 90, usage: "séjours associatifs et sorties de CSE" },
+      { vers: "Saint-Nazaire", km: 60, usage: "visites d'entreprise et scolaires" },
+      { vers: "Paris", km: 385, usage: "congrès et voyages de fin d'année" },
+    ],
     axesRetours: "L'axe Nantes ↔ Paris et les flux littoraux estivaux produisent des retours à vide constants.",
   },
   {
     slug: "maine-et-loire", nom: "Maine-et-Loire", code: "49", region: "Pays de la Loire",
     contexte: "Angers et le Puy du Fou tout proche structurent le transport de groupe du Maine-et-Loire : le grand parc vendéen draine des cars de toute la France, tandis que vignobles de Loire et scolaires angevins entretiennent une activité locale dense.",
     villes: [{ nom: "Angers" }, { nom: "Cholet" }, { nom: "Saumur" }, { nom: "Segré" }],
+    trajets: [
+      { vers: "Puy du Fou", km: 90, usage: "sorties de CSE et associations" },
+      { vers: "Châteaux de la Loire", km: 60, usage: "circuits patrimoniaux scolaires" },
+      { vers: "Paris", km: 300, usage: "salons et compétitions" },
+    ],
     axesRetours: "Les rotations vers le Puy du Fou et les châteaux de la Loire créent d'excellentes opportunités de trajets retour.",
   },
   {
     slug: "sarthe", nom: "Sarthe", code: "72", region: "Pays de la Loire",
     contexte: "Les 24 Heures du Mans déplacent chaque année l'un des plus grands flux d'autocars d'Europe — un pic autour duquel les autocaristes sarthois organisent une saison faite de scolaires, d'entreprises et de liaisons vers Paris à moins d'une heure de TGV.",
     villes: [{ nom: "Le Mans" }, { nom: "La Flèche" }, { nom: "Sablé-sur-Sarthe" }, { nom: "Mamers" }],
+    trajets: [
+      { vers: "Circuit des 24 Heures", km: 10, usage: "navettes événementielles et hospitalités" },
+      { vers: "Paris", km: 210, usage: "sorties culturelles et scolaires" },
+      { vers: "Mont-Saint-Michel", km: 190, usage: "excursions à la journée" },
+    ],
     axesRetours: "Les grands week-ends du circuit génèrent des centaines de trajets retour vers toute la France.",
   },
   /* ---------- Nouvelle-Aquitaine ---------- */
@@ -206,18 +322,33 @@ export const DEPARTEMENTS: Departement[] = [
     slug: "gironde", nom: "Gironde", code: "33", region: "Nouvelle-Aquitaine",
     contexte: "Bordeaux et ses vignobles font de la Gironde une capitale mondiale de l'œnotourisme de groupe : circuits Médoc et Saint-Émilion, congrès, croisières fluviales et supporters du Matmut Atlantique mobilisent une flotte d'autocars considérable.",
     villes: [{ nom: "Bordeaux" }, { nom: "Mérignac" }, { nom: "Pessac" }, { nom: "Libourne" }, { nom: "Arcachon" }, { nom: "Saint-Émilion" }],
+    trajets: [
+      { vers: "Dune du Pilat", km: 60, usage: "sorties scolaires et centres de loisirs" },
+      { vers: "Biarritz", km: 190, usage: "séminaires et clubs sportifs" },
+      { vers: "Futuroscope", km: 230, usage: "voyages de fin d'année" },
+    ],
     axesRetours: "L'axe Bordeaux ↔ Paris et les circuits viticoles produisent des trajets retour quotidiens.",
   },
   {
     slug: "pyrenees-atlantiques", nom: "Pyrénées-Atlantiques", code: "64", region: "Nouvelle-Aquitaine",
     contexte: "Entre la côte basque qui attire séminaires et fêtes de Bayonne, les pèlerinages de Lourdes toute proche et les stations pyrénéennes, les Pyrénées-Atlantiques vivent un transport de groupe à trois saisons — balnéaire, spirituelle et neige.",
     villes: [{ nom: "Pau" }, { nom: "Bayonne" }, { nom: "Biarritz" }, { nom: "Anglet" }, { nom: "Saint-Jean-de-Luz" }],
+    trajets: [
+      { vers: "Lourdes", km: 40, usage: "pèlerinages et voyages paroissiaux" },
+      { vers: "Saint-Sébastien", km: 50, usage: "séjours transfrontaliers et scolaires" },
+      { vers: "Bordeaux", km: 200, usage: "compétitions et congrès" },
+    ],
     axesRetours: "Les flux de Lourdes et les liaisons côte basque ↔ Bordeaux offrent des retours à vide réguliers.",
   },
   {
     slug: "charente-maritime", nom: "Charente-Maritime", code: "17", region: "Nouvelle-Aquitaine",
     contexte: "La Rochelle, les îles de Ré et d'Oléron, les Francofolies et le Futuroscope voisin : la Charente-Maritime est une terre d'excursions de groupe où la saison estivale multiplie les rotations d'autocars entre gares, ports et sites.",
     villes: [{ nom: "La Rochelle" }, { nom: "Saintes" }, { nom: "Rochefort" }, { nom: "Royan" }],
+    trajets: [
+      { vers: "Île de Ré", km: 20, usage: "sorties d'aînés et journées associatives" },
+      { vers: "Futuroscope", km: 140, usage: "voyages scolaires" },
+      { vers: "Bordeaux", km: 185, usage: "salons et déplacements sportifs" },
+    ],
     axesRetours: "Les flux estivaux vers les îles et le littoral créent des trajets retour fréquents vers Bordeaux et Poitiers.",
   },
   /* ---------- Occitanie ---------- */
@@ -225,18 +356,33 @@ export const DEPARTEMENTS: Departement[] = [
     slug: "haute-garonne", nom: "Haute-Garonne", code: "31", region: "Occitanie",
     contexte: "Toulouse, capitale européenne de l'aéronautique, génère un transport de groupe permanent — visites d'usines Airbus, congrès, étudiants de la première ville universitaire de province et supporters du Stadium — auquel s'ajoutent les liaisons vers les Pyrénées.",
     villes: [{ nom: "Toulouse" }, { nom: "Colomiers" }, { nom: "Blagnac" }, { nom: "Muret" }, { nom: "Saint-Gaudens" }],
+    trajets: [
+      { vers: "Lourdes", km: 170, usage: "pèlerinages et groupes paroissiaux" },
+      { vers: "Carcassonne", km: 90, usage: "sorties patrimoine et scolaires" },
+      { vers: "Barcelone", km: 390, usage: "séjours linguistiques" },
+    ],
     axesRetours: "Les liaisons vers les stations pyrénéennes l'hiver et l'axe Toulouse ↔ Bordeaux produisent des trajets retour constants.",
   },
   {
     slug: "herault", nom: "Hérault", code: "34", region: "Occitanie",
     contexte: "Montpellier l'étudiante et son littoral font de l'Hérault un marché de groupe jeune et festif — week-ends d'intégration, festivals, congrès médicaux — sur un axe méditerranéen très fréquenté entre Espagne et vallée du Rhône.",
     villes: [{ nom: "Montpellier" }, { nom: "Béziers" }, { nom: "Sète" }, { nom: "Agde" }, { nom: "Lunel" }],
+    trajets: [
+      { vers: "Pont du Gard", km: 60, usage: "sorties scolaires et patrimoine" },
+      { vers: "Carcassonne", km: 150, usage: "excursions à la journée" },
+      { vers: "Barcelone", km: 350, usage: "voyages scolaires et séjours linguistiques" },
+    ],
     axesRetours: "L'arc méditerranéen Barcelone ↔ Marseille qui traverse le département regorge de trajets retour.",
   },
   {
     slug: "gard", nom: "Gard", code: "30", region: "Occitanie",
     contexte: "Des arènes de Nîmes au pont du Gard, le département vit du tourisme patrimonial de groupe — férias, scolaires et circuits provençaux — à la croisée des flux entre Méditerranée et vallée du Rhône.",
     villes: [{ nom: "Nîmes" }, { nom: "Alès" }, { nom: "Bagnols-sur-Cèze" }, { nom: "Beaucaire" }],
+    trajets: [
+      { vers: "Pont du Gard", km: 25, usage: "sorties scolaires et journées associatives" },
+      { vers: "Camargue et Saintes-Maries", km: 40, usage: "sorties nature et clubs d'aînés" },
+      { vers: "Avignon", km: 45, usage: "festival et sorties culturelles" },
+    ],
     axesRetours: "La position de carrefour entre Montpellier, Avignon et Marseille multiplie les opportunités de trajets retour.",
   },
   /* ---------- Grand Est ---------- */
@@ -244,18 +390,33 @@ export const DEPARTEMENTS: Departement[] = [
     slug: "bas-rhin", nom: "Bas-Rhin", code: "67", region: "Grand Est",
     contexte: "Strasbourg l'européenne cumule les visites institutionnelles (Parlement, Conseil de l'Europe), le marché de Noël qui draine des cars de tout le continent et les circuits de la route des vins — le Bas-Rhin est l'un des départements les plus « autocar » de France.",
     villes: [{ nom: "Strasbourg" }, { nom: "Haguenau" }, { nom: "Sélestat" }, { nom: "Obernai" }, { nom: "Saverne" }],
+    trajets: [
+      { vers: "Route des Vins d'Alsace", km: 40, usage: "circuits œnotouristiques et CSE" },
+      { vers: "Europa-Park", km: 65, usage: "sorties scolaires et centres de loisirs" },
+      { vers: "Paris", km: 490, usage: "congrès et voyages de fin d'année" },
+    ],
     axesRetours: "Le marché de Noël et les liaisons européennes créent des flux de trajets retour massifs en fin d'année.",
   },
   {
     slug: "marne", nom: "Marne", code: "51", region: "Grand Est",
     contexte: "Reims et Épernay font de la Marne la capitale mondiale de l'œnotourisme effervescent : les caves de champagne reçoivent des groupes toute l'année — CSE parisiens en tête, à moins de deux heures de route — aux côtés des scolaires et foires rémoises.",
     villes: [{ nom: "Reims" }, { nom: "Châlons-en-Champagne" }, { nom: "Épernay" }, { nom: "Vitry-le-François" }],
+    trajets: [
+      { vers: "Épernay et la Côte des Blancs", km: 30, usage: "circuits champagne et incentives" },
+      { vers: "Paris", km: 145, usage: "spectacles, salons et compétitions" },
+      { vers: "Verdun", km: 120, usage: "circuits mémoriels scolaires" },
+    ],
     axesRetours: "Les circuits champagne depuis Paris produisent des retours à vide hebdomadaires dans les deux sens.",
   },
   {
     slug: "moselle", nom: "Moselle", code: "57", region: "Grand Est",
     contexte: "Frontalière du Luxembourg et de l'Allemagne, la Moselle mêle navettes transfrontalières, marchés de Noël de Metz et déplacements de clubs — un marché où les autocaristes lorrains jouent sur trois pays.",
     villes: [{ nom: "Metz" }, { nom: "Thionville" }, { nom: "Forbach" }, { nom: "Sarreguemines" }],
+    trajets: [
+      { vers: "Luxembourg", km: 65, usage: "déplacements d'entreprise et scolaires" },
+      { vers: "Verdun", km: 80, usage: "circuits mémoriels et voyages scolaires" },
+      { vers: "Strasbourg", km: 165, usage: "marchés de Noël et sorties de CSE" },
+    ],
     axesRetours: "Les flux transfrontaliers et l'axe Metz ↔ Paris offrent des trajets retour réguliers.",
   },
   /* ---------- Bourgogne-Franche-Comté ---------- */
@@ -263,12 +424,22 @@ export const DEPARTEMENTS: Departement[] = [
     slug: "cote-d-or", nom: "Côte-d'Or", code: "21", region: "Bourgogne-Franche-Comté",
     contexte: "Dijon et la route des grands crus font de la Côte-d'Or une étape obligée de l'œnotourisme de groupe — les Hospices de Beaune et les climats de Bourgogne classés à l'UNESCO drainent des autocars du monde entier, sur l'axe stratégique Paris ↔ Lyon.",
     villes: [{ nom: "Dijon" }, { nom: "Beaune" }, { nom: "Montbard" }, { nom: "Auxonne" }],
+    trajets: [
+      { vers: "Beaune et la route des Grands Crus", km: 45, usage: "œnotourisme et séminaires" },
+      { vers: "Paris", km: 315, usage: "congrès et compétitions" },
+      { vers: "Lyon", km: 195, usage: "salons et déplacements sportifs" },
+    ],
     axesRetours: "La position sur l'A6 entre Paris et Lyon garantit des trajets retour quasi quotidiens.",
   },
   {
     slug: "doubs", nom: "Doubs", code: "25", region: "Bourgogne-Franche-Comté",
     contexte: "Entre Besançon l'universitaire, la citadelle Vauban et la frontière suisse, le Doubs vit d'un transport de groupe frontalier et patrimonial — auquel s'ajoutent les stations du Haut-Doubs l'hiver.",
     villes: [{ nom: "Besançon" }, { nom: "Montbéliard" }, { nom: "Pontarlier" }],
+    trajets: [
+      { vers: "Saline royale d'Arc-et-Senans", km: 35, usage: "sorties scolaires et patrimoine" },
+      { vers: "Lausanne", km: 130, usage: "séjours transfrontaliers et clubs" },
+      { vers: "Lyon", km: 230, usage: "compétitions et congrès" },
+    ],
     axesRetours: "Les liaisons vers la Suisse et les stations jurassiennes créent des trajets retour saisonniers.",
   },
   /* ---------- Hauts-de-France (complément) ---------- */
@@ -276,6 +447,11 @@ export const DEPARTEMENTS: Departement[] = [
     slug: "nord", nom: "Nord", code: "59", region: "Hauts-de-France",
     contexte: "Département le plus peuplé de France, le Nord vit un transport de groupe intense : braderie de Lille, supporters du LOSC et du RC Lens voisin, liaisons vers la Belgique et Londres — les autocaristes nordistes disposent de flottes parmi les plus importantes du pays.",
     villes: [{ nom: "Lille" }, { nom: "Roubaix" }, { nom: "Tourcoing" }, { nom: "Dunkerque" }, { nom: "Valenciennes" }, { nom: "Douai" }],
+    trajets: [
+      { vers: "Bruxelles", km: 110, usage: "voyages scolaires et séjours culturels" },
+      { vers: "Londres", km: 280, usage: "séjours linguistiques via le shuttle" },
+      { vers: "Paris", km: 225, usage: "compétitions, salons et spectacles" },
+    ],
     axesRetours: "Les axes Lille ↔ Paris et les liaisons transfrontalières produisent des trajets retour quotidiens.",
   },
   /* ---------- Auvergne-Rhône-Alpes (complément) ---------- */
@@ -283,12 +459,22 @@ export const DEPARTEMENTS: Departement[] = [
     slug: "isere", nom: "Isère", code: "38", region: "Auvergne-Rhône-Alpes",
     contexte: "Grenoble, capitale des Alpes, orchestre les transferts neige de l'Oisans et de Chartreuse — l'Alpe d'Huez et Les Deux Alpes en tête — tandis que ses campus et laboratoires génèrent des déplacements scientifiques toute l'année.",
     villes: [{ nom: "Grenoble" }, { nom: "Vienne" }, { nom: "Bourgoin-Jallieu" }, { nom: "Voiron" }, { nom: "L'Alpe d'Huez" }],
+    trajets: [
+      { vers: "Stations de l'Oisans", km: 60, usage: "transferts neige et classes de découverte" },
+      { vers: "Lyon", km: 110, usage: "congrès et compétitions" },
+      { vers: "Annecy", km: 105, usage: "séminaires et sorties de CSE" },
+    ],
     axesRetours: "Les rotations de stations produisent des centaines de trajets retour chaque semaine d'hiver.",
   },
   {
     slug: "haute-savoie", nom: "Haute-Savoie", code: "74", region: "Auvergne-Rhône-Alpes",
     contexte: "De Chamonix aux Portes du Soleil, la Haute-Savoie concentre les plus grands domaines skiables du monde : les transferts depuis Genève, Lyon et Paris y font tourner des flottes entières chaque hiver — et le lac d'Annecy prend le relais l'été.",
     villes: [{ nom: "Annecy" }, { nom: "Chamonix" }, { nom: "Thonon-les-Bains" }, { nom: "Annemasse" }, { nom: "Cluses" }],
+    trajets: [
+      { vers: "Chamonix et la vallée de l'Arve", km: 95, usage: "transferts neige et séjours de groupe" },
+      { vers: "Genève", km: 45, usage: "transferts aéroport et déplacements d'entreprise" },
+      { vers: "Lyon", km: 140, usage: "compétitions et salons" },
+    ],
     axesRetours: "Les samedis de sports d'hiver génèrent le plus grand flux de retours à vide de France entre stations et aéroports.",
   },
   /* ---------- PACA (complément) ---------- */
@@ -296,12 +482,22 @@ export const DEPARTEMENTS: Departement[] = [
     slug: "alpes-maritimes", nom: "Alpes-Maritimes", code: "06", region: "Provence-Alpes-Côte d'Azur",
     contexte: "Entre les congrès de Nice-Acropolis, le Festival de Cannes, le Grand Prix de Monaco voisin et les croisières de Villefranche, les Alpes-Maritimes vivent de l'événementiel international de groupe — un marché premium où la ponctualité et les avis vérifiés font la différence.",
     villes: [{ nom: "Nice" }, { nom: "Cannes" }, { nom: "Antibes" }, { nom: "Grasse" }, { nom: "Menton" }],
+    trajets: [
+      { vers: "Monaco", km: 20, usage: "événements, congrès et sorties de CSE" },
+      { vers: "Cannes", km: 35, usage: "navettes de festivals et de salons" },
+      { vers: "Gorges du Verdon", km: 130, usage: "sorties nature et colonies" },
+    ],
     axesRetours: "Les grands événements azuréens créent des pics de rotations avec de nombreux trajets retour vers Marseille et Lyon.",
   },
   {
     slug: "var", nom: "Var", code: "83", region: "Provence-Alpes-Côte d'Azur",
     contexte: "De Toulon la maritime aux plages de Saint-Tropez et aux vignobles de Provence, le Var conjugue transport militaire et événementiel estival — un littoral où les rotations de groupe explosent de juin à septembre.",
     villes: [{ nom: "Toulon" }, { nom: "Fréjus" }, { nom: "Draguignan" }, { nom: "Hyères" }, { nom: "Saint-Tropez" }],
+    trajets: [
+      { vers: "Saint-Tropez", km: 70, usage: "sorties d'entreprise et événements" },
+      { vers: "Gorges du Verdon", km: 110, usage: "sorties nature et centres de loisirs" },
+      { vers: "Marseille", km: 65, usage: "compétitions, congrès et transferts" },
+    ],
     axesRetours: "Les flux estivaux du littoral offrent des trajets retour fréquents vers Marseille et Nice.",
   },
   /* ---------- Corse ---------- */
@@ -309,12 +505,22 @@ export const DEPARTEMENTS: Departement[] = [
     slug: "corse-du-sud", nom: "Corse-du-Sud", code: "2A", region: "Corse",
     contexte: "D'Ajaccio à Bonifacio, la Corse-du-Sud vit du tourisme de groupe débarqué des ferries et des croisières — circuits île de Beauté, scolaires insulaires et navettes d'aéroport rythment la saison.",
     villes: [{ nom: "Ajaccio" }, { nom: "Porto-Vecchio" }, { nom: "Bonifacio" }, { nom: "Propriano" }],
+    trajets: [
+      { vers: "Bonifacio", km: 135, usage: "circuits touristiques et sorties scolaires" },
+      { vers: "Porto-Vecchio", km: 140, usage: "transferts de séjours et colonies" },
+      { vers: "Corte", km: 80, usage: "déplacements universitaires et sportifs" },
+    ],
     axesRetours: "Les rotations entre ports, aéroports et sites touristiques créent des trajets retour tout l'été.",
   },
   {
     slug: "haute-corse", nom: "Haute-Corse", code: "2B", region: "Corse",
     contexte: "Bastia, porte d'entrée maritime de l'île, et les circuits du Cap Corse à la Balagne font de la Haute-Corse un territoire d'excursions en autocar — sur des routes où l'expérience locale des transporteurs insulaires est irremplaçable.",
     villes: [{ nom: "Bastia" }, { nom: "Calvi" }, { nom: "Corte" }, { nom: "L'Île-Rousse" }],
+    trajets: [
+      { vers: "Saint-Florent et le Cap Corse", km: 25, usage: "circuits à la journée" },
+      { vers: "Corte", km: 70, usage: "déplacements universitaires et scolaires" },
+      { vers: "Porto-Vecchio", km: 140, usage: "transferts de séjours de groupe" },
+    ],
     axesRetours: "Les liaisons ferry de Bastia et les circuits touristiques offrent des trajets retour saisonniers.",
   },
   /* ---------- Centre-Val de Loire (complément) ---------- */
@@ -322,12 +528,22 @@ export const DEPARTEMENTS: Departement[] = [
     slug: "indre-et-loire", nom: "Indre-et-Loire", code: "37", region: "Centre-Val de Loire",
     contexte: "Tours et les châteaux de la Loire — Chenonceau, Amboise, Villandry — font de l'Indre-et-Loire l'épicentre du tourisme patrimonial de groupe français : les circuits châteaux y mobilisent des autocars du monde entier de mars à novembre.",
     villes: [{ nom: "Tours" }, { nom: "Amboise" }, { nom: "Chinon" }, { nom: "Loches" }],
+    trajets: [
+      { vers: "Chenonceau et Amboise", km: 35, usage: "circuits châteaux scolaires et associatifs" },
+      { vers: "Puy du Fou", km: 180, usage: "séjours de deux jours" },
+      { vers: "Paris", km: 240, usage: "salons, spectacles et compétitions" },
+    ],
     axesRetours: "Les circuits châteaux depuis Paris produisent des retours à vide réguliers en saison.",
   },
   {
     slug: "loiret", nom: "Loiret", code: "45", region: "Centre-Val de Loire",
     contexte: "Orléans et sa position de carrefour autoroutier au sud de Paris font du Loiret un territoire de passage et de logistique — fêtes johanniques, scolaires et zones d'activités entretiennent une demande de groupe régulière.",
     villes: [{ nom: "Orléans" }, { nom: "Montargis" }, { nom: "Gien" }, { nom: "Pithiviers" }],
+    trajets: [
+      { vers: "Châteaux de la Loire", km: 40, usage: "circuits patrimoniaux à la journée" },
+      { vers: "Zoo de Beauval", km: 105, usage: "sorties scolaires et centres de loisirs" },
+      { vers: "Paris", km: 130, usage: "spectacles, salons et compétitions" },
+    ],
     axesRetours: "La convergence des axes A10, A71 et A77 garantit des trajets retour dans toutes les directions.",
   },
 ];

@@ -11,6 +11,7 @@ export type Ville = {
   contexte: string;      // paragraphe unique — ancrage local
   destinations: { vers: string; km: number; usage: string }[];
   axesRetours: string;   // phrase sur les retours à vide typiques
+  saison: string;        // saisonnalité locale — contenu unique
 };
 
 export const VILLES: Ville[] = [
@@ -24,6 +25,7 @@ export const VILLES: Ville[] = [
       { vers: "Deauville", km: 180, usage: "séminaires et sorties d'entreprise" },
       { vers: "Londres", km: 470, usage: "voyages scolaires via le shuttle" },
     ],
+    saison: "Mai et juin sont les semaines les plus tendues de l'année : sorties scolaires de fin d'année et mariages se disputent les mêmes samedis. Pour un déplacement à ces dates, comptez six à huit semaines d'avance ; en janvier-février, deux semaines suffisent et les prix sont sensiblement plus bas.",
     axesRetours: "Les retours à vide y sont fréquents sur l'axe Normandie → Île-de-France et au retour des stations de ski en hiver.",
   },
   {
@@ -36,6 +38,7 @@ export const VILLES: Ville[] = [
       { vers: "Parc Astérix", km: 95, usage: "sorties de fin d'année" },
       { vers: "Honfleur / Deauville", km: 140, usage: "sorties des aînés et associations" },
     ],
+    saison: "Les déplacements de clubs sportifs occupent les week-ends de septembre à mai, les sorties scolaires les jeudis et vendredis de printemps. Les vacances scolaires libèrent beaucoup de véhicules — une fenêtre intéressante pour les associations et les comités des fêtes.",
     axesRetours: "Sa position sur l'axe A13 en fait un point de passage idéal pour capter les retours à vide Paris ↔ Normandie.",
   },
   {
@@ -48,6 +51,7 @@ export const VILLES: Ville[] = [
       { vers: "Bruxelles", km: 320, usage: "échanges européens et institutions" },
       { vers: "Normandie (plages du Débarquement)", km: 250, usage: "programmes d'histoire" },
     ],
+    saison: "Les voyages éducatifs se concentrent sur mars-avril et sur la dernière quinzaine de juin. Les transporteurs habitués à l'encadrement de mineurs sont peu nombreux et se réservent tôt : anticipez de deux mois pour un séjour, trois pour l'étranger.",
     axesRetours: "Les retours à vide de l'ouest parisien y trouvent preneur auprès des groupes scolaires flexibles sur les dates.",
   },
   {
@@ -60,6 +64,7 @@ export const VILLES: Ville[] = [
       { vers: "Deauville / Trouville", km: 110, usage: "sorties d'été des comités des fêtes" },
       { vers: "Mont-Saint-Michel", km: 250, usage: "excursions à la journée" },
     ],
+    saison: "Giverny ouvre d'avril à novembre et rythme toute l'activité locale, avec un pic en mai-juin. Hors saison, les autocaristes de la vallée de la Seine cherchent à remplir leurs plannings et se montrent nettement plus agressifs sur les prix.",
     axesRetours: "Les navettes touristiques de Giverny créent des retours à vide réguliers vers Paris et Rouen d'avril à octobre.",
   },
   {
@@ -72,6 +77,7 @@ export const VILLES: Ville[] = [
       { vers: "Caen", km: 120, usage: "compétitions régionales" },
       { vers: "Center Parcs Normandie", km: 60, usage: "séjours d'associations" },
     ],
+    saison: "La demande est régulière toute l'année, portée par les collèges et les clubs, avec un pic classique de fin d'année scolaire. Les retours à vide vers Paris et Rouen sont fréquents en semaine, souvent en fin de journée.",
     axesRetours: "Sa position centrale dans l'Eure en fait un point de départ malin pour profiter des retours à vide de tout le département.",
   },
   {
@@ -84,6 +90,7 @@ export const VILLES: Ville[] = [
       { vers: "Lille", km: 230, usage: "matchs et salons professionnels" },
       { vers: "Londres", km: 320, usage: "voyages scolaires par le ferry ou le tunnel" },
     ],
+    saison: "Les escales de croisière et les flux étudiants tendent le marché de mai à septembre. En revanche, la densité de flottes locales permet presque toujours d'obtenir plusieurs offres sous 24 heures, même en dernière minute.",
     axesRetours: "L'axe Rouen ↔ Paris est l'un des plus riches en retours à vide de France — surveillez-le, les prix y sont imbattables.",
   },
   {
@@ -96,6 +103,7 @@ export const VILLES: Ville[] = [
       { vers: "Honfleur / Deauville", km: 45, usage: "circuits touristiques d'une journée" },
       { vers: "Rouen", km: 90, usage: "liaisons régionales régulières" },
     ],
+    saison: "Les transferts de croisiéristes saturent les quais d'avril à octobre, avec des pointes le samedi. En basse saison, les mêmes véhicules sont disponibles à des tarifs bien plus doux pour les groupes locaux.",
     axesRetours: "Les transferts de croisiéristes génèrent des retours à vide quasi quotidiens en saison — une aubaine pour les groupes flexibles.",
   },
   {
@@ -108,6 +116,7 @@ export const VILLES: Ville[] = [
       { vers: "Reims", km: 170, usage: "sorties œnotourisme de CSE" },
       { vers: "Rouen", km: 100, usage: "compétitions universitaires" },
     ],
+    saison: "Les week-ends d'intégration étudiants concentrent la demande en septembre et octobre, les transferts vers Roissy toute l'année. Les délais courts sont fréquents ici — les retours à vide sont souvent la meilleure réponse.",
     axesRetours: "Aux portes de l'A15, l'agglomération capte les retours à vide entre Paris et la Normandie dans les deux sens.",
   },
   {
@@ -120,6 +129,7 @@ export const VILLES: Ville[] = [
       { vers: "Le Mans", km: 115, usage: "événements sportifs" },
       { vers: "Versailles", km: 75, usage: "sorties scolaires" },
     ],
+    saison: "Les pèlerinages du printemps et « Chartres en Lumières » de mai à septembre structurent la saison. L'hiver est calme : c'est la période où les écarts entre transporteurs sont les plus faciles à exploiter.",
     axesRetours: "Les flux de pèlerinage (Paris-Chartres notamment) créent des retours à vide saisonniers très avantageux.",
   },
   {
@@ -132,6 +142,7 @@ export const VILLES: Ville[] = [
       { vers: "Paris", km: 240, usage: "liaisons capitales et transferts gares" },
       { vers: "Rouen", km: 130, usage: "rencontres inter-régionales" },
     ],
+    saison: "Les circuits du Débarquement tournent de mars à novembre, avec un pic autour des commémorations de juin qui bloque les flottes locales des semaines à l'avance. En dehors, l'offre est abondante et compétitive.",
     axesRetours: "Le tourisme de mémoire génère des retours à vide constants entre Caen, les plages et Paris.",
   },
   {
@@ -144,6 +155,7 @@ export const VILLES: Ville[] = [
       { vers: "Reims / Épernay", km: 145, usage: "œnotourisme d'entreprise" },
       { vers: "Bruxelles", km: 310, usage: "voyages institutionnels et salons" },
     ],
+    saison: "Le marché est tendu toute l'année, mais le vrai goulot d'étranglement est le stationnement et les créneaux de dépose plus que la disponibilité des véhicules. Précisez vos points d'embarquement dès la demande : les offres seront plus fiables.",
     axesRetours: "Tous les axes de retours à vide de France convergent vers Paris — le tableau en direct mérite d'être consulté avant toute demande classique.",
   },
   {
@@ -156,6 +168,7 @@ export const VILLES: Ville[] = [
       { vers: "Marseille", km: 315, usage: "congrès et croisières" },
       { vers: "Genève", km: 150, usage: "transferts aéroport internationaux" },
     ],
+    saison: "De décembre à avril, une grande partie du parc part vers les Alpes le samedi — pour un déplacement ce jour-là en hiver, publiez au moins un mois avant. En semaine et hors saison de ski, la disponibilité est excellente.",
     axesRetours: "Les rotations vers les stations alpines produisent chaque hiver des centaines de retours à vide — les tarifs y défient toute concurrence.",
   },
   {
@@ -168,6 +181,7 @@ export const VILLES: Ville[] = [
       { vers: "Avignon", km: 105, usage: "festivals et tourisme provençal" },
       { vers: "Paris", km: 775, usage: "la grande liaison — reine des retours à vide" },
     ],
+    saison: "Escales de croisière, matchs au Vélodrome et colonies estivales se cumulent de mai à septembre. Les mois de février et mars restent les plus abordables, à prestation identique.",
     axesRetours: "L'axe Marseille → Paris est emblématique des retours à vide : des autocars complets à une fraction du prix normal, chaque semaine.",
   },
 ];
