@@ -73,7 +73,7 @@ export function ReserverRetourButton({
         {saving ? "Envoi…" : statut === "refusee" ? "Redemander ce trajet →" : "Réserver ce trajet →"}
       </button>
       {error && (
-        <p className="font-mono text-xs text-[#E8735D] mt-2">{error}</p>
+        <p className="font-mono text-xs text-[#C2410C] mt-2">{error}</p>
       )}
     </div>
   );

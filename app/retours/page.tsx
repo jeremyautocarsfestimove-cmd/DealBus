@@ -38,10 +38,10 @@ export default async function RetoursPage() {
             <div key={r.id} className="card">
               <div className="flex items-center justify-between flex-wrap gap-3 mb-2">
                 <span className="flex items-center gap-3 font-condensed font-semibold text-xl uppercase">
-                  <span className="tag bg-ambre-dim text-ambre">Retour à vide</span>
+                  <span className="tag bg-ambre-dim text-ambre-fort">Retour à vide</span>
                   {r.depart_adresse} <span className="text-blanc-faint font-sans normal-case font-normal">→</span> {r.arrivee_adresse}
                 </span>
-                <span className="font-mono text-xl font-semibold text-ambre">
+                <span className="font-mono text-xl font-semibold text-ambre-fort">
                   {Number(r.prix_fixe).toLocaleString("fr-FR")} €
                   <span className="text-[11px] text-blanc-faint uppercase ml-1.5">prix fixe</span>
                 </span>

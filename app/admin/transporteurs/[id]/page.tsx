@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Nav } from "@/components/Nav";
 import { BackButton } from "@/components/BackButton";
 import { createClient } from "@/lib/supabase/server";
 import { TransporteurActions, PilotageAction, EnvoyerEmailTransporteur } from "../../actions";
@@ -26,7 +25,6 @@ export default async function FicheTransporteurPage({
   if (me?.role !== "admin") {
     return (
       <>
-        <Nav />
         <main className="max-w-2xl mx-auto px-7 py-24 text-center">
           <h1 className="h-display text-4xl mb-4">Accès réservé.</h1>
           <p className="text-blanc-dim">Cette page est réservée à l&apos;administration DealBus.</p>
@@ -44,10 +42,9 @@ export default async function FicheTransporteurPage({
   if (!t) {
     return (
       <>
-        <Nav />
         <main className="max-w-2xl mx-auto px-7 py-24 text-center">
           <h1 className="h-display text-4xl mb-4">Transporteur introuvable.</h1>
-          <Link href="/admin" className="btn-ghost mt-6 inline-block">← Retour à l&apos;administration</Link>
+          <Link href="/admin/transporteurs" className="btn-ghost mt-6 inline-block">← Liste des transporteurs</Link>
         </main>
       </>
     );
@@ -80,13 +77,12 @@ export default async function FicheTransporteurPage({
 
   return (
     <>
-      <Nav />
       <main className="max-w-4xl mx-auto px-7 py-14">
-        <BackButton href="/admin" className="mb-8" />
+        <BackButton href="/admin/transporteurs" className="mb-8" />
 
         {t.suppression_demandee_at && (
-          <div className="card border-[#E8735D]/50 bg-[#3a2020]/40 mb-8">
-            <p className="font-semibold text-[#E8735D] mb-1">⚠ Suppression de compte demandée</p>
+          <div className="card border-[#C2410C]/50 bg-[#FCEBE4]/40 mb-8">
+            <p className="font-semibold text-[#C2410C] mb-1">⚠ Suppression de compte demandée</p>
             <p className="text-sm text-blanc-dim mb-4">
               Ce transporteur a demandé la suppression de son compte le {dtHeure(t.suppression_demandee_at)}.
               {aHistorique
@@ -111,8 +107,8 @@ export default async function FicheTransporteurPage({
             <p className="eyebrow mb-3">Fiche transporteur</p>
             <h1 className="h-display text-4xl mb-2">{t.raison_sociale}</h1>
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="tag bg-bleunuit text-[#9DB3DE]">{SECTEURS[t.secteur] ?? t.secteur}</span>
-              <span className={`tag ${t.statut === "valide" ? "bg-vert-dim text-vert" : t.statut === "en_attente" ? "bg-ambre-dim text-ambre" : "bg-[#3a2020] text-[#E8735D]"}`}>
+              <span className="tag bg-bleunuit text-bleunuit-fort">{SECTEURS[t.secteur] ?? t.secteur}</span>
+              <span className={`tag ${t.statut === "valide" ? "bg-vert-dim text-vert" : t.statut === "en_attente" ? "bg-ambre-dim text-ambre-fort" : "bg-[#FCEBE4] text-[#C2410C]"}`}>
                 {t.statut === "valide" ? "Actif" : t.statut === "en_attente" ? "En attente" : "Suspendu"}
               </span>
               <span className="font-mono text-xs text-blanc-faint">Transporteur #{t.numero_anonyme}</span>
@@ -127,7 +123,7 @@ export default async function FicheTransporteurPage({
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
           <div className="card"><p className="font-mono text-xl font-semibold">★ {t.note_moyenne ?? "—"}/5</p><p className="font-mono text-[10px] uppercase tracking-wider text-blanc-faint mt-1">{t.nb_avis} avis</p></div>
           <div className="card"><p className="font-mono text-xl font-semibold">{t.nb_missions}</p><p className="font-mono text-[10px] uppercase tracking-wider text-blanc-faint mt-1">Missions réalisées</p></div>
-          <div className="card"><p className="font-mono text-xl font-semibold text-ambre">{eur(commissionTotale)}</p><p className="font-mono text-[10px] uppercase tracking-wider text-blanc-faint mt-1">Commissions générées</p></div>
+          <div className="card"><p className="font-mono text-xl font-semibold text-ambre-fort">{eur(commissionTotale)}</p><p className="font-mono text-[10px] uppercase tracking-wider text-blanc-faint mt-1">Commissions générées</p></div>
           <div className="card"><p className="font-mono text-xl font-semibold">{V.length}</p><p className="font-mono text-[10px] uppercase tracking-wider text-blanc-faint mt-1">Véhicules déclarés</p></div>
         </div>
 
@@ -146,7 +142,7 @@ export default async function FicheTransporteurPage({
               SIREN {t.siren}<br />
               Titre d&apos;exercice {t.licence_transport}<br />
               Siège dépt. {t.departement_siege}<br />
-              RC Pro {t.rc_pro_url ? <a href={t.rc_pro_url} target="_blank" className="text-ambre hover:underline">Voir le justificatif →</a> : "non fourni"}
+              RC Pro {t.rc_pro_url ? <a href={t.rc_pro_url} target="_blank" className="text-ambre-fort hover:underline">Voir le justificatif →</a> : "non fourni"}
             </p>
           </div>
         </div>
@@ -213,7 +209,7 @@ export default async function FicheTransporteurPage({
             {A.map((a) => (
               <div key={a.id} className="card">
                 <p className="font-semibold text-sm">
-                  <span className="text-ambre">{"★".repeat(a.note)}{"☆".repeat(5 - a.note)}</span>
+                  <span className="text-ambre-fort">{"★".repeat(a.note)}{"☆".repeat(5 - a.note)}</span>
                   <span className="ml-2.5 font-mono text-xs text-blanc-faint">{a.client?.nom ?? "Client"} · {dt(a.created_at)}</span>
                 </p>
                 {a.commentaire && <p className="text-sm text-blanc-dim mt-1.5">« {a.commentaire} »</p>}
@@ -237,7 +233,7 @@ export default async function FicheTransporteurPage({
         </div>
 
         {!t.suppression_demandee_at && (
-          <div className="card border-[#E8735D]/30">
+          <div className="card border-[#C2410C]/30">
             <p className="font-semibold text-sm mb-1.5">Zone de danger</p>
             <p className="text-[12.5px] text-blanc-dim mb-4">
               Suppression manuelle du compte, en dehors de toute demande du transporteur.

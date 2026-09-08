@@ -50,7 +50,7 @@ export function TransporteurActions({
         <button className="btn-ghost text-xs px-4 py-2 disabled:opacity-50" disabled={busy}
           onClick={() => run("reactiver")}>Réactiver</button>
       )}
-      {error && <span className="font-mono text-xs text-[#E8735D]">{error}</span>}
+      {error && <span className="font-mono text-xs text-[#C2410C]">{error}</span>}
     </div>
   );
 }
@@ -106,7 +106,7 @@ export function EnvoyerEmailTransporteur({
               Envoyé depuis l&apos;adresse DealBus officielle, avec la charte email de la plateforme.
               Les réponses arrivent sur contact@dealbus.fr.
             </p>
-            {error && <p className="font-mono text-xs text-[#E8735D] mt-3">{error}</p>}
+            {error && <p className="font-mono text-xs text-[#C2410C] mt-3">{error}</p>}
             {envoye && <p className="font-mono text-xs text-vert mt-3">✓ Email envoyé à {envoye}</p>}
             <div className="flex justify-end gap-3 mt-6">
               <button className="btn-ghost" disabled={busy} onClick={() => setOpen(false)}>Annuler</button>
@@ -170,7 +170,7 @@ export function PilotageAction({
       >
         {label}
       </button>
-      {error && <span className="font-mono text-[11px] text-[#E8735D]">{error}</span>}
+      {error && <span className="font-mono text-[11px] text-[#C2410C]">{error}</span>}
       {confirm && (
         <ConfirmModal
           open={confirmOpen}
@@ -184,62 +184,5 @@ export function PilotageAction({
         />
       )}
     </span>
-  );
-}
-
-export function AdminTabs({
-  labels,
-  children,
-}: {
-  labels: string[];
-  children: React.ReactNode[];
-}) {
-  const [active, setActive] = useState(0);
-  return (
-    <div className="lg:grid lg:grid-cols-[230px_minmax(0,1fr)] lg:gap-10 lg:items-start">
-      {/* ---------- Menu latéral (barre horizontale défilante sur mobile) ---------- */}
-      <nav className="mb-8 lg:mb-0 lg:sticky lg:top-24">
-        <p className="hidden lg:block font-mono text-[10.5px] uppercase tracking-widest text-blanc-faint mb-3 px-4">
-          Pilotage
-        </p>
-        <div className="flex lg:flex-col gap-1.5 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 -mx-1 px-1
-                        lg:bg-asphalte-2/40 lg:border lg:border-ligne lg:rounded-md lg:p-2">
-          {labels.map((l, i) => (
-            <button
-              key={l}
-              onClick={() => setActive(i)}
-              className={`shrink-0 lg:w-full text-left text-[13.5px] font-semibold px-4 py-2.5 rounded-sm border transition whitespace-nowrap
-                ${active === i
-                  ? "bg-asphalte-3 text-blanc border-ligne-strong lg:border-l-2 lg:border-l-ambre"
-                  : "text-blanc-faint border-transparent hover:text-blanc-dim hover:bg-asphalte-2/60"}`}
-            >
-              {l}
-            </button>
-          ))}
-          <a
-            href="/admin/prospection"
-            className="shrink-0 lg:w-full text-left text-[13.5px] font-semibold px-4 py-2.5 rounded-sm border border-transparent
-                       text-blanc-faint hover:text-blanc-dim hover:bg-asphalte-2/60 transition whitespace-nowrap
-                       lg:mt-2 lg:border-t lg:border-t-ligne lg:rounded-none lg:pt-4"
-          >
-            Prospection transporteurs →
-          </a>
-          <a
-            href="/admin/prospection-clients"
-            className="shrink-0 lg:w-full text-left text-[13.5px] font-semibold px-4 py-2.5 rounded-sm border border-transparent
-                       text-blanc-faint hover:text-blanc-dim hover:bg-asphalte-2/60 transition whitespace-nowrap"
-          >
-            Prospection clients →
-          </a>
-        </div>
-      </nav>
-
-      {/* ---------- Contenu ---------- */}
-      <div className="min-w-0">
-        {children.map((c, i) => (
-          <div key={i} hidden={active !== i}>{c}</div>
-        ))}
-      </div>
-    </div>
   );
 }

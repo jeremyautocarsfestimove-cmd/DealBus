@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
 type Prospect = {
@@ -11,10 +10,10 @@ type Prospect = {
 };
 
 const STATUTS: Record<string, { label: string; classe: string }> = {
-  a_contacter: { label: "À contacter", classe: "bg-bleunuit text-[#9DB3DE]" },
+  a_contacter: { label: "À contacter", classe: "bg-bleunuit text-bleunuit-fort" },
   envoye: { label: "Envoyé", classe: "bg-vert-dim text-vert" },
   stop: { label: "STOP", classe: "bg-rouge-dim text-rouge" },
-  erreur: { label: "Erreur", classe: "bg-ambre-dim text-ambre" },
+  erreur: { label: "Erreur", classe: "bg-ambre-dim text-ambre-fort" },
   inscrit: { label: "Inscrit ✓", classe: "bg-vert-dim text-vert" },
 };
 
@@ -220,10 +219,6 @@ export function ProspectionClientsClient() {
           <p className="eyebrow mb-3">Administration</p>
           <h1 className="h-display text-4xl">Prospection clients.</h1>
         </div>
-        <div className="flex gap-2.5">
-          <Link href="/admin/prospection" className="btn-ghost">Prospection transporteurs</Link>
-          <Link href="/admin" className="btn-ghost">← Back-office</Link>
-        </div>
       </div>
 
       {/* ---------- Stats ---------- */}
@@ -267,7 +262,7 @@ export function ProspectionClientsClient() {
                     <button key={n} type="button"
                       onClick={() => setLimite(n)}
                       className={`font-mono text-[11px] px-2 py-1 rounded-sm border transition
-                        ${limite === n ? "border-ambre text-ambre" : "border-ligne text-blanc-faint hover:text-blanc-dim"}`}>
+                        ${limite === n ? "border-ambre text-ambre-fort" : "border-ligne text-blanc-faint hover:text-blanc-dim"}`}>
                       {n}
                     </button>
                   ))}
@@ -339,7 +334,7 @@ export function ProspectionClientsClient() {
                 <td className="px-5 py-2.5 font-mono text-[12px] text-blanc-faint">
                   {p.envoye_le ? new Date(p.envoye_le).toLocaleDateString("fr-FR") : "—"}
                   {p.nb_relances ? (
-                    <span className="text-ambre" title={p.relance_le ? `Dernière relance le ${new Date(p.relance_le).toLocaleDateString("fr-FR")}` : undefined}>
+                    <span className="text-ambre-fort" title={p.relance_le ? `Dernière relance le ${new Date(p.relance_le).toLocaleDateString("fr-FR")}` : undefined}>
                       {" "}· ↻{p.nb_relances}
                     </span>
                   ) : null}
