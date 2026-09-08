@@ -27,7 +27,7 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser();
 
-  const protectedPaths = ["/mes-demandes", "/admin"];
+  const protectedPaths = ["/mes-demandes", "/admin", "/compte"];
   const isProtected = protectedPaths.some((p) => request.nextUrl.pathname.startsWith(p));
   if (isProtected && !user) {
     const url = request.nextUrl.clone();
@@ -41,6 +41,7 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   // Uniquement les zones nécessitant une session : les pages publiques
-  // (accueil, SEO, retours, CGU, login) sont servies sans aucun détour.
-  matcher: ["/mes-demandes/:path*", "/admin/:path*", "/pro/:path*", "/demande/:path*"],
+  // (accueil, SEO, retours, CGU, login, parcours mot de passe oublié)
+  // sont servies sans aucun détour.
+  matcher: ["/mes-demandes/:path*", "/admin/:path*", "/pro/:path*", "/demande/:path*", "/compte/:path*"],
 };

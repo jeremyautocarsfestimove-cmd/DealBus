@@ -213,7 +213,7 @@ export function ProspectionClientsClient() {
   }
 
   return (
-    <main className="max-w-6xl mx-auto px-7 py-12">
+    <main>
       <div className="flex items-center justify-between flex-wrap gap-4 mb-8">
         <div>
           <p className="eyebrow mb-3">Administration</p>

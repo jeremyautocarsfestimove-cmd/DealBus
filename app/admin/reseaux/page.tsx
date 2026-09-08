@@ -7,7 +7,7 @@ export default async function AdminReseauxPage() {
   const initial = await getReseauxTous();
 
   return (
-    <main className="max-w-2xl mx-auto px-7 py-14">
+    <main>
         <p className="eyebrow mb-4">Administration</p>
         <h1 className="h-display text-4xl mb-10">Réseaux sociaux.</h1>
         <ReseauxForm initial={initial} />

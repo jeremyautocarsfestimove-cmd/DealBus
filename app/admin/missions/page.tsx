@@ -24,7 +24,7 @@ export default async function AdminMissionsPage() {
   const caTotal = facturables.reduce((s, m) => s + Number(m.commission_montant), 0);
 
   return (
-    <main className="max-w-6xl mx-auto px-7 py-12">
+    <main>
       <p className="eyebrow mb-4">Administration</p>
       <h1 className="h-display text-4xl mb-2">Missions &amp; commissions.</h1>
       <p className="text-sm text-blanc-dim mb-8">

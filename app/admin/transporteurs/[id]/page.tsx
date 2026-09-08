@@ -77,7 +77,7 @@ export default async function FicheTransporteurPage({
 
   return (
     <>
-      <main className="max-w-4xl mx-auto px-7 py-14">
+      <main>
         <BackButton href="/admin/transporteurs" className="mb-8" />
 
         {t.suppression_demandee_at && (

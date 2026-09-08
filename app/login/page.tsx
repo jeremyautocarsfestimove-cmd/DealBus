@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, Suspense } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Nav } from "@/components/Nav";
 import { createClient } from "@/lib/supabase/client";
@@ -100,7 +101,17 @@ function LoginForm() {
           value={email} onChange={(e) => setEmail(e.target.value)} />
       </div>
       <div>
-        <label className="label">Mot de passe</label>
+        <div className="flex items-baseline justify-between">
+          <label className="label">Mot de passe</label>
+          {mode === "login" && (
+            <Link
+              href={`/mot-de-passe-oublie${email.trim() ? `?email=${encodeURIComponent(email.trim())}` : ""}`}
+              className="font-mono text-[11px] text-blanc-faint hover:text-ambre-fort transition mb-2"
+            >
+              Mot de passe oublié ?
+            </Link>
+          )}
+        </div>
         <input onKeyDown={(e) => e.key === "Enter" && go()} className="input mb-5" type="password" placeholder="6 caractères minimum"
           value={password} onChange={(e) => setPassword(e.target.value)} />
       </div>

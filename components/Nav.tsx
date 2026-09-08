@@ -94,6 +94,9 @@ export function Nav() {
               </span>
               <span className="hidden sm:block max-w-[140px] truncate">{name}</span>
             </Link>
+            <Link href="/compte" className="hidden sm:block font-mono text-[11px] text-blanc-faint hover:text-blanc-dim uppercase tracking-wider transition">
+              Mon compte
+            </Link>
             <button onClick={logout} className="font-mono text-[11px] text-blanc-faint hover:text-blanc-dim uppercase tracking-wider transition">
               Déconnexion
             </button>

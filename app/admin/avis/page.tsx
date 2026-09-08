@@ -13,7 +13,7 @@ export default async function AdminAvisPage() {
   const A = (data ?? []) as any[];
 
   return (
-    <main className="max-w-6xl mx-auto px-7 py-12">
+    <main>
       <p className="eyebrow mb-4">Administration</p>
       <h1 className="h-display text-4xl mb-2">Avis.</h1>
       <p className="text-sm text-blanc-dim mb-10">

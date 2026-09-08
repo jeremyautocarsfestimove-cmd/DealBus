@@ -47,7 +47,7 @@ export default async function PilotagePage() {
   ];
 
   return (
-    <main className="max-w-6xl mx-auto px-7 py-12">
+    <main>
       <p className="eyebrow mb-4">Administration</p>
       <h1 className="h-display text-4xl mb-10">Pilotage DealBus.</h1>
 

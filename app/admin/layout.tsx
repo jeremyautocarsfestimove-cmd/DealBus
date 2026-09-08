@@ -1,12 +1,10 @@
 import { Nav } from "@/components/Nav";
 import { createClient } from "@/lib/supabase/server";
-import { AdminBar } from "./AdminBar";
+import { AdminMenu } from "./AdminMenu";
 import { aTraiter } from "./helpers";
 
 export const metadata = { title: "Administration — DealBus" };
 
-// Le contrôle d'accès et la navigation vivent ici : les pages enfants n'ont
-// plus à les répéter, et n'ont plus qu'à charger leurs propres données.
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -26,7 +24,6 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     );
   }
 
-  // Deux requêtes légères, juste pour les pastilles d'alerte de la barre.
   const [{ count: aValider }, { data: dossiers }] = await Promise.all([
     supabase.from("transporteurs").select("id", { count: "exact", head: true }).eq("statut", "en_attente"),
     supabase.from("missions").select("statut, client_confirmation").in("statut", ["annulee", "litige"]),
@@ -35,13 +32,15 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <>
       <Nav />
-      <AdminBar
-        alertes={{
-          transporteurs: aValider ?? 0,
-          litiges: (dossiers ?? []).filter(aTraiter).length,
-        }}
-      />
-      {children}
+      <div className="max-w-[1400px] mx-auto px-5 lg:px-8 pt-8 pb-16 lg:grid lg:grid-cols-[230px_minmax(0,1fr)] lg:gap-8">
+        <AdminMenu
+          alertes={{
+            transporteurs: aValider ?? 0,
+            litiges: (dossiers ?? []).filter(aTraiter).length,
+          }}
+        />
+        <div className="min-w-0">{children}</div>
+      </div>
     </>
   );
 }

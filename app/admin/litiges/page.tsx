@@ -16,7 +16,7 @@ export default async function AdminLitigesPage() {
   const restants = dossiers.filter(aTraiter);
 
   return (
-    <main className="max-w-6xl mx-auto px-7 py-12">
+    <main>
       <p className="eyebrow mb-4">Administration</p>
       <div className="flex items-end justify-between gap-4 flex-wrap mb-10">
         <div>

@@ -59,7 +59,7 @@ export default async function DetailDemandePage({ params }: { params: Promise<{ 
     p && km ? `${(p / km).toFixed(2).replace(".", ",")} €/km` : "—";
 
   return (
-    <main className="max-w-5xl mx-auto px-7 py-12">
+    <main>
       <BackButton href="/admin/demandes" className="mb-8" />
 
       <p className="eyebrow mb-4">Demande #{demande.numero}</p>
