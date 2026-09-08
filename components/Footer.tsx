@@ -39,7 +39,7 @@ export async function Footer() {
   const zonesFortes = DEPARTEMENTS.filter((d) => ZONES_FORTES.includes(d.slug));
 
   return (
-    <footer className="border-t border-ligne mt-24">
+    <footer className="border-t border-ligne">
       <div className="max-w-6xl mx-auto px-7 py-14 grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-10">
         <div>
           <p className={colTitre}>DealBus</p>

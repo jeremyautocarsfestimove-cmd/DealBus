@@ -70,17 +70,17 @@ export function Nav() {
     : "/mes-demandes";
 
   return (
-    <header className="sticky top-0 z-50 bg-asphalte/90 backdrop-blur border-b border-ligne">
+    <header className="sombre sticky top-0 z-50 bg-asphalte/95 backdrop-blur border-b border-ligne">
       <nav className="max-w-6xl mx-auto px-7 py-4 flex items-center justify-between">
-        <Link href="/"><Logo /></Link>
+        <Link href="/" className="text-ambre"><Logo /></Link>
 
         {/* Menu central : jamais rendu tant que l'état est inconnu, jamais pour un transporteur */}
         {checked && role !== "transporteur" && role !== "admin" && (
           <div className="hidden md:flex items-center gap-8 text-sm text-blanc-dim">
-            <Link href="/demande" className="hover:text-blanc">Faire une demande</Link>
-            <Link href="/mes-demandes" className="hover:text-blanc">Mes demandes</Link>
-            <Link href="/retours" className="hover:text-blanc">Retours à vide</Link>
-            <Link href="/pro" className="text-vert hover:opacity-80">Inscription transporteur</Link>
+            <Link href="/demande" className="hover:text-blanc transition">Faire une demande</Link>
+            <Link href="/mes-demandes" className="hover:text-blanc transition">Mes demandes</Link>
+            <Link href="/retours" className="hover:text-blanc transition">Retours à vide</Link>
+            <Link href="/pro" className="text-vert hover:opacity-80 transition">Inscription transporteur</Link>
           </div>
         )}
 
@@ -88,13 +88,13 @@ export function Nav() {
           <span className="w-28" />
         ) : name ? (
           <div className="flex items-center gap-3">
-            <Link href={espaceHref} className="flex items-center gap-2.5 text-sm font-semibold hover:text-ambre">
-              <span className="w-7 h-7 rounded-full bg-ambre text-asphalte flex items-center justify-center font-mono text-xs font-bold uppercase">
+            <Link href={espaceHref} className="flex items-center gap-2.5 text-sm font-semibold hover:text-ambre-fort transition">
+              <span className="w-7 h-7 rounded-full bg-ambre text-encre flex items-center justify-center font-mono text-xs font-bold uppercase">
                 {name.charAt(0)}
               </span>
               <span className="hidden sm:block max-w-[140px] truncate">{name}</span>
             </Link>
-            <button onClick={logout} className="font-mono text-[11px] text-blanc-faint hover:text-blanc-dim uppercase tracking-wider">
+            <button onClick={logout} className="font-mono text-[11px] text-blanc-faint hover:text-blanc-dim uppercase tracking-wider transition">
               Déconnexion
             </button>
           </div>

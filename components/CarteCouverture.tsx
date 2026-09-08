@@ -92,7 +92,7 @@ export function CarteCouverture() {
 
   const nbCouverts = Object.keys(couverture).length;
   const teinte = (nb: number | undefined) =>
-    !nb ? "rgba(245,242,234,0.05)"
+    !nb ? "rgba(18,21,27,0.06)"
     : nb === 1 ? "rgba(232,166,61,0.35)"
     : nb <= 3 ? "rgba(232,166,61,0.6)"
     : "rgba(232,166,61,0.9)";
@@ -133,7 +133,7 @@ export function CarteCouverture() {
           <p className="font-semibold text-[13.5px]">{survol.nom} <span className="font-mono text-blanc-faint">({survol.code})</span></p>
           <p className="font-mono text-[11px] mt-0.5">
             {survol.nb > 0
-              ? <span className="text-ambre">{survol.nb} transporteur{survol.nb > 1 ? "s" : ""} actif{survol.nb > 1 ? "s" : ""}</span>
+              ? <span className="text-ambre-fort">{survol.nb} transporteur{survol.nb > 1 ? "s" : ""} actif{survol.nb > 1 ? "s" : ""}</span>
               : <span className="text-blanc-faint">Zone à prendre — soyez le premier</span>}
           </p>
         </div>
@@ -143,7 +143,7 @@ export function CarteCouverture() {
         <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm" style={{ background: "rgba(232,166,61,0.9)" }} /> 4+ transporteurs</span>
         <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm" style={{ background: "rgba(232,166,61,0.55)" }} /> 2-3</span>
         <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm" style={{ background: "rgba(232,166,61,0.3)" }} /> 1</span>
-        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm border border-ligne" style={{ background: "rgba(245,242,234,0.05)" }} /> À couvrir</span>
+        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm border border-ligne" style={{ background: "rgba(18,21,27,0.06)" }} /> À couvrir</span>
       </div>
     </div>
   );
