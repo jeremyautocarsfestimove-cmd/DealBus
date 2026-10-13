@@ -4,6 +4,7 @@ import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { CarteCouverture } from "@/components/CarteCouverture";
 import { QuickDemandeForm } from "@/components/QuickDemandeForm";
+import { FEATURES } from "@/lib/features";
 
 // Home en bandes pleine largeur. Le rythme repose sur quatre valeurs
 // (blanc, asphalte-2, asphalte-3, .sombre) et jamais sur une teinte :
@@ -13,7 +14,7 @@ const STATS = [
   { num: "0 €", label: "Côté client, sans condition" },
   { num: "9-5 %", label: "Commission au succès, la plus basse du marché" },
   { num: "100 %", label: "Licences & RC Pro contrôlées" },
-  { num: "−1 %", label: "Palier minimum entre deux enchères" },
+  { num: "24 h", label: "Premières offres, en général" },
 ];
 
 // Destinations mises en avant sur la section "Où partez-vous". Chaque puce
@@ -65,8 +66,8 @@ export default function Home() {
                 Le prix juste,<br />pas le premier prix<span className="text-ambre">.</span>
               </h1>
               <p className="text-lg text-blanc-dim mb-9 max-w-xl">
-                Déposez votre trajet. Choisissez de recevoir des devis détaillés ou de
-                lancer une enchère en direct entre transporteurs anonymes. Vous gardez la main.
+                Déposez votre trajet. Les transporteurs vérifiés de votre région vous envoient
+                des devis fermes, sous profil anonyme. Vous comparez, vous gardez la main.
               </p>
               <div className="flex flex-wrap gap-3.5">
                 <Link href="#demande-rapide" className="btn-primary">Demander mon transport →</Link>
@@ -128,14 +129,15 @@ export default function Home() {
         {/* ---------- 4. DEUX PARCOURS — gris clair ---------- */}
         <section id="comment-ca-marche" className="bg-asphalte-2 border-y border-ligne py-24">
           <div className="max-w-6xl mx-auto px-7">
-            <p className="eyebrow mb-4">Deux façons de recevoir vos offres</p>
-            <h2 className="h-display text-4xl md:text-5xl mb-3">Vous choisissez le rythme.</h2>
+            <p className="eyebrow mb-4">{FEATURES.enchere ? "Deux façons de recevoir vos offres" : "Comment ça marche"}</p>
+            <h2 className="h-display text-4xl md:text-5xl mb-3">{FEATURES.enchere ? "Vous choisissez le rythme." : "Des offres fermes, comparables."}</h2>
             <p className="text-blanc-dim max-w-lg mb-12 leading-relaxed">
-              Même formulaire de départ, deux mécaniques différentes : de la comparaison
-              posée, ou de la pression concurrentielle immédiate.
+              {FEATURES.enchere
+                ? "Même formulaire de départ, deux mécaniques différentes : de la comparaison posée, ou de la pression concurrentielle immédiate."
+                : "Un seul formulaire, plusieurs transporteurs vérifiés qui répondent chacun avec une offre unique et détaillée. Pas de démarchage, pas de marchandage."}
             </p>
 
-            <div className="grid md:grid-cols-2 gap-5">
+            <div className={`grid gap-5 ${FEATURES.enchere ? "md:grid-cols-2" : "md:grid-cols-1 max-w-2xl"}`}>
               <div className="bg-asphalte border border-ligne border-t-[3px] border-t-bleunuit-fort p-9">
                 <div className="flex items-center gap-3 mb-5">
                   <span className="w-9 h-9 rounded-sm bg-bleunuit text-bleunuit-fort flex items-center justify-center font-mono font-semibold">D</span>
@@ -154,7 +156,7 @@ export default function Home() {
                 </ul>
               </div>
 
-              <div className="bg-asphalte border border-ligne border-t-[3px] border-t-vert p-9">
+              {FEATURES.enchere && <div className="bg-asphalte border border-ligne border-t-[3px] border-t-vert p-9">
                 <div className="flex items-center gap-3 mb-5">
                   <span className="w-9 h-9 rounded-sm bg-vert-dim text-vert flex items-center justify-center font-mono font-semibold">E</span>
                   <h3 className="h-display text-2xl">Enchère</h3>
@@ -170,13 +172,13 @@ export default function Home() {
                     </li>
                   ))}
                 </ul>
-              </div>
+              </div>}
             </div>
           </div>
         </section>
 
         {/* ---------- 5. RETOURS À VIDE — bande sombre ---------- */}
-        <section className="sombre relative overflow-hidden">
+        {FEATURES.retours && <section className="sombre relative overflow-hidden">
           {/* Sortie du conteneur centré : l'image court jusqu'au bord de l'écran,
               son flanc gauche fondu dans la bande — plus aucune arête visible. */}
           <div className="absolute inset-y-0 right-0 w-[52%] hidden md:block">
@@ -213,7 +215,7 @@ export default function Home() {
               <Link href="/retours" className="btn-primary">Voir les retours à vide →</Link>
             </div>
           </div>
-        </section>
+        </section>}
 
         {/* ---------- 6. DEUX PUBLICS — blanc ---------- */}
         <section className="py-24">
@@ -241,7 +243,7 @@ export default function Home() {
                   <ul className="text-[13.5px] text-blanc-dim space-y-1.5 mb-7">
                     <li>— Demande en moins de 2 minutes</li>
                     <li>— Identité masquée jusqu&apos;à votre choix</li>
-                    <li>— Choix devis ou enchère à tout moment</li>
+                    <li>— Des offres fermes, détaillées et comparables</li>
                     <li>— Avis vérifiés et licences contrôlées</li>
                   </ul>
                   <Link href="/demande" className="btn-ghost">Faire une demande →</Link>
@@ -261,14 +263,14 @@ export default function Home() {
                   <p className="font-mono text-[11px] uppercase tracking-widest text-vert mb-4">Espace transporteur</p>
                   <h3 className="h-display text-3xl mb-3">Des leads qualifiés, pas du bruit.</h3>
                   <p className="text-sm text-blanc-dim mb-6 max-w-sm leading-relaxed">
-                    Pour les autocaristes qui veulent remplir leur planning — et leurs
-                    trajets retour — sans démarchage à froid.
+                    Pour les autocaristes qui veulent remplir leur planning
+                    sans démarchage à froid.
                   </p>
                   <ul className="text-[13.5px] text-blanc-dim space-y-1.5 mb-7">
                     <li>— Leads filtrés par zones que vous choisissez</li>
                     <li>— Client anonyme jusqu&apos;à votre offre retenue</li>
-                    <li>— Devis en un envoi, ou enchère en direct</li>
-                    <li>— Publiez vos retours à vide, commission réduite</li>
+                    <li>— Un devis par demande, en un seul envoi</li>
+                    <li>— Vous ne payez que si vous gagnez la mission</li>
                   </ul>
                   <Link href="/pro" className="btn-ghost">Devenir partenaire →</Link>
                 </div>
@@ -323,7 +325,7 @@ export default function Home() {
                 <h3 className="h-display text-3xl mb-3">Une commission, uniquement si vous gagnez.</h3>
                 <ul className="text-[13.5px] text-blanc-dim space-y-1.5">
                   <li>— 9 % jusqu&apos;à 2 000 € · 7 % jusqu&apos;à 5 000 € · 5 % au-delà</li>
-                  <li>— Taux réduit en enchère, encore réduit sur les retours à vide</li>
+                  <li>— Aucun abonnement, aucun frais fixe</li>
                   <li>— Même taux partout en France, sans majoration géographique</li>
                   <li>— Facturée après la mission — aucun forfait sans course gagnée</li>
                 </ul>

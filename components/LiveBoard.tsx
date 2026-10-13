@@ -1,5 +1,6 @@
 "use client";
 
+import { FEATURES } from "@/lib/features";
 import { useEffect, useState } from "react";
 
 
@@ -66,11 +67,12 @@ function mulberry32(a: number) {
 function pickFake(now: number, exclude: number): PoolItem[] {
   const block = Math.floor(now / FENETRE_MS);
   const rng = mulberry32(hash(`bloc-${block}`));
-  const indices = POOL.map((_, i) => i)
+  const pool = FEATURES.enchere ? POOL : POOL.filter((p) => p.mode === "devis");
+  const indices = pool.map((_, i) => i)
     .map((i) => ({ i, k: rng() }))
     .sort((a, b) => a.k - b.k)
     .map(({ i }) => i);
-  return indices.slice(0, Math.max(0, MAX_ROWS - exclude)).map((i) => POOL[i]);
+  return indices.slice(0, Math.max(0, MAX_ROWS - exclude)).map((i) => pool[i]);
 }
 
 function prixEnchereFake(item: PoolItem, now: number): number {
@@ -147,7 +149,8 @@ export function LiveBoard() {
         setLoaded(true);
         return;
       }
-      const [{ data: demandes }, { data: retours }] = resultat;
+      const [{ data: demandes }, { data: retoursBruts }] = resultat;
+      const retours = FEATURES.retours ? retoursBruts : [];
 
       /* eslint-disable @typescript-eslint/no-explicit-any */
       const rows: (Row & { created_at: string })[] = [
@@ -160,7 +163,7 @@ export function LiveBoard() {
           reel: true,
           created_at: r.created_at,
         })),
-        ...(demandes ?? []).map((d: any) => ({
+        ...(demandes ?? []).filter((d: any) => FEATURES.enchere || d.mode !== "enchere").map((d: any) => ({
           key: `demande-${d.id}`,
           mode: d.mode as "devis" | "enchere",
           route: `${ville(d.depart_adresse)} → ${ville(d.arrivee_adresse)}`,

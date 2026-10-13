@@ -47,7 +47,6 @@ export default function Page() {
       related={[
         { href: "/location-autocar", label: "Location d'autocar avec chauffeur" },
         { href: "/reserver-un-bus", label: "Réserver un bus : le guide" },
-        { href: "/retours", label: "Les retours à vide du moment" },
       ]}
     />
   );

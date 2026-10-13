@@ -25,7 +25,7 @@ export function HeroMockup() {
                 <span className="w-2 h-2 rounded-[2px] bg-ambre" />DEAL<span className="text-ambre">BUS</span>
               </span>
               <span className="flex gap-3 font-mono text-[7px] text-blanc-faint">
-                <span>Demande</span><span>Retours à vide</span><span>Transporteurs</span>
+                <span>Demande</span><span>Mes demandes</span><span>Transporteurs</span>
               </span>
             </div>
             {/* formulaire */}

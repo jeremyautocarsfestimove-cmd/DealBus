@@ -6,6 +6,7 @@ import { Nav } from "@/components/Nav";
 import { AddressInput } from "@/components/AddressInput";
 import { createClient } from "@/lib/supabase/client";
 import type { DemandeMode } from "@/lib/types";
+import { FEATURES } from "@/lib/features";
 
 const STEPS = ["Trajet", "Estimation", "Détails", "Réception"];
 
@@ -330,7 +331,7 @@ function DemandeWizard() {
                 <input className="input" placeholder="Scolaire, entreprise, mariage…"
                   value={form.motif} onChange={(e) => set("motif", e.target.value)} />
               </div>
-              <div>
+              {FEATURES.enchere && <div>
                 <label className="label">Comment recevoir vos offres ?</label>
                 <div className="flex gap-2.5">
                   <button onClick={() => set("mode", "devis")}
@@ -354,7 +355,7 @@ function DemandeWizard() {
                     <span className="block font-mono text-[10.5px] font-normal opacity-75 mt-1">Prix en baisse, vous fixez la clôture</span>
                   </button>
                 </div>
-              </div>
+              </div>}
               {form.mode === "enchere" && (
                 <div>
                   <label className="label">Clôture de l&apos;enchère</label>

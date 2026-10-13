@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Nav } from "@/components/Nav";
 import { Tabs } from "@/components/Tabs";
+import { FEATURES } from "@/lib/features";
 import { createClient } from "@/lib/supabase/server";
 import type { Demande } from "@/lib/types";
 import { InscriptionTransporteur } from "./InscriptionTransporteur";
@@ -189,7 +190,7 @@ export default async function ProPage() {
           `Nouveaux leads (${leadsActifs.length})`,
           `Mes offres (${offresActives.length + encheres.filter((e) => e.demande?.statut === "ouverte" && (!e.demande?.enchere_fin || new Date(e.demande.enchere_fin) > now)).length})`,
           `Mes missions (${missionsActives.length})`,
-          `Mes retours à vide (${retoursActifs.length})`,
+          ...(FEATURES.retours ? [`Mes retours à vide (${retoursActifs.length})`] : []),
           `Avis (${A.length})`,
           "Mon profil",
         ]}>
@@ -287,7 +288,7 @@ export default async function ProPage() {
                 {offresActives.length === 0 && <p className="text-blanc-dim text-sm">Aucun devis en cours.</p>}
               </div>
 
-              <h3 className="h-display text-xl mb-4">Enchères en cours</h3>
+              {FEATURES.enchere && <><h3 className="h-display text-xl mb-4">Enchères en cours</h3>
               <div className="space-y-3 mb-8">
                 {encheres.filter((e) => e.demande?.statut === "ouverte" && (!e.demande?.enchere_fin || new Date(e.demande.enchere_fin) > now)).map((e, i) => (
                   <Link key={i} href={`/pro/leads/${e.demande?.id}`} className="card flex items-center justify-between gap-4 flex-wrap hover:border-ligne-strong transition">
@@ -299,7 +300,7 @@ export default async function ProPage() {
                   </Link>
                 ))}
                 {encheres.filter((e) => e.demande?.statut === "ouverte" && (!e.demande?.enchere_fin || new Date(e.demande.enchere_fin) > now)).length === 0 && <p className="text-blanc-dim text-sm">Aucune enchère en cours.</p>}
-              </div>
+              </div></>}
 
               <details className="card p-0 overflow-hidden group">
                 <summary className="cursor-pointer list-none px-5 py-4 flex items-center justify-between gap-4 hover:bg-asphalte-2 transition">
@@ -406,7 +407,7 @@ export default async function ProPage() {
             </div>,
 
             /* ---------- MES RETOURS À VIDE ---------- */
-            <div key="r">
+            ...(FEATURES.retours ? [<div key="r">
               <PublierRetour transporteurId={user!.id} />
               <div className="flex items-end justify-between gap-4 flex-wrap mb-5">
                 <div>
@@ -459,7 +460,7 @@ export default async function ProPage() {
                   {retoursArchives.length === 0 && <p className="text-blanc-dim text-sm">Aucun retour archivé.</p>}
                 </div>
               </details>
-            </div>,
+            </div>] : []),
             /* ---------- AVIS CLIENTS ---------- */
             <div key="a">
               <div className="flex items-end justify-between gap-4 flex-wrap mb-6">

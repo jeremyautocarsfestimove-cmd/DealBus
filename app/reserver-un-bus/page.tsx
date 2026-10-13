@@ -47,7 +47,6 @@ export default function Page() {
       related={[
         { href: "/location-autocar", label: "Location d'autocar avec chauffeur" },
         { href: "/comparateur-devis-autocar", label: "Comparer les devis d'autocar" },
-        { href: "/retours", label: "Les retours à vide du moment" },
       ]}
     />
   );

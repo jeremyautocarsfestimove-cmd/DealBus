@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useLayoutEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Logo } from "./Logo";
+import { FEATURES } from "@/lib/features";
 import type { createClient as CreateClientType } from "@/lib/supabase/client";
 
 // Chargement différé de Supabase : la librairie (~40 Ko) sort du bundle
@@ -79,7 +80,7 @@ export function Nav() {
           <div className="hidden md:flex items-center gap-8 text-sm text-blanc-dim">
             <Link href="/demande" className="hover:text-blanc transition">Faire une demande</Link>
             <Link href="/mes-demandes" className="hover:text-blanc transition">Mes demandes</Link>
-            <Link href="/retours" className="hover:text-blanc transition">Retours à vide</Link>
+            {FEATURES.retours && <Link href="/retours" className="hover:text-blanc transition">Retours à vide</Link>}
             <Link href="/pro" className="text-vert hover:opacity-80 transition">Inscription transporteur</Link>
           </div>
         )}

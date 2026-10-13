@@ -2,8 +2,26 @@ import { Nav } from "@/components/Nav";
 import { createClient } from "@/lib/supabase/server";
 import type { RetourVide } from "@/lib/types";
 import { ReserverRetourButton } from "./reserver-button";
+import { FEATURES } from "@/lib/features";
+import Link from "next/link";
 
 export default async function RetoursPage() {
+  if (!FEATURES.retours) {
+    return (
+      <>
+        <Nav />
+        <main className="max-w-2xl mx-auto px-7 py-24 text-center">
+          <p className="eyebrow mb-4">Module en pause</p>
+          <h1 className="h-display text-4xl mb-4">Les retours à vide reviendront bientôt.</h1>
+          <p className="text-blanc-dim mb-8">
+            Nous concentrons DealBus sur la demande de devis. En attendant, décrivez votre trajet :
+            les transporteurs de votre région vous répondent avec des offres fermes.
+          </p>
+          <Link href="/demande" className="btn-primary">Demander des devis →</Link>
+        </main>
+      </>
+    );
+  }
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 

@@ -1,3 +1,4 @@
+import { FEATURES } from "@/lib/features";
 import type { MetadataRoute } from "next";
 import { VILLES } from "@/lib/villes";
 import { DEPARTEMENTS } from "@/lib/departements";
@@ -18,7 +19,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     // Pages dont le contenu bouge réellement tous les jours
     { url: base, lastModified: maintenant, changeFrequency: "daily", priority: 1 },
-    { url: `${base}/retours`, lastModified: maintenant, changeFrequency: "daily", priority: 0.8 },
+    ...(FEATURES.retours ? [{ url: `${base}/retours`, lastModified: maintenant, changeFrequency: "daily" as const, priority: 0.8 }] : []),
 
     // Pages éditoriales : lastmod figé sur la dernière vraie mise à jour
     { url: `${base}/location-autocar`, lastModified: MAJ_CONTENU, changeFrequency: "monthly", priority: 0.9 },

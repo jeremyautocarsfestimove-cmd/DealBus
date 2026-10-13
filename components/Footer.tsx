@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { FEATURES } from "@/lib/features";
 import { DEPARTEMENTS } from "@/lib/departements";
 import { REGIONS } from "@/lib/regions";
 import { getReseauxActifs } from "@/lib/reseaux";
@@ -45,7 +46,7 @@ export async function Footer() {
           <p className={colTitre}>DealBus</p>
           <Link href="/#comment-ca-marche" className={colLien}>Comment ça marche</Link>
           <Link href="/demande" className={colLien}>Faire une demande</Link>
-          <Link href="/retours" className={colLien}>Retours à vide</Link>
+          {FEATURES.retours && <Link href="/retours" className={colLien}>Retours à vide</Link>}
           <Link href="/pro" className={colLien}>Devenir transporteur</Link>
           <Link href="/reglementation" className={colLien}>Réglementation autocar</Link>
           <Link href="/cgu" className={colLien}>Conditions générales</Link>
@@ -56,7 +57,7 @@ export async function Footer() {
           <Link href="/location-autocar" className={colLien}>Location d&apos;autocar avec chauffeur</Link>
           <Link href="/reserver-un-bus" className={colLien}>Réserver un bus pour un groupe</Link>
           <Link href="/comparateur-devis-autocar" className={colLien}>Comparateur de devis d&apos;autocar</Link>
-          <Link href="/retours" className={colLien}>Autocar pas cher : retours à vide</Link>
+          {FEATURES.retours && <Link href="/retours" className={colLien}>Autocar pas cher : retours à vide</Link>}
           <Link href="/reglementation" className={colLien}>Temps de conduite &amp; amplitude</Link>
         </div>
         <div>
