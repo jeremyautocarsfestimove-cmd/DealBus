@@ -3,6 +3,7 @@ import { Nav } from "@/components/Nav";
 import { StatusChip } from "@/components/StatusChip";
 import { createClient } from "@/lib/supabase/server";
 import type { Demande } from "@/lib/types";
+import { demandeActive, dateDepassee } from "@/lib/demandes";
 
 export default async function MesDemandesPage() {
   const supabase = await createClient();
@@ -40,7 +41,7 @@ export default async function MesDemandesPage() {
         <h1 className="h-display text-4xl mb-10">Vos demandes.</h1>
 
         <div className="space-y-3.5">
-          {(demandes as Demande[] | null)?.map((d) => {
+          {(demandes as Demande[] | null)?.filter(demandeActive).map((d) => {
             const mission = missionParDemande.get(d.id);
 
             const annulationSignalee =
@@ -108,10 +109,10 @@ export default async function MesDemandesPage() {
                   ) : (
                     <StatusChip kind={d.statut === "confirmee" ? "confirmee" : "ouverte"}>
                       {d.statut === "ouverte"
-                        ? "En attente d'offres"
+                        ? (dateDepassee(d) ? "Expirée (date passée)" : "En attente d'offres")
                         : d.statut === "confirmee"
                           ? "Transporteur sélectionné"
-                          : d.statut}
+                          : d.statut === "expiree" ? "Close" : d.statut === "annulee" ? "Annulée" : d.statut}
                     </StatusChip>
                   )}
                 </div>
@@ -144,7 +145,34 @@ export default async function MesDemandesPage() {
               </Link>
             </div>
           )}
+          {!!demandes?.length && !demandes.some(demandeActive) && (
+            <div className="card text-center py-10">
+              <p className="text-blanc-dim mb-5">Aucune demande en cours. Vos demandes passées sont dans les archives ci-dessous.</p>
+              <Link href="/demande" className="btn-primary">Nouvelle demande →</Link>
+            </div>
+          )}
         </div>
+
+        {!!demandes?.some((d) => !demandeActive(d)) && (
+          <details className="mt-10 group">
+            <summary className="cursor-pointer font-mono text-[11px] uppercase tracking-wider text-blanc-faint hover:text-blanc-dim">
+              Archives · {demandes.filter((d) => !demandeActive(d)).length} demande{demandes.filter((d) => !demandeActive(d)).length > 1 ? "s" : ""} passée{demandes.filter((d) => !demandeActive(d)).length > 1 ? "s" : ""} ▾
+            </summary>
+            <div className="space-y-3 mt-4 opacity-80">
+              {(demandes as Demande[]).filter((d) => !demandeActive(d)).map((d) => (
+                <Link key={d.id} href={`/mes-demandes/${d.id}`} className="card block hover:border-ligne-strong transition">
+                  <div className="flex items-center justify-between flex-wrap gap-3">
+                    <span className="font-condensed font-semibold text-lg uppercase">{d.depart_adresse} <span className="text-blanc-faint font-sans normal-case font-normal">→</span> {d.arrivee_adresse}</span>
+                    <span className="tag bg-asphalte-3 text-blanc-dim">
+                      {d.statut === "confirmee" ? "Réalisée / passée" : d.statut === "annulee" ? "Annulée" : d.statut === "expiree" ? "Close" : "Expirée"}
+                    </span>
+                  </div>
+                  <p className="font-mono text-xs text-blanc-faint mt-1.5">{new Date(d.date_aller).toLocaleDateString("fr-FR")} · {d.passagers} passagers · Demande #{d.numero}</p>
+                </Link>
+              ))}
+            </div>
+          </details>
+        )}
       </main>
     </>
   );

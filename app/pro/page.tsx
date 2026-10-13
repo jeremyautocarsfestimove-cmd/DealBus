@@ -125,7 +125,7 @@ export default async function ProPage() {
     !!d?.enchere_fin &&
     new Date(d.enchere_fin).getTime() <= now.getTime();
 
-  const leadsActifs = L.filter((d: any) => !enchereEstTerminee(d));
+  const leadsActifs = L.filter((d: any) => !enchereEstTerminee(d) && new Date(`${d.date_aller}T23:59:59`) >= today);
   const encheresTermineesSansOffre = L.filter((d: any) => enchereEstTerminee(d));
 
   const offreEstActive = (o: any) =>

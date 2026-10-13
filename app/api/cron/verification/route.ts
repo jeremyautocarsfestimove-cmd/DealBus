@@ -27,6 +27,17 @@ export async function GET(req: Request) {
   const resend = new Resend(process.env.RESEND_API_KEY);
   const site = process.env.NEXT_PUBLIC_SITE_URL;
 
+  // Demandes ouvertes dont la date de départ est passée → expirées (archives),
+  // offres en attente → non retenues.
+  const veille = new Date(Date.now() - 24 * 3600 * 1000).toISOString().slice(0, 10);
+  const { data: perimees } = await admin.from("demandes").select("id")
+    .eq("statut", "ouverte").lte("date_aller", veille);
+  if (perimees?.length) {
+    const ids = perimees.map((d) => d.id);
+    await admin.from("demandes").update({ statut: "expiree" }).in("id", ids);
+    await admin.from("offres").update({ statut: "non_retenue" }).in("demande_id", ids).in("statut", ["envoyee", "consultee"]);
+  }
+
   const { data: missions } = await admin
     .from("missions")
     .select("id, demande:demandes(client_id, depart_adresse, arrivee_adresse, date_aller)")
