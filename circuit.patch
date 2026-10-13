@@ -1,0 +1,252 @@
+--- a/components/QuickDemandeForm.tsx	2026-09-08 15:18:51.000000000 +0200
++++ b/components/QuickDemandeForm.tsx	2026-10-13 14:14:36.581020252 +0200
+@@ -39,7 +39,7 @@
+         {TYPES.map((t) => (
+           <button
+             key={t.id}
+-            onClick={() => setType(t.id)}
++            onClick={() => { setType(t.id); if (t.id === "aller_simple") { set("date_retour", ""); set("heure_retour", ""); } }}
+             className={`pb-3 text-sm font-semibold border-b-2 -mb-px transition
+               ${type === t.id ? "text-ambre border-ambre" : "text-blanc-faint border-transparent hover:text-blanc-dim"}`}
+           >
+@@ -81,15 +81,15 @@
+               value={form.heure_aller} onChange={(e) => set("heure_aller", e.target.value)} />
+           </div>
+         </div>
+-        {type === "aller_retour" ? (
++        {type !== "aller_simple" ? (
+           <div className="grid grid-cols-[1fr_110px] gap-2.5">
+             <div>
+-              <label className="label">Retour</label>
+-              <input className="input" type="date"
++              <label className="label">{type === "circuit" ? "Fin du circuit" : "Retour"}</label>
++              <input className="input" type="date" min={form.date_aller || undefined}
+                 value={form.date_retour} onChange={(e) => set("date_retour", e.target.value)} />
+             </div>
+             <div>
+-              <label className="label">Départ à</label>
++              <label className="label">{type === "circuit" ? "Retour vers" : "Départ à"}</label>
+               <input className="input" type="time"
+                 value={form.heure_retour} onChange={(e) => set("heure_retour", e.target.value)} />
+             </div>
+@@ -103,7 +103,7 @@
+         )}
+       </div>
+ 
+-      {type === "aller_retour" && (
++      {type !== "aller_simple" && (
+         <div className="mb-4">
+           <label className="label">Passagers</label>
+           <input className="input" type="number" min={1} placeholder="Ex. 50"
+--- a/app/demande/page.tsx	2026-09-08 15:18:51.000000000 +0200
++++ b/app/demande/page.tsx	2026-10-13 14:14:36.581422937 +0200
+@@ -209,7 +209,7 @@
+             <div className="space-y-4">
+               <div className="flex gap-6 border-b border-ligne-strong mb-6">
+                 {(["aller_retour", "aller_simple", "circuit"] as const).map((t) => (
+-                  <button key={t} onClick={() => set("type_trajet", t)}
++                  <button key={t} onClick={() => { set("type_trajet", t); if (t === "aller_simple") { set("date_retour", ""); set("heure_retour", ""); } }}
+                     className={`pb-3 text-sm font-semibold border-b-2 -mb-px transition
+                       ${form.type_trajet === t ? "text-ambre border-ambre" : "text-blanc-faint border-transparent"}`}>
+                     {t === "aller_retour" ? "Aller-retour" : t === "aller_simple" ? "Aller simple" : "Circuit"}
+@@ -252,15 +252,15 @@
+                     value={form.heure_aller} onChange={(e) => set("heure_aller", e.target.value)} />
+                 </div>
+               </div>
+-              {form.type_trajet === "aller_retour" && (
++              {form.type_trajet !== "aller_simple" && (
+                 <div className="grid sm:grid-cols-2 gap-4">
+                   <div>
+-                    <label className="label">Retour — date</label>
+-                    <input className="input" type="date"
++                    <label className="label">{form.type_trajet === "circuit" ? "Fin du circuit — date" : "Retour — date"}</label>
++                    <input className="input" type="date" min={form.date_aller || undefined}
+                       value={form.date_retour} onChange={(e) => set("date_retour", e.target.value)} />
+                   </div>
+                   <div>
+-                    <label className="label">Départ à</label>
++                    <label className="label">{form.type_trajet === "circuit" ? "Retour vers" : "Départ à"}</label>
+                     <input className="input" type="time"
+                       value={form.heure_retour} onChange={(e) => set("heure_retour", e.target.value)} />
+                   </div>
+--- a/app/nouveau-mot-de-passe/page.tsx	2026-09-08 15:18:51.000000000 +0200
++++ b/app/nouveau-mot-de-passe/page.tsx	2026-10-13 14:19:07.124529240 +0200
+@@ -1,6 +1,6 @@
+ "use client";
+ 
+-import { useEffect, useState } from "react";
++import { useEffect, useRef, useState } from "react";
+ import Link from "next/link";
+ import { Nav } from "@/components/Nav";
+ import { createClient } from "@/lib/supabase/client";
+@@ -19,7 +19,10 @@
+ }
+ 
+ export default function NouveauMotDePassePage() {
+-  const supabase = createClient();
++  // Client Supabase créé à la demande, côté navigateur uniquement : cette page
++  // est prérendue au build, où les variables NEXT_PUBLIC_* peuvent manquer.
++  const clientRef = useRef<ReturnType<typeof createClient> | null>(null);
++  const supabase = () => (clientRef.current ??= createClient());
+   const [etat, setEtat] = useState<Etat>("verification");
+   const [compte, setCompte] = useState<string | null>(null);
+   const [motif, setMotif] = useState<string | null>(null);
+@@ -54,12 +57,12 @@
+ 
+       // Le client browser (@supabase/ssr, flow PKCE) échange déjà le ?code=
+       // automatiquement au démarrage : getSession attend cette initialisation.
+-      const { data: { session } } = await supabase.auth.getSession();
++      const { data: { session } } = await supabase().auth.getSession();
+       let ouverte = session;
+ 
+       // Filet 1 : le code n'a pas été consommé automatiquement
+       if (!ouverte && code) {
+-        const { data, error: err } = await supabase.auth.exchangeCodeForSession(code);
++        const { data, error: err } = await supabase().auth.exchangeCodeForSession(code);
+         if (err) {
+           if (!actif) return;
+           setMotif(
+@@ -76,7 +79,7 @@
+       // Filet 2 : modèle d'email basé sur {{ .TokenHash }} plutôt que sur
+       // {{ .ConfirmationURL }} — fonctionne alors depuis n'importe quel appareil.
+       if (!ouverte && tokenHash && type === "recovery") {
+-        const { data, error: err } = await supabase.auth.verifyOtp({
++        const { data, error: err } = await supabase().auth.verifyOtp({
+           token_hash: tokenHash,
+           type: "recovery",
+         });
+@@ -121,17 +124,17 @@
+ 
+     setSaving(true);
+     try {
+-      const { error: err } = await supabase.auth.updateUser({ password: mdp });
++      const { error: err } = await supabase().auth.updateUser({ password: mdp });
+       if (err) { setError(messageClair(err.message)); return; }
+ 
+       // Le cache de la barre de navigation est reconstruit à la volée
+       try { localStorage.removeItem("dealbus_nav"); } catch { /* sans importance */ }
+ 
+       // Destination selon le rôle, avec le même filet que la page de connexion
+-      const { data: { user } } = await supabase.auth.getUser();
++      const { data: { user } } = await supabase().auth.getUser();
+       const lecture = (async () => {
+         if (!user) return "/login";
+-        const { data: p } = await supabase
++        const { data: p } = await supabase()
+           .from("profiles").select("role").eq("id", user.id).maybeSingle();
+         const role = p?.role ?? "client";
+         if (role === "transporteur") return "/pro";
+--- a/check.sh	2026-09-08 15:18:51.000000000 +0200
++++ b/check.sh	2026-10-13 14:38:27.976324912 +0200
+@@ -1,85 +1,28 @@
+ #!/usr/bin/env bash
+-# Contrôle avant commit. À lancer depuis la racine du repo : bash check.sh
+-ko=0
+-ok()  { printf '  \033[32mOK\033[0m   %s\n' "$1"; }
+-err() { printf '  \033[31mKO\033[0m   %s\n' "$1"; ko=$((ko+1)); }
+-
+-echo
+-echo "── Racine du projet"
+-[ -f package.json ] && ok "package.json présent" || { err "pas à la racine du repo — stop"; exit 1; }
+-
+-echo
+-echo "── Fichiers racine de app/ (aucun fichier d'admin ne doit y traîner)"
+-for f in app/AdminBar.tsx app/actions.tsx app/helpers.ts; do
+-  [ -f "$f" ] && err "$f ne devrait pas exister" || ok "$f absent"
+-done
+-
+-echo
+-echo "── Layout et home"
+-grep -q "next/font/google" app/layout.tsx \
+-  && ok "app/layout.tsx est bien le layout racine (polices)" \
+-  || err "app/layout.tsx ne charge pas les polices — écrasé ?"
+-grep -q 'from "next/image"' app/page.tsx && grep -q "Home en bandes" app/page.tsx \
+-  && ok "app/page.tsx est bien la home en bandes" \
+-  || err "app/page.tsx n'est pas la home"
+-
+-echo
+-echo "── Administration"
+-n=$(find app/admin -type f | wc -l)
+-[ "$n" -ge 18 ] && ok "app/admin : $n fichiers" || err "app/admin : $n fichiers (18 minimum attendus)"
+-for f in layout.tsx AdminBar.tsx helpers.ts page.tsx \
+-         transporteurs/page.tsx demandes/page.tsx missions/page.tsx \
+-         litiges/page.tsx avis/page.tsx retours/page.tsx; do
+-  [ -f "app/admin/$f" ] && ok "app/admin/$f" || err "app/admin/$f manquant"
+-done
+-grep -rq "AdminTabs" app components 2>/dev/null \
+-  && err "AdminTabs encore référencé (doit avoir disparu)" \
+-  || ok "AdminTabs entièrement retiré"
+-grep -q "PilotageAction" app/retours/page.tsx 2>/dev/null \
+-  && err "app/retours/page.tsx contient du code admin" \
+-  || ok "app/retours/page.tsx est bien la page publique"
+-
+-echo
+-echo "── Thème"
+-grep -q -- "--c-surface" app/globals.css && ok "variables de couleur dans globals.css" || err "globals.css sans variables --c-*"
+-grep -q "^\.sombre" app/globals.css && ok "classe .sombre définie" || err ".sombre absente de globals.css"
+-grep -q "rgb(var(" tailwind.config.ts && ok "tailwind pointe sur les variables CSS" || err "tailwind.config.ts non migré"
+-grep -rq 'text-\[#2A3752\]' app components 2>/dev/null \
+-  && err "text-[#2A3752] encore en dur — lance le sed" \
+-  || ok "aucun bleu figé en dur"
+-grep -rq "motif-route" app components 2>/dev/null \
+-  && err "motif-route encore référencé" \
+-  || ok "motif de panneaux supprimé"
+-grep -q "mt-24" components/Footer.tsx \
+-  && err "Footer garde son mt-24 (espace avant le footer)" \
+-  || ok "Footer collé au contenu"
+-grep -q "currentColor" components/Logo.tsx && ok "Logo en currentColor" || err "Logo encore en couleur figée"
+-grep -q "sombre sticky" components/Nav.tsx && ok "header en bande sombre" || err "Nav.tsx pas en version sombre"
+-
+-echo
+-echo "── SEO"
+-for f in lib/trajets.ts lib/seo-contenu.ts app/location-autocar/trajet/\[slug\]/page.tsx; do
+-  [ -f "$f" ] && ok "$f" || err "$f manquant"
+-done
+-grep -q "TRAJETS" app/sitemap.ts && ok "sitemap inclut les pages liaison" || err "sitemap.ts non mis à jour"
+-grep -q "MAJ_CONTENU" app/sitemap.ts && ok "lastmod figé" || err "sitemap.ts utilise encore new Date()"
+-grep -q "trajets:" lib/departements.ts && ok "départements enrichis" || err "lib/departements.ts sans champ trajets"
+-
+-echo
+-echo "── Image du hero"
+-[ -f public/img/hero.jpg ] && ok "public/img/hero.jpg présent ($(du -h public/img/hero.jpg | cut -f1))" \
+-  || err "public/img/hero.jpg manquant"
+-
+-echo
+-echo "── Compilation"
+-npx tsc --noEmit > /tmp/check-tsc.log 2>&1 \
+-  && ok "tsc --noEmit" \
+-  || { err "tsc échoue :"; sed 's/^/       /' /tmp/check-tsc.log | head -20; }
+-
+-echo
+-if [ "$ko" -eq 0 ]; then
+-  printf '\033[32mTout est en place. Lance npm run build, puis commit.\033[0m\n\n'
+-else
+-  printf '\033[31m%s problème(s) à corriger avant de commiter.\033[0m\n\n' "$ko"
++# Contrôle + mise en ligne. Depuis la racine du repo :
++#   bash check.sh                      → vérifie seulement (tsc + build)
++#   bash check.sh "message de commit"  → vérifie, puis commit + push + déploiement
++set -e
++
++[ -f package.json ] || { echo "❌ Lance ce script depuis la racine du repo"; exit 1; }
++
++if [ ! -f .env.local ]; then
++  echo "── .env.local absent : récupération des variables depuis Vercel"
++  npx vercel env pull .env.local --environment=production
+ fi
+-exit "$ko"
++
++echo "── Typage (tsc)"
++npx tsc --noEmit
++
++echo "── Build (next build)"
++npm run build > /tmp/check-build.log 2>&1 || { tail -40 /tmp/check-build.log; echo "❌ build en échec"; exit 1; }
++echo "✅ Build OK"
++
++[ -z "$1" ] && { echo "Tout est bon. Relance avec un message de commit pour mettre en ligne."; exit 0; }
++
++echo "── Commit + push + déploiement"
++git add -A
++git commit -m "$1"
++git push
++npx vercel --prod
++echo "🚀 En ligne"
