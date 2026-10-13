@@ -143,7 +143,7 @@ export function Messagerie({
           </p>
         )}
         {erreur && (
-          <div className="mt-2 text-[12.5px] bg-[#3a2020] border border-[#E8735D]/40 rounded-sm px-3 py-2">
+          <div className="mt-2 text-[12.5px] bg-[#E8735D]/10 border border-[#E8735D]/40 rounded-sm px-3 py-2">
             <p className="font-semibold text-[#E8735D] mb-0.5">Message non envoyé</p>
             {erreur.map((e) => <p key={e} className="text-blanc-dim">{e}</p>)}
           </div>

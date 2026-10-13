@@ -110,7 +110,7 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
           <div className="card text-sm">
             <p className="font-mono text-[11px] uppercase tracking-wider text-blanc-faint mb-4">Ce que DealBus a calculé</p>
             {analyse.horairesIncoherents && (
-              <p className="mb-4 text-[12.5px] bg-[#3a2020] border border-[#E8735D]/40 rounded-sm px-3.5 py-2.5 text-blanc-dim">
+              <p className="mb-4 text-[12.5px] bg-[#E8735D]/10 border border-[#E8735D]/40 rounded-sm px-3.5 py-2.5 text-blanc-dim">
                 <strong className="text-[#E8735D]">Horaires du client incohérents</strong> : le retour est prévu avant l&apos;arrivée à destination. Le plan ci-dessous suppose 2 h sur place ; demandez confirmation au client par la messagerie avant de chiffrer.
               </p>
             )}

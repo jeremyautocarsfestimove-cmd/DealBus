@@ -12,6 +12,10 @@ type Props = {
   montrerTemps?: boolean;  // côté transporteur : temps de conduite à 80 km/h
 };
 
+const fmtMin = (minutes: number): string => {
+  const h = Math.floor(minutes / 60), m = minutes % 60;
+  return h ? `${h} h${m ? ` ${String(m).padStart(2, "0")}` : ""}` : `${m} min`;
+};
 const dureeA80 = (km: number): string => {
   const minutes = Math.round((km / 80) * 60);
   const h = Math.floor(minutes / 60);
@@ -50,6 +54,7 @@ export function ItineraireMap({ depart, arrivee, allerRetour = false, montrerTem
   const conteneur = useRef<HTMLDivElement>(null);
   const carte = useRef<any>(null);
   const [km, setKm] = useState<number | null>(null);
+  const [minutes, setMinutes] = useState<number | null>(null);
   const [etat, setEtat] = useState<"chargement" | "ok" | "erreur">("chargement");
 
   useEffect(() => {
@@ -60,9 +65,10 @@ export function ItineraireMap({ depart, arrivee, allerRetour = false, montrerTem
           `/api/itineraire?depart=${encodeURIComponent(depart)}&arrivee=${encodeURIComponent(arrivee)}`
         );
         if (!r.ok) throw new Error();
-        const itin = (await r.json()) as { km: number; geometry: [number, number][] };
+        const itin = (await r.json()) as { km: number; minutes?: number; geometry: [number, number][] };
         if (!actif) return;
         setKm(itin.km);
+        setMinutes(itin.minutes ?? null);
 
         const L = await chargerLeaflet();
         if (!actif || !conteneur.current || carte.current) { setEtat("ok"); return; }
@@ -120,7 +126,7 @@ export function ItineraireMap({ depart, arrivee, allerRetour = false, montrerTem
             </span>
             {montrerTemps && (
               <span className="text-blanc-dim">
-                ≈ {dureeA80(km!)} de route par trajet <span className="text-blanc-faint">(moy. 80 km/h)</span>
+                ≈ {minutes ? fmtMin(minutes) : dureeA80(km!)} de route par trajet <span className="text-blanc-faint">{minutes ? "(hors pauses, rythme autocar)" : "(moy. 80 km/h)"}</span>
               </span>
             )}
           </>
