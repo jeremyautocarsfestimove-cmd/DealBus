@@ -71,7 +71,7 @@ export default function Home() {
 
         {/* ---------- 1. HERO ---------- */}
         <header className="relative min-h-[600px] flex items-end text-white overflow-hidden">
-          <Illu id="msm" titre="Groupe devant le Mont-Saint-Michel au lever du soleil, autocar sur la digue" />
+          <Illu id="msm" priorite titre="Groupe devant le Mont-Saint-Michel au lever du soleil, autocar sur la digue" />
           <div className="absolute inset-0 bg-gradient-to-b from-encre/10 via-transparent to-encre/70" />
           <div className="relative max-w-6xl mx-auto px-7 pt-24 pb-10 w-full">
             <span className="inline-flex items-center gap-2 bg-white/15 border border-white/30 rounded-full px-3 py-1.5 text-[12.5px] backdrop-blur-sm">

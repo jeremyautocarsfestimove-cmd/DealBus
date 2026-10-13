@@ -1,3 +1,7 @@
+import fs from "node:fs";
+import path from "node:path";
+import Image from "next/image";
+
 // Illustrations de la page d'accueil : scènes SVG « plat », palette DealBus.
 // Le sprite est injecté une fois (IllustrationsSprite), chaque <Illu id> y fait référence.
 // Un autocar ambre figure dans chaque scène : c'est le fil rouge visuel du site.
@@ -155,7 +159,37 @@ export function IllustrationsSprite() {
   return <div aria-hidden="true" dangerouslySetInnerHTML={{ __html: SPRITE_SVG }} />;
 }
 
-export function Illu({ id, className = "", titre }: { id: IlluId; className?: string; titre?: string }) {
+// Si une image existe dans public/img/<id>.(webp|png|jpg), elle remplace le
+// SVG de la même scène. Vérifié au build (page statique) : aucun coût au runtime.
+const EXTENSIONS = ["webp", "png", "jpg", "jpeg"];
+const cacheImages = new Map<IlluId, string | null>();
+
+function imagePour(id: IlluId): string | null {
+  if (cacheImages.has(id)) return cacheImages.get(id)!;
+  let trouve: string | null = null;
+  try {
+    for (const ext of EXTENSIONS) {
+      if (fs.existsSync(path.join(process.cwd(), "public", "img", `${id}.${ext}`))) { trouve = `/img/${id}.${ext}`; break; }
+    }
+  } catch { trouve = null; }
+  cacheImages.set(id, trouve);
+  return trouve;
+}
+
+export function Illu({ id, className = "", titre, priorite = false }: { id: IlluId; className?: string; titre?: string; priorite?: boolean }) {
+  const src = imagePour(id);
+  if (src) {
+    return (
+      <Image
+        src={src}
+        alt={titre ?? ""}
+        fill
+        priority={priorite}
+        sizes="(max-width: 768px) 100vw, 50vw"
+        className={`object-cover ${className}`}
+      />
+    );
+  }
   return (
     <svg className={`absolute inset-0 w-full h-full block ${className}`} role={titre ? "img" : undefined} aria-label={titre} aria-hidden={titre ? undefined : true}>
       <use href={`#s-${id}`} />
