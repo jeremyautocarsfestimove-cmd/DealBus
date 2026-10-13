@@ -37,6 +37,8 @@ export interface Offre {
   vehicule_places: number;
   vehicule_annee: number | null;
   conditions: string | null;
+  inclus?: string[] | null;
+  validite_jours?: number | null;
 }
 
 export interface TransporteurAnonyme {

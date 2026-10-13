@@ -5,6 +5,7 @@ import { FEATURES } from "@/lib/features";
 import { createClient } from "@/lib/supabase/server";
 import type { Demande } from "@/lib/types";
 import { InscriptionTransporteur } from "./InscriptionTransporteur";
+import { ParametresDevis } from "./parametres-devis";
 import { DeclarerTerminee, ReservationActions, PublierRetour, AnnulerMission, GererVehicules, CgvForm, GererZones, DemanderSuppression, ModifierProfilTransporteur } from "./pro-actions";
 
 const eur = (n: number) => Number(n).toLocaleString("fr-FR") + " €";
@@ -545,6 +546,17 @@ export default async function ProPage() {
                 }}
               />
               <GererZones transporteurId={user!.id} zones={(zones ?? []) as any[]} />
+              <ParametresDevis
+                transporteurId={user!.id}
+                initial={{
+                  depot_adresse: transporteur.depot_adresse ?? null,
+                  cout_km: transporteur.cout_km ?? null,
+                  cout_heure: transporteur.cout_heure ?? null,
+                  cout_nuit: transporteur.cout_nuit ?? null,
+                  cout_immobilisation: transporteur.cout_immobilisation ?? null,
+                  marge_pct: transporteur.marge_pct ?? null,
+                }}
+              />
               <GererVehicules transporteurId={user!.id} vehicules={(vehicules ?? []) as any[]} />
               <CgvForm transporteurId={user!.id} initial={transporteur.cgv ?? null} />
               <div className="mt-5">

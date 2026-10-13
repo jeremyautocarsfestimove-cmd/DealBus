@@ -1,3 +1,4 @@
+import { INCLUS } from "@/lib/assistant-demande";
 import { Nav } from "@/components/Nav";
 import { BackButton } from "@/components/BackButton";
 import { createClient } from "@/lib/supabase/server";
@@ -257,10 +258,18 @@ async function DevisView({ demandeId }: { demandeId: string }) {
               <span className="text-xs text-blanc-faint font-normal ml-1.5">TTC</span>
             </p>
 
-            <p className="text-[13px] text-blanc-dim mb-4">
+            <p className="text-[13px] text-blanc-dim mb-2">
               {o.vehicule_type} · {o.vehicule_places} places
               {o.vehicule_annee ? ` · ${o.vehicule_annee}` : ""}
             </p>
+            {(o.inclus?.length || o.validite_jours) && (
+              <p className="flex flex-wrap gap-1.5 mb-4">
+                {(o.inclus ?? []).map((i: string) => (
+                  <span key={i} className="tag bg-vert-dim text-vert">{INCLUS.find((x) => x.id === i)?.label ?? i}</span>
+                ))}
+                {o.validite_jours && <span className="tag bg-asphalte-3 text-blanc-dim">Valable {o.validite_jours} jours</span>}
+              </p>
+            )}
 
             {(o.conditions || o.transporteur?.cgv) && (
               <details className="mb-5 group">

@@ -244,3 +244,149 @@ export function completude(f: {
 }
 
 export const eur = (n: number) => `${Math.round(n).toLocaleString("fr-FR")} €`;
+
+// ============================================================
+// Côté transporteur : haut-le-pied, journées, coût de revient
+// ============================================================
+
+export const PEAGE_PAR_KM = 0.085;   // € par km, part autoroute moyenne (estimation)
+
+export const INCLUS = [
+  { id: "hebergement", label: "Hébergement chauffeur" },
+  { id: "repas", label: "Repas chauffeur" },
+  { id: "peages", label: "Péages" },
+  { id: "parkings", label: "Parkings" },
+  { id: "toilettes", label: "Toilettes à bord" },
+  { id: "wifi", label: "Wifi" },
+  { id: "usb", label: "Prises USB" },
+  { id: "pmr", label: "Accès PMR" },
+] as const;
+
+export type Tarifs = {
+  cout_km: number;
+  cout_heure: number;
+  cout_nuit: number;
+  cout_immobilisation: number;
+  marge_pct: number;
+};
+
+export const TARIFS_DEFAUT: Tarifs = {
+  cout_km: BAREME.coutKm,
+  cout_heure: BAREME.coutHeure,
+  cout_nuit: BAREME.nuitConducteur,
+  cout_immobilisation: BAREME.immobilisationJour,
+  marge_pct: Math.round(BAREME.marge * 100),
+};
+
+// Barème DealBus (identique à commission_taux en SQL et /api/selection)
+export function commissionTaux(prixTtc: number): number {
+  return prixTtc <= 2000 ? 9 : prixTtc <= 5000 ? 7 : 5;
+}
+
+export type Journee = { titre: string; detail: string; conduiteMin: number; amplitudeMin: number };
+
+export type PlanMission = {
+  hautLePiedKm: number | null;     // dépôt → prise en charge → … → dépôt, total
+  kmTotal: number | null;          // trajets client + haut-le-pied
+  heuresTotal: number;             // amplitude conducteur cumulée (h)
+  nuits: number;
+  joursImmobilisation: number;     // journées entières de car sur place
+  peages: number;                  // estimation €
+  journees: Journee[];
+  deuxConducteurs: boolean;
+};
+
+export function planifier(e: EntreeAssistant, hlpAllerKm: number | null, hlpRetourKm: number | null): PlanMission {
+  const a = analyser(e);
+  const km = e.km ?? 0;
+  const routeMin = a.routeMin ?? 0;
+  const pauseMin = a.pauseMin ?? 0;
+  const trajets = e.type_trajet === "aller_simple" ? 1 : 2;
+  const hlpA = hlpAllerKm ?? BAREME.hautLePiedKm / 2;
+  const hlpR = hlpRetourKm ?? BAREME.hautLePiedKm / 2;
+  const hautLePiedKm = e.km ? Math.round(hlpA + hlpR) : null;
+  const kmTotal = e.km ? Math.round(km * trajets + (hautLePiedKm ?? 0)) : null;
+  const hlpAMin = minutesDeRoute(hlpA), hlpRMin = minutesDeRoute(hlpR);
+  const depart = e.heure_aller ? (() => { const [h, m] = e.heure_aller.split(":").map(Number); return h * 60 + m; })() : 8 * 60;
+  const retour = e.heure_retour ? (() => { const [h, m] = e.heure_retour.split(":").map(Number); return h * 60 + m; })() : 17 * 60;
+  const journees: Journee[] = [];
+
+  if (!e.km) {
+    return { hautLePiedKm: null, kmTotal: null, heuresTotal: 0, nuits: a.nuits, joursImmobilisation: 0, peages: 0, journees, deuxConducteurs: a.deuxConducteurs };
+  }
+
+  const segAller = routeMin + pauseMin;
+  if (trajets === 2 && a.nuits === 0) {
+    // Aller-retour dans la journée
+    const debut = depart - hlpAMin;
+    const fin = retour + segAller + hlpRMin;
+    journees.push({
+      titre: "Journée unique",
+      detail: `Dépôt ${fmtHeure(debut)} → prise en charge ${fmtHeure(depart)} → arrivée ${fmtHeure(depart + segAller)} · retour ${fmtHeure(retour)} → dépose ${fmtHeure(retour + segAller)} → dépôt ${fmtHeure(fin)}`,
+      conduiteMin: 2 * routeMin + hlpAMin + hlpRMin,
+      amplitudeMin: fin - debut,
+    });
+  } else {
+    const debut = depart - hlpAMin;
+    journees.push({
+      titre: "Jour 1",
+      detail: `Dépôt ${fmtHeure(debut)} → prise en charge ${fmtHeure(depart)} → arrivée ${fmtHeure(depart + segAller)}${e.vehicule_utilise_sur_place || trajets === 1 ? "" : " → retour du car à vide"}`,
+      conduiteMin: routeMin + hlpAMin + (e.vehicule_utilise_sur_place || trajets === 1 ? 0 : routeMin),
+      amplitudeMin: segAller + hlpAMin + (e.vehicule_utilise_sur_place || trajets === 1 ? 0 : segAller),
+    });
+    if (trajets === 2) {
+      const fin = retour + segAller + hlpRMin;
+      journees.push({
+        titre: a.nuits === 1 ? "Jour 2" : `Jour ${a.nuits + 1}`,
+        detail: `${e.vehicule_utilise_sur_place ? "" : `Dépôt → arrivée à vide · `}départ ${fmtHeure(retour)} → dépose ${fmtHeure(retour + segAller)} → dépôt ${fmtHeure(fin)}`,
+        conduiteMin: routeMin + hlpRMin + (e.vehicule_utilise_sur_place ? 0 : routeMin),
+        amplitudeMin: segAller + hlpRMin + (e.vehicule_utilise_sur_place ? 0 : segAller),
+      });
+    } else {
+      journees[0].detail += ` → dépôt ${fmtHeure(depart + segAller + hlpRMin)}`;
+      journees[0].conduiteMin += hlpRMin;
+      journees[0].amplitudeMin += hlpRMin;
+    }
+  }
+
+  const deuxConducteurs = journees.some((j) => j.conduiteMin > BAREME.conduiteMaxJourMin || j.amplitudeMin > BAREME.amplitudeMaxJourMin);
+  const surPlace = trajets === 2 && e.vehicule_utilise_sur_place && a.nuits > 0;
+  const kmReels = surPlace || trajets === 1 || a.nuits === 0 ? (kmTotal ?? 0) : (kmTotal ?? 0) + km * 2; // car rentré à vide entre-temps
+  const heuresTotal = Math.round((journees.reduce((s, j) => s + j.amplitudeMin, 0) / 60) * 10) / 10;
+
+  return {
+    hautLePiedKm,
+    kmTotal: Math.round(kmReels),
+    heuresTotal,
+    nuits: surPlace ? a.nuits : 0,
+    joursImmobilisation: surPlace ? Math.max(0, a.nuits - 1) : 0,
+    peages: Math.round(kmReels * PEAGE_PAR_KM),
+    journees,
+    deuxConducteurs,
+  };
+}
+
+export type LigneCout = { poste: string; quantite: string; unitaire: number; total: number };
+
+export function coutDeRevient(p: PlanMission, t: Tarifs, nbVehicules = 1) {
+  const lignes: LigneCout[] = [
+    { poste: "Kilomètres (haut-le-pied inclus)", quantite: `${p.kmTotal ?? 0} km`, unitaire: t.cout_km, total: (p.kmTotal ?? 0) * t.cout_km },
+    { poste: "Heures conducteur (amplitude)", quantite: `${p.heuresTotal} h`, unitaire: t.cout_heure, total: p.heuresTotal * t.cout_heure },
+  ];
+  if (p.deuxConducteurs) lignes.push({ poste: "Second conducteur", quantite: `${p.heuresTotal} h`, unitaire: t.cout_heure * 0.8, total: p.heuresTotal * t.cout_heure * 0.8 });
+  if (p.nuits > 0) lignes.push({ poste: "Hébergement + repas conducteur", quantite: `${p.nuits} nuit${p.nuits > 1 ? "s" : ""}`, unitaire: t.cout_nuit, total: p.nuits * t.cout_nuit });
+  if (p.joursImmobilisation > 0) lignes.push({ poste: "Immobilisation du véhicule sur place", quantite: `${p.joursImmobilisation} jour${p.joursImmobilisation > 1 ? "s" : ""}`, unitaire: t.cout_immobilisation, total: p.joursImmobilisation * t.cout_immobilisation });
+  lignes.push({ poste: "Péages (estimation)", quantite: "forfait", unitaire: p.peages, total: p.peages });
+
+  const coutHT = lignes.reduce((s, l) => s + l.total, 0) * nbVehicules;
+  const margeHT = coutHT * (t.marge_pct / 100);
+  // Le prix doit couvrir coût + marge après commission DealBus (prélevée sur le TTC)
+  let prixHT = coutHT + margeHT;
+  for (let i = 0; i < 3; i++) {
+    const taux = commissionTaux(prixHT * (1 + BAREME.tva)) / 100;
+    prixHT = (coutHT + margeHT) / (1 - taux);
+  }
+  const prixTTC = prixHT * (1 + BAREME.tva);
+  const commission = prixTTC * commissionTaux(prixTTC) / 100;
+  return { lignes, coutHT, margeHT, commission, prixHT, prixTTC, tauxCommission: commissionTaux(prixTTC) };
+}
