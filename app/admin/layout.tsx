@@ -24,9 +24,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     );
   }
 
-  const [{ count: aValider }, { data: dossiers }] = await Promise.all([
+  const [{ count: aValider }, { data: dossiers }, { count: supportNonLus }] = await Promise.all([
     supabase.from("transporteurs").select("id", { count: "exact", head: true }).eq("statut", "en_attente"),
     supabase.from("missions").select("statut, client_confirmation").in("statut", ["annulee", "litige"]),
+    supabase.from("support_messages").select("id", { count: "exact", head: true }).eq("auteur", "user").is("lu_le", null),
   ]);
 
   return (
@@ -37,6 +38,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           alertes={{
             transporteurs: aValider ?? 0,
             litiges: (dossiers ?? []).filter(aTraiter).length,
+            support: supportNonLus ?? 0,
           }}
         />
         <div className="min-w-0">{children}</div>

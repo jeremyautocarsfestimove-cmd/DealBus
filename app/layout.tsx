@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+import { AideWidget } from "@/components/AideWidget";
 import type { Metadata } from "next";
 import { Barlow_Condensed, IBM_Plex_Mono, Inter } from "next/font/google";
 import "./globals.css";
@@ -81,6 +83,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }) }}
         />
         {children}
+        <Suspense><AideWidget /></Suspense>
       </body>
     </html>
   );

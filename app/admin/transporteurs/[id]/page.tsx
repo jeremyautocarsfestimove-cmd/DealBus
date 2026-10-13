@@ -1,3 +1,4 @@
+import { EcrireMessage } from "../../ecrire-message";
 import Link from "next/link";
 import { BackButton } from "@/components/BackButton";
 import { createClient } from "@/lib/supabase/server";
@@ -116,6 +117,7 @@ export default async function FicheTransporteurPage({
           </div>
           <div className="flex items-center gap-2.5 flex-wrap">
             <EnvoyerEmailTransporteur id={t.id} raisonSociale={t.raison_sociale} />
+            <EcrireMessage userId={t.id} label="Écrire au transporteur" />
             <TransporteurActions id={t.id} statut={t.statut} />
           </div>
         </div>

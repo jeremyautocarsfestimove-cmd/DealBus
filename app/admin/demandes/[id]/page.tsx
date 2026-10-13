@@ -1,3 +1,4 @@
+import { EcrireMessage } from "../../ecrire-message";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BackButton } from "@/components/BackButton";
@@ -73,6 +74,8 @@ export default async function DetailDemandePage({ params }: { params: Promise<{ 
           {demande.client?.nom ?? "Client sans nom"}
           {demande.client?.telephone ? ` · ${demande.client.telephone}` : ""}
         </span>
+        <EcrireMessage userId={demande.client_id} demandeId={id} label="Écrire au client"
+          suggestion={`Bonjour,\n\nNous avons relu votre demande #${demande.numero} (${demande.depart_adresse} → ${demande.arrivee_adresse}) et un point nous semble à vérifier : \n\nPouvez-vous nous confirmer ? Les transporteurs chiffreront plus juste.\n\nL'équipe DealBus`} />
       </div>
 
       {/* ---------- Le trajet ---------- */}
