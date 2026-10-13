@@ -19,9 +19,11 @@ case "$FICHIER" in
     else
       echo "   Le patch ne s'applique pas tel quel, tentative fichier par fichier…"
       git apply --reject "$FICHIER" || true
-      if ls **/*.rej */*.rej *.rej >/dev/null 2>&1; then
-        echo "❌ Conflits sur :"; find . -name "*.rej" -not -path "./node_modules/*"
-        echo "   Utilise le zip des fichiers complets de cette étape à la place."
+      REJ=$(find . -name "*.rej" -not -path "./node_modules/*")
+      if [ -n "$REJ" ]; then
+        echo "❌ Conflits sur :"; echo "$REJ"
+        echo "   Nettoyage des .rej. Utilise le zip des fichiers complets de cette étape à la place."
+        find . -name "*.rej" -not -path "./node_modules/*" -delete
         exit 1
       fi
     fi

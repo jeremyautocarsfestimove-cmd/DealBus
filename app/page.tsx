@@ -1,348 +1,276 @@
 import Link from "next/link";
-import Image from "next/image";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
-import { CarteCouverture } from "@/components/CarteCouverture";
-import { QuickDemandeForm } from "@/components/QuickDemandeForm";
-import { FEATURES } from "@/lib/features";
+import { RechercheVoyage } from "@/components/RechercheVoyage";
+import { IllustrationsSprite, Illu, type IlluId } from "@/components/Illustrations";
 
-// Home en bandes pleine largeur. Le rythme repose sur quatre valeurs
-// (blanc, asphalte-2, asphalte-3, .sombre) et jamais sur une teinte :
-// l'ambre reste le seul accent, comme sur le reste du site.
+// Accueil « voyage » : on donne envie de partir, puis on montre que DealBus
+// est le moyen simple d'y aller en car. Illustrations SVG intégrées
+// (components/Illustrations.tsx), un autocar ambre dans chaque scène.
 
-const STATS = [
-  { num: "0 €", label: "Côté client, sans condition" },
-  { num: "9-5 %", label: "Commission au succès, la plus basse du marché" },
-  { num: "100 %", label: "Licences & RC Pro contrôlées" },
-  { num: "24 h", label: "Premières offres, en général" },
+type Envie = { illu: IlluId; saison: string; titre: string; texte: string; prix: string; href: string; grande?: boolean };
+const ENVIES: Envie[] = [
+  { illu: "noel", saison: "Décembre · Marchés de Noël", titre: "Strasbourg, Colmar, Reims", texte: "La sortie de fin d'année des CSE et des associations. Réservez tôt : les cars sont pleins dès novembre.", prix: "Depuis Paris · dès 1 450 € le car", href: "/location-autocar/trajet/paris-reims", grande: true },
+  { illu: "parc", saison: "Toute l'année", titre: "Parcs d'attractions", texte: "Disneyland, Astérix, Puy du Fou.", prix: "dès 590 €", href: "/location-autocar/trajet/paris-disneyland" },
+  { illu: "mer", saison: "Mai à septembre", titre: "Journée à la mer", texte: "Deauville, Étretat, Le Touquet.", prix: "dès 850 €", href: "/location-autocar/trajet/paris-deauville" },
+  { illu: "vigne", saison: "Septembre · Octobre", titre: "Vignobles & caves", texte: "Champagne, Loire, Bourgogne.", prix: "dès 720 €", href: "/location-autocar/trajet/paris-reims" },
+  { illu: "chateau", saison: "Printemps", titre: "Châteaux de la Loire", texte: "Chambord, Chenonceau, Amboise.", prix: "dès 980 €", href: "/demande?vers=Chambord" },
+  { illu: "londres", saison: "Séjours · 2 à 4 jours", titre: "Londres, Bruxelles, Amsterdam", texte: "Le car reste avec le groupe sur place : transferts, visites, retour. Un seul transporteur, un seul devis.", prix: "Londres depuis Paris · dès 2 100 €", href: "/location-autocar/trajet/paris-londres", grande: true },
 ];
 
-// Destinations mises en avant sur la section "Où partez-vous". Chaque puce
-// pointe vers sa page liaison : c'est à la fois l'accroche et un lien interne
-// de la home vers le bas de la pyramide SEO.
-const ENVIES = [
-  { label: "Disneyland Paris", href: "/location-autocar/trajet/paris-disneyland" },
-  { label: "Le Puy du Fou", href: "/location-autocar/trajet/paris-puy-du-fou" },
-  { label: "Le Mont-Saint-Michel", href: "/location-autocar/trajet/paris-mont-saint-michel" },
-  { label: "Les plages du Débarquement", href: "/location-autocar/trajet/caen-plages-du-debarquement" },
-  { label: "Un week-end à Deauville", href: "/location-autocar/trajet/paris-deauville" },
-  { label: "Les caves de champagne", href: "/location-autocar/trajet/paris-reims" },
-  { label: "Le Parc Astérix", href: "/location-autocar/trajet/saint-germain-en-laye-parc-asterix" },
-  { label: "Londres", href: "/location-autocar/trajet/paris-londres" },
+const TYPES: { illu: IlluId; titre: string; sous: string; organisme: string }[] = [
+  { illu: "parc", titre: "Écoles", sous: "Sorties, voyages scolaires", organisme: "ecole" },
+  { illu: "vigne", titre: "Associations", sous: "Sorties annuelles, aînés", organisme: "association" },
+  { illu: "londres", titre: "CSE & entreprises", sous: "Séminaires, arbres de Noël", organisme: "cse" },
+  { illu: "chateau", titre: "Mariages", sous: "Navettes invités", organisme: "mariage" },
+  { illu: "mer", titre: "Clubs sportifs", sous: "Matchs, tournois, stages", organisme: "club" },
+  { illu: "route", titre: "Collectivités", sous: "Centres de loisirs, colos", organisme: "collectivite" },
 ];
 
 const ETAPES = [
-  {
-    tag: "2 min", tagCls: "bg-ambre-dim text-ambre-fort",
-    titre: "Décrivez le trajet",
-    texte: "Départ, arrivée, dates, nombre de passagers. Pas de nom, pas de téléphone : la demande part anonymisée aux transporteurs de votre région.",
-  },
-  {
-    tag: "24 h", tagCls: "bg-bleunuit text-bleunuit-fort",
-    titre: "Recevez les offres",
-    texte: "Les autocaristes vérifiés répondent chacun avec une offre unique et définitive : prix ferme, véhicule, année, conditions.",
-  },
-  {
-    tag: "Vous décidez", tagCls: "bg-vert-dim text-vert",
-    titre: "Choisissez, ou pas",
-    texte: "Vous retenez une offre : les coordonnées s'échangent, vous réglez le transporteur directement. Ou vous ne donnez pas suite.",
-  },
+  { tag: "2 min", tagCls: "bg-ambre-dim text-ambre", titre: "Décrivez le voyage", texte: "Trajet, dates, nombre de passagers, ce qu'il faut prévoir. Un assistant vérifie les horaires et vous donne une fourchette de prix." },
+  { tag: "24 h", tagCls: "bg-vert-dim text-vert", titre: "Recevez des offres fermes", texte: "Chaque transporteur répond une fois : prix tout compris, véhicule, ce qui est inclus. Posez-lui vos questions par la messagerie." },
+  { tag: "Vous décidez", tagCls: "bg-asphalte-3 text-blanc", titre: "Retenez, et partez", texte: "Coordonnées échangées avec le transporteur choisi, règlement direct avec lui. DealBus ne prend rien côté client." },
 ];
 
-const ETAPES_ENCHERE = [
-  "Une fenêtre d'enchère s'ouvre (2 h) avec un prix de départ indicatif.",
-  "Les transporteurs surenchérissent à la baisse, anonymement, par paliers d'au moins 1 %.",
-  "À la clôture, vous validez (ou non) le meilleur prix — identité révélée à ce moment seulement.",
+type Dest = { illu: IlluId; titre: string; meta: string; texte: string; prix: string; href: string };
+const DESTINATIONS: Dest[] = [
+  { illu: "parc", titre: "Disneyland Paris", meta: "Depuis Paris · 45 km · journée", texte: "La sortie la plus demandée par les écoles et les CSE. Dépose au parking cars, reprise le soir.", prix: "dès 590 € l'aller-retour", href: "/location-autocar/trajet/paris-disneyland" },
+  { illu: "msm", titre: "Mont-Saint-Michel", meta: "Depuis Paris · 360 km · journée ou 2 jours", texte: "Longue journée : les transporteurs prévoient souvent deux conducteurs, c'est inclus dans leur offre.", prix: "dès 1 380 €", href: "/location-autocar/trajet/paris-mont-saint-michel" },
+  { illu: "mer", titre: "Plages du Débarquement", meta: "Depuis Caen · 30 km · journée", texte: "Circuit mémoriel : Omaha Beach, cimetière américain, Arromanches. Le car suit le groupe toute la journée.", prix: "dès 420 €", href: "/location-autocar/trajet/caen-plages-du-debarquement" },
+  { illu: "vigne", titre: "Puy du Fou", meta: "Depuis Paris · 380 km · 2 jours", texte: "Nuit sur place : hébergement du chauffeur et immobilisation du car compris dans les offres.", prix: "dès 1 450 €", href: "/location-autocar/trajet/paris-puy-du-fou" },
+  { illu: "mer", titre: "Deauville · Honfleur", meta: "Depuis Paris · 200 km · journée", texte: "La journée à la mer des associations et des aînés. Arrêt possible à Honfleur sur le retour.", prix: "dès 890 €", href: "/location-autocar/trajet/paris-deauville" },
+  { illu: "londres", titre: "Londres", meta: "Depuis Paris · 460 km · 3 jours", texte: "Séjour avec le car sur place. Transporteurs habitués au tunnel et aux formalités de groupe.", prix: "dès 2 100 €", href: "/location-autocar/trajet/paris-londres" },
 ];
+
+const CONFIANCE = [
+  { ic: "✓", titre: "Transporteurs vérifiés", texte: "Licence de transport et assurance RC Pro contrôlées par DealBus avant toute mise en relation, puis à échéance." },
+  { ic: "👁", titre: "Vous restez anonyme", texte: "Les transporteurs voient le trajet, jamais votre nom, votre école ou votre téléphone, jusqu'à votre choix." },
+  { ic: "€", titre: "Des prix fermes, comparables", texte: "Un seul devis par transporteur, tout compris, avec ce qui est inclus écrit noir sur blanc. Pas de marchandage." },
+  { ic: "🛟", titre: "Une équipe derrière", texte: "Une question, un doute, une annulation ? DealBus suit chaque dossier et répond dans la journée." },
+];
+
+const FAQ = [
+  { q: "Combien ça coûte ?", r: "Rien pour vous. DealBus se rémunère par une commission versée par le transporteur, uniquement s'il remporte la mission." },
+  { q: "Suis-je obligé d'accepter une offre ?", r: "Non. Vous comparez, vous posez vos questions, et vous pouvez clore la demande sans donner suite." },
+  { q: "Comment se passe le paiement ?", r: "Directement avec le transporteur retenu, selon ses conditions (acompte, solde, mandat administratif pour les établissements publics)." },
+  { q: "Combien de temps à l'avance ?", r: "2 à 6 semaines dans l'idéal, davantage pour les samedis de mai, juin et septembre et les marchés de Noël." },
+  { q: "Et si le transporteur annule ?", r: "Toute annulation est motivée et validée par DealBus. Votre demande est relancée en priorité auprès des autres transporteurs." },
+  { q: "Peut-on aller à l'étranger ?", r: "Oui pour la destination. Le départ doit se situer en France pour que les transporteurs de votre zone répondent." },
+];
+
+const eyebrow = "font-mono text-[11px] uppercase tracking-[.14em] text-ambre-fort";
+const h2 = "h-display text-4xl md:text-5xl mt-3 mb-2";
 
 export default function Home() {
   return (
     <>
       <Nav />
+      <IllustrationsSprite />
       <main className="relative overflow-x-clip">
 
-        {/* ---------- 1. HERO — photo pleine, sans voile ---------- */}
-        <section className="relative overflow-hidden">
-          <div className="absolute inset-0 -z-10">
-            <Image src="/img/hero.jpg" alt="" fill priority className="object-cover" />
-            {/* Aucun voile : la photo doit être claire par elle-même, sinon le
-                titre en encre sombre devient illisible. Seul le fondu bas
-                raccorde l'image à la bande suivante. */}
-            <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-b from-transparent via-asphalte/70 to-asphalte" />
+        {/* ---------- 1. HERO ---------- */}
+        <header className="relative min-h-[600px] flex items-end text-white overflow-hidden">
+          <Illu id="msm" titre="Groupe devant le Mont-Saint-Michel au lever du soleil, autocar sur la digue" />
+          <div className="absolute inset-0 bg-gradient-to-b from-encre/10 via-transparent to-encre/70" />
+          <div className="relative max-w-6xl mx-auto px-7 pt-24 pb-10 w-full">
+            <span className="inline-flex items-center gap-2 bg-white/15 border border-white/30 rounded-full px-3 py-1.5 text-[12.5px] backdrop-blur-sm">
+              🚌 Voyages de groupe en autocar · devis gratuits de transporteurs vérifiés
+            </span>
+            <h1 className="h-display text-5xl md:text-7xl mt-4 mb-3 drop-shadow-[0_2px_20px_rgba(0,0,0,.3)]">
+              Partez ensemble.<br /><span className="text-ambre">On s&apos;occupe du car.</span>
+            </h1>
+            <p className="text-lg max-w-2xl text-white/90 mb-7">
+              Voyage scolaire, sortie d&apos;association, séminaire, mariage, tournoi… Dites-nous où vous allez :
+              les autocaristes de votre région vous envoient leurs meilleures offres, vous comparez, vous partez.
+            </p>
+            <RechercheVoyage />
+            <div className="flex flex-wrap gap-x-6 gap-y-1.5 mt-4 text-[12.5px] text-white/90">
+              {["Gratuit et sans engagement", "Identité masquée jusqu'à votre choix", "Transporteurs vérifiés : licence et assurance", "Premières offres en général sous 24 h"].map((t) => (
+                <span key={t}><span className="text-[#3FCE94] font-bold">✓</span> {t}</span>
+              ))}
+            </div>
           </div>
+        </header>
 
-          <div className="max-w-6xl mx-auto px-7 pt-28 pb-32">
-            <div className="max-w-2xl">
-              <p className="eyebrow mb-5">Marketplace B2B — Transport en autocar</p>
-              <h1 className="h-display text-6xl md:text-7xl mb-6">
-                Le prix juste,<br />pas le premier prix<span className="text-ambre">.</span>
-              </h1>
-              <p className="text-lg text-blanc-dim mb-9 max-w-xl">
-                Déposez votre trajet. Les transporteurs vérifiés de votre région vous envoient
-                des devis fermes, sous profil anonyme. Vous comparez, vous gardez la main.
-              </p>
-              <div className="flex flex-wrap gap-3.5">
-                <Link href="#demande-rapide" className="btn-primary">Demander mon transport →</Link>
-                <Link href="#comment-ca-marche" className="btn-ghost">Voir comment ça marche</Link>
-              </div>
+        {/* ---------- 2. ENVIES DU MOMENT ---------- */}
+        <section className="py-20" id="envies">
+          <div className="max-w-6xl mx-auto px-7">
+            <div className="grid lg:grid-cols-[1fr_auto] gap-6 lg:items-end mb-9">
+              <div><p className={eyebrow}>Envies du moment</p><h2 className={h2}>Où partir cette saison ?</h2></div>
+              <p className="text-blanc-dim max-w-sm text-[14.5px]">Des idées de sorties par saison, avec les ordres de prix constatés sur la plateforme. Un clic, et votre demande est pré-remplie.</p>
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {ENVIES.map((e) => (
+                <Link key={e.titre} href={e.href} className={`relative rounded-lg overflow-hidden min-h-[300px] flex flex-col justify-end text-white group ${e.grande ? "sm:col-span-2" : ""}`}>
+                  <Illu id={e.illu} className="transition group-hover:scale-[1.03] duration-500" />
+                  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-encre/55 to-encre/90" />
+                  <div className="relative p-5">
+                    <p className="font-mono text-[10.5px] uppercase tracking-[.12em] text-ambre mb-1.5">{e.saison}</p>
+                    <h3 className="h-display text-3xl">{e.titre}</h3>
+                    <p className="text-[13.5px] text-white/85 mt-1.5 max-w-md">{e.texte}</p>
+                    <span className="inline-block mt-2.5 font-mono text-xs bg-white/15 border border-white/30 px-2.5 py-1 rounded-sm">{e.prix}</span>
+                  </div>
+                </Link>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* ---------- 2. CHIFFRES — bande ambre claire ---------- */}
-        <section className="bg-ambre-dim border-y border-ambre/35">
-          <div className="max-w-6xl mx-auto px-7 py-14 grid grid-cols-2 md:grid-cols-4 gap-7">
-            {STATS.map((s) => (
-              <div key={s.label} className="chiffre">
-                <p className="h-display text-4xl">{s.num}</p>
-                <p className="font-mono text-[11px] uppercase tracking-wider text-blanc-faint mt-2">{s.label}</p>
+        {/* ---------- 3. POUR TOUS LES GROUPES ---------- */}
+        <section className="pb-20">
+          <div className="max-w-6xl mx-auto px-7">
+            <div className="grid lg:grid-cols-[1fr_auto] gap-6 lg:items-end mb-9">
+              <div><p className={eyebrow}>Pour tous les groupes</p><h2 className={h2}>Quel que soit le voyage.</h2></div>
+              <p className="text-blanc-dim max-w-sm text-[14.5px]">Chaque type de groupe a ses contraintes : ceintures pour les enfants, soute pour les séjours, horaires souples pour un mariage. La demande en tient compte.</p>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+              {TYPES.map((t) => (
+                <Link key={t.titre} href={`/demande?organisme=${t.organisme}`} className="bg-asphalte border border-ligne rounded-md overflow-hidden text-center pb-4 hover:border-ligne-strong transition">
+                  <div className="relative h-24"><Illu id={t.illu} /></div>
+                  <b className="block text-[14.5px] mt-3">{t.titre}</b>
+                  <small className="block text-xs text-blanc-faint px-2">{t.sous}</small>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ---------- 4. LE CŒUR ---------- */}
+        <section className="sombre py-20" id="comment-ca-marche">
+          <div className="max-w-6xl mx-auto px-7 grid lg:grid-cols-[1.1fr_1fr] gap-12 items-center">
+            <div>
+              <p className="font-mono text-[11px] uppercase tracking-[.14em] text-ambre">Le principe DealBus</p>
+              <h2 className="h-display text-4xl md:text-5xl mt-3 mb-4">Vous choisissez la destination.<br />Les transporteurs viennent à vous.</h2>
+              <p className="text-[17px] text-blanc-dim max-w-xl mb-6">Plus d&apos;appels à dix autocaristes pour comparer des devis incomparables. Une seule demande, anonyme, et des offres fermes de professionnels vérifiés.</p>
+              <div className="grid gap-3">
+                {ETAPES.map((e, i) => (
+                  <div key={e.titre} className="grid grid-cols-[54px_1fr] gap-4 bg-asphalte-2 border border-ligne rounded-md px-5 py-4">
+                    <span className="h-display text-5xl text-ambre">0{i + 1}</span>
+                    <div>
+                      <span className={`tag float-right ${e.tagCls}`}>{e.tag}</span>
+                      <h3 className="h-display text-2xl">{e.titre}</h3>
+                      <p className="text-sm text-blanc-dim mt-1">{e.texte}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="flex flex-wrap gap-7 mt-7 pt-6 border-t border-ligne">
+                {[["0 €", "Pour le client, toujours"], ["100 %", "Licences & RC Pro contrôlées"], ["1 seul", "Devis par transporteur, ferme"]].map(([n, l]) => (
+                  <div key={l}><p className="h-display text-4xl">{n}</p><p className="font-mono text-[10.5px] uppercase tracking-wider text-blanc-faint mt-1">{l}</p></div>
+                ))}
+              </div>
+            </div>
+            <div className="relative rounded-lg overflow-hidden min-h-[420px]"><Illu id="car" titre="Autocar de nuit, vitres éclairées" /></div>
+          </div>
+        </section>
+
+        {/* ---------- 5. DESTINATIONS PRÉFÉRÉES ---------- */}
+        <section className="py-20" id="destinations">
+          <div className="max-w-6xl mx-auto px-7">
+            <div className="grid lg:grid-cols-[1fr_auto] gap-6 lg:items-end mb-9">
+              <div><p className={eyebrow}>Ce que les groupes réservent le plus</p><h2 className={h2}>Destinations préférées.</h2></div>
+              <Link href="/location-autocar" className="font-mono text-[11px] uppercase tracking-[.1em] text-ambre-fort hover:underline">Toutes les destinations →</Link>
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {DESTINATIONS.map((d) => (
+                <Link key={d.titre} href={d.href} className="bg-asphalte border border-ligne rounded-lg overflow-hidden hover:border-ligne-strong transition group">
+                  <div className="relative h-[150px] overflow-hidden"><Illu id={d.illu} className="transition group-hover:scale-[1.03] duration-500" /></div>
+                  <div className="p-4 pb-5">
+                    <h4 className="h-display text-2xl">{d.titre}</h4>
+                    <p className="font-mono text-[11px] text-blanc-faint tracking-wide mt-1">{d.meta}</p>
+                    <p className="text-[13.5px] text-blanc-dim mt-2">{d.texte}</p>
+                    <div className="flex justify-between items-center mt-3 pt-3 border-t border-ligne">
+                      <b className="font-mono text-[13px] text-ambre-fort">{d.prix}</b>
+                      <span className="font-mono text-[10.5px] uppercase tracking-[.1em]">Demander →</span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+            <p className="font-mono text-[11px] text-blanc-faint mt-4 tracking-wide uppercase">Prix indicatifs constatés sur la plateforme, autocar complet. Seules les offres des transporteurs font foi.</p>
+          </div>
+        </section>
+
+        {/* ---------- 6. CONFIANCE ---------- */}
+        <section className="pb-20">
+          <div className="max-w-6xl mx-auto px-7 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {CONFIANCE.map((c) => (
+              <div key={c.titre} className="bg-asphalte border border-ligne rounded-lg p-6">
+                <div className="w-10 h-10 rounded-full bg-ambre-dim flex items-center justify-center font-condensed font-bold text-ambre-fort text-lg mb-3">{c.ic}</div>
+                <b className="block text-[15.5px] mb-1">{c.titre}</b>
+                <p className="text-[13.5px] text-blanc-dim">{c.texte}</p>
               </div>
             ))}
           </div>
         </section>
 
-        {/* ---------- 3. DEMANDE — blanc ---------- */}
-        <section id="demande-rapide" className="py-24">
-          <div className="max-w-6xl mx-auto px-7 grid lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-12 lg:items-center">
-            <div>
-              <p className="eyebrow mb-4">Votre demande en 2 minutes</p>
-              <h2 className="h-display text-4xl md:text-5xl mb-4">Où partez-vous ?</h2>
-              <p className="text-blanc-dim mb-7 leading-relaxed">
-                Un mariage, un match à l&apos;extérieur, une classe qui part en voyage, la sortie
-                annuelle du club : derrière chaque demande, il y a un groupe qui a hâte.
-                Dites-nous où vous allez, on s&apos;occupe de la partie pénible.
-              </p>
-
-              <p className="font-mono text-[11px] uppercase tracking-wider text-blanc-faint mb-3">
-                Ce que les groupes réservent le plus
-              </p>
-              <div className="flex flex-wrap gap-2 mb-7">
-                {ENVIES.map((e) => (
-                  <Link
-                    key={e.href}
-                    href={e.href}
-                    className="bg-ambre-dim border border-ambre/35 rounded-sm px-3 py-1.5 text-[13px] font-medium text-ambre-fort hover:bg-ambre hover:text-encre hover:border-ambre transition"
-                  >
-                    {e.label}
-                  </Link>
+        {/* ---------- 7. UN VOYAGE RACONTÉ (cas illustratif) ---------- */}
+        <section className="pb-20">
+          <div className="max-w-6xl mx-auto px-7">
+            <div className="bg-asphalte-2 border border-ligne rounded-lg p-8 md:p-10 grid lg:grid-cols-2 gap-10 items-center">
+              <div>
+                <p className={`${eyebrow} mb-4`}>Exemple de voyage · cas illustratif</p>
+                <blockquote className="font-serif text-[21px] leading-snug">« Classe de 6e, 53 élèves, deux jours au Puy du Fou. J&apos;ai décrit le trajet un lundi soir, j&apos;avais trois offres le mercredi. On a choisi celle qui incluait l&apos;hôtel du chauffeur. »</blockquote>
+                <p className="font-mono text-[11px] uppercase tracking-wider text-blanc-faint mt-4">Professeure principale · collège des Yvelines · exemple rédigé à partir d&apos;une demande type</p>
+              </div>
+              <div className="bg-asphalte border border-ligne rounded-md p-5 text-[13.5px] divide-y divide-ligne">
+                {[["Mantes-la-Jolie → Puy du Fou", "412 km"], ["12 et 13 mai, car sur place", "2 jours"], ["58 passagers, autocar 63 places", "soute, ceintures"], ["Offres reçues", "3 en 48 h"], ["Offre retenue, tout compris", "2 590 € TTC"]].map(([a, b], i) => (
+                  <div key={a} className="flex justify-between py-2"><span>{a}</span><b className={`font-mono ${i === 4 ? "text-ambre-fort" : ""}`}>{b}</b></div>
                 ))}
               </div>
-
-              <ul className="text-[13.5px] text-blanc-dim space-y-1.5">
-                <li>— Estimation de prix instantanée</li>
-                <li>— Identité masquée jusqu&apos;à la sélection</li>
-                <li>— Gratuit, sans engagement</li>
-              </ul>
             </div>
-            <QuickDemandeForm />
           </div>
         </section>
 
-        {/* ---------- 4. COMMENT ÇA MARCHE — trois étapes ---------- */}
-        <section id="comment-ca-marche" className="bg-asphalte-2 border-y border-ligne py-24">
-          <div className="max-w-6xl mx-auto px-7">
-            <div className="grid lg:grid-cols-[1fr_auto] gap-8 lg:items-end mb-12">
-              <div>
-                <p className="eyebrow mb-4">Comment ça marche</p>
-                <h2 className="h-display text-4xl md:text-5xl mb-3">Trois étapes, zéro coup de fil.</h2>
+        {/* ---------- 8. TRANSPORTEURS ---------- */}
+        <section className="bg-asphalte-2 border-y border-ligne py-20" id="transporteurs">
+          <div className="max-w-6xl mx-auto px-7 grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <p className={eyebrow}>Vous êtes autocariste ?</p>
+              <h2 className={h2}>Des voyages à remplir, pas du démarchage.</h2>
+              <p className="text-blanc-dim max-w-lg">Des demandes réelles, datées, qualifiées, dans vos zones. Vous répondez quand votre planning le permet. Vous ne payez que si vous gagnez.</p>
+              <ul className="my-6 space-y-2 text-[15px]">
+                {["Commission de 9 à 5 % uniquement sur mission réalisée, aucun abonnement", "Haut-le-pied, journées et nombre de conducteurs calculés depuis votre dépôt", "Le client vous paie directement, DealBus ne touche jamais votre argent", "Messagerie avec le client avant de chiffrer, avis après chaque mission"].map((t) => (
+                  <li key={t} className="flex gap-2.5"><span className="text-vert font-bold">✓</span>{t}</li>
+                ))}
+              </ul>
+              <div className="flex flex-wrap gap-3">
+                <Link href="/pro" className="btn-primary">Rejoindre les transporteurs →</Link>
+                <Link href="/cgu#commission" className="btn-ghost">Voir le barème</Link>
               </div>
-              <p className="text-blanc-dim max-w-md leading-relaxed text-[15px]">
-                Vous ne contactez personne : les transporteurs disponibles viennent à vous,
-                sans connaître votre identité tant que vous n&apos;avez pas choisi.
-              </p>
             </div>
+            <div className="relative rounded-lg overflow-hidden min-h-[360px]"><Illu id="car" titre="Conducteur devant son autocar, dépôt au petit matin" /></div>
+          </div>
+        </section>
 
-            <div className="grid md:grid-cols-3 gap-5">
-              {ETAPES.map((e, i) => (
-                <div key={e.titre} className="relative bg-asphalte border border-ligne rounded p-8 shadow-carte">
-                  <span className={`absolute top-7 right-7 tag ${e.tagCls}`}>{e.tag}</span>
-                  <p className="h-display text-6xl text-ambre mb-5">0{i + 1}</p>
-                  <h3 className="h-display text-2xl mb-2.5">{e.titre}</h3>
-                  <p className="text-sm text-blanc-dim leading-relaxed">{e.texte}</p>
+        {/* ---------- 9. FAQ ---------- */}
+        <section className="py-20">
+          <div className="max-w-6xl mx-auto px-7">
+            <p className={`${eyebrow} mb-2`}>Questions fréquentes</p>
+            <div className="grid md:grid-cols-2 gap-x-10">
+              {FAQ.map((f) => (
+                <div key={f.q} className="border-t border-ligne py-4">
+                  <b className="block text-[15.5px] mb-1">{f.q}</b>
+                  <p className="text-sm text-blanc-dim">{f.r}</p>
                 </div>
               ))}
             </div>
-
-            {FEATURES.enchere && (
-              <div className="mt-8 bg-asphalte border border-ligne border-t-[3px] border-t-vert p-9 max-w-2xl">
-                <div className="flex items-center gap-3 mb-5">
-                  <span className="w-9 h-9 rounded-sm bg-vert-dim text-vert flex items-center justify-center font-mono font-semibold">E</span>
-                  <h3 className="h-display text-2xl">Enchère</h3>
-                </div>
-                <ul className="text-sm text-blanc-dim divide-y divide-ligne">
-                  {ETAPES_ENCHERE.map((e, i) => (
-                    <li key={e} className="flex gap-3.5 py-3">
-                      <span className="font-mono text-xs text-vert pt-0.5">0{i + 1}</span>{e}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
           </div>
         </section>
 
-        {/* ---------- 5. RETOURS À VIDE — bande sombre ---------- */}
-        {FEATURES.retours && <section className="sombre relative overflow-hidden">
-          {/* Sortie du conteneur centré : l'image court jusqu'au bord de l'écran,
-              son flanc gauche fondu dans la bande — plus aucune arête visible. */}
-          <div className="absolute inset-y-0 right-0 w-[52%] hidden md:block">
-            <Image
-              src="/img/retour.jpg"
-              alt="Autocar sur la route"
-              fill
-              className="object-cover grayscale-[0.4] brightness-[0.75]"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-asphalte via-asphalte/55 to-transparent" />
-          </div>
-
-          <div className="relative max-w-6xl mx-auto px-7 py-24">
-            <div className="md:max-w-xl">
-              <p className="eyebrow mb-5">Uniquement sur DealBus</p>
-              <h2 className="h-display text-4xl md:text-5xl mb-4">
-                Un trajet déjà en route,<br />à prix cassé.
-              </h2>
-              <p className="text-[15px] text-blanc-dim mb-8 leading-relaxed">
-                Après avoir déposé un groupe, un transporteur publie son retour à vide :
-                prix fixe défini par lui, souvent bien en dessous du marché. Vous économisez,
-                il rentabilise des kilomètres perdus — et un car de moins roule pour rien.
-              </p>
-              <div className="flex flex-wrap gap-10 mb-9">
-                <div className="chiffre">
-                  <p className="h-display text-3xl">−40 %</p>
-                  <p className="font-mono text-[11px] uppercase tracking-wider text-blanc-faint mt-1.5">Écart moyen constaté</p>
-                </div>
-                <div className="chiffre">
-                  <p className="h-display text-3xl">0 km</p>
-                  <p className="font-mono text-[11px] uppercase tracking-wider text-blanc-faint mt-1.5">Roulé pour rien</p>
-                </div>
-              </div>
-              <Link href="/retours" className="btn-primary">Voir les retours à vide →</Link>
-            </div>
-          </div>
-        </section>}
-
-        {/* ---------- 6. DEUX PUBLICS — blanc ---------- */}
-        <section className="py-24">
-          <div className="max-w-6xl mx-auto px-7">
-            <p className="eyebrow mb-4">Une plateforme, deux interfaces</p>
-            <h2 className="h-display text-4xl md:text-5xl mb-12">Fait pour les deux côtés du trajet.</h2>
-            <div className="grid md:grid-cols-2 gap-5">
-
-              <div className="bg-ambre-dim border border-ambre/40 rounded p-0 overflow-hidden group">
-                <div className="relative h-44 overflow-hidden">
-                  <Image
-                    src="/img/client.jpg"
-                    alt="Groupe de voyageurs"
-                    fill
-                    className="object-cover grayscale-[0.55] brightness-105 group-hover:grayscale-0 transition duration-500"
-                  />
-                </div>
-                <div className="p-9 pt-7 border-t-[3px] border-ambre">
-                  <p className="font-mono text-[11px] uppercase tracking-widest text-ambre-fort mb-4">Espace client</p>
-                  <h3 className="h-display text-3xl mb-3">Organisez, comparez, partez.</h3>
-                  <p className="text-sm text-blanc-dim mb-6 max-w-sm leading-relaxed">
-                    Pour les entreprises, écoles, associations, clubs et particuliers qui
-                    organisent un déplacement de groupe.
-                  </p>
-                  <ul className="text-[13.5px] text-blanc-dim space-y-1.5 mb-7">
-                    <li>— Demande en moins de 2 minutes</li>
-                    <li>— Identité masquée jusqu&apos;à votre choix</li>
-                    <li>— Des offres fermes, détaillées et comparables</li>
-                    <li>— Avis vérifiés et licences contrôlées</li>
-                  </ul>
-                  <Link href="/demande" className="btn-ghost">Faire une demande →</Link>
-                </div>
-              </div>
-
-              <div className="bg-vert-dim border border-vert/40 rounded p-0 overflow-hidden group">
-                <div className="relative h-44 overflow-hidden">
-                  <Image
-                    src="/img/pro.jpg"
-                    alt="Flotte d'autocars"
-                    fill
-                    className="object-cover grayscale-[0.55] brightness-105 group-hover:grayscale-0 transition duration-500"
-                  />
-                </div>
-                <div className="p-9 pt-7 border-t-[3px] border-vert">
-                  <p className="font-mono text-[11px] uppercase tracking-widest text-vert mb-4">Espace transporteur</p>
-                  <h3 className="h-display text-3xl mb-3">Des leads qualifiés, pas du bruit.</h3>
-                  <p className="text-sm text-blanc-dim mb-6 max-w-sm leading-relaxed">
-                    Pour les autocaristes qui veulent remplir leur planning
-                    sans démarchage à froid.
-                  </p>
-                  <ul className="text-[13.5px] text-blanc-dim space-y-1.5 mb-7">
-                    <li>— Leads filtrés par zones que vous choisissez</li>
-                    <li>— Client anonyme jusqu&apos;à votre offre retenue</li>
-                    <li>— Un devis par demande, en un seul envoi</li>
-                    <li>— Vous ne payez que si vous gagnez la mission</li>
-                  </ul>
-                  <Link href="/pro" className="btn-ghost">Devenir partenaire →</Link>
-                </div>
-              </div>
-
-            </div>
+        {/* ---------- 10. CTA FINAL ---------- */}
+        <section className="relative text-white overflow-hidden">
+          <Illu id="route" titre="Route côtière, autocar, mer" />
+          <div className="absolute inset-0 bg-encre/60" />
+          <div className="relative max-w-6xl mx-auto px-7 py-20 text-center">
+            <h2 className="h-display text-5xl">Votre groupe a hâte.</h2>
+            <p className="text-[17px] text-white/85 max-w-xl mx-auto mt-3 mb-7">Décrivez votre voyage en 2 minutes. Les premières offres arrivent en général dans la journée.</p>
+            <Link href="/demande" className="btn-primary px-7 py-4 text-[15px]">Demander des devis, c&apos;est gratuit →</Link>
           </div>
         </section>
-
-        {/* ---------- 7. COUVERTURE — gris moyen + panneau blanc ---------- */}
-        <section className="bg-asphalte-3 border-y border-ligne">
-          <div className="max-w-6xl mx-auto px-7 py-24 lg:grid lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:gap-14 lg:items-center">
-            <div className="mb-10 lg:mb-0">
-              <p className="eyebrow mb-4">Couverture en temps réel</p>
-              <h2 className="h-display text-4xl md:text-5xl mb-4">Nos transporteurs, département par département.</h2>
-              <p className="text-blanc-dim mb-6 leading-relaxed">
-                Chaque zone ambre est couverte par au moins un transporteur vérifié — la carte
-                s&apos;actualise à chaque nouvelle inscription. Survolez un département pour voir
-                le détail.
-              </p>
-              <p className="text-blanc-dim mb-8 leading-relaxed">
-                <span className="text-blanc font-semibold">Transporteur dans une zone encore libre ?</span>{" "}
-                Les premiers inscrits de chaque département recevront ses premières demandes.
-              </p>
-              <a href="/pro" className="btn-ghost">Prendre ma zone →</a>
-            </div>
-            <CarteCouverture />
-          </div>
-        </section>
-
-        {/* ---------- 8. MODÈLE ÉCONOMIQUE — gris clair, collé au footer ---------- */}
-        <section className="bg-asphalte-2 pt-24 pb-24">
-          <div className="max-w-6xl mx-auto px-7">
-            <p className="eyebrow mb-4">Transparence commerciale</p>
-            <h2 className="h-display text-4xl md:text-5xl mb-3">Comment on se rémunère.</h2>
-            <p className="text-blanc-dim max-w-lg mb-12 leading-relaxed">
-              Pas d&apos;abonnement à l&apos;entrée, pas de frais cachés. DealBus ne gagne
-              que si le transport a vraiment lieu.
-            </p>
-            <div className="grid md:grid-cols-2 gap-5">
-              <div className="bg-asphalte border border-ligne p-9">
-                <p className="font-mono text-[11px] uppercase tracking-widest text-blanc-faint mb-4">Côté client</p>
-                <h3 className="h-display text-3xl mb-3">Gratuit, sans condition.</h3>
-                <ul className="text-[13.5px] text-blanc-dim space-y-1.5">
-                  <li>— 0 € à l&apos;inscription</li>
-                  <li>— 0 € par demande déposée</li>
-                  <li>— 0 € de commission sur le prix payé au transporteur</li>
-                </ul>
-              </div>
-              <div className="bg-asphalte border border-ligne border-l-[3px] border-l-ambre p-9">
-                <p className="font-mono text-[11px] uppercase tracking-widest text-blanc-faint mb-4">Côté transporteur</p>
-                <h3 className="h-display text-3xl mb-3">Une commission, uniquement si vous gagnez.</h3>
-                <ul className="text-[13.5px] text-blanc-dim space-y-1.5">
-                  <li>— 9 % jusqu&apos;à 2 000 € · 7 % jusqu&apos;à 5 000 € · 5 % au-delà</li>
-                  <li>— Aucun abonnement, aucun frais fixe</li>
-                  <li>— Même taux partout en France, sans majoration géographique</li>
-                  <li>— Facturée après la mission — aucun forfait sans course gagnée</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ---------- 9. FOOTER — bande sombre ---------- */}
-        <div className="sombre">
-          <Footer />
-        </div>
       </main>
+      <Footer />
     </>
   );
 }
