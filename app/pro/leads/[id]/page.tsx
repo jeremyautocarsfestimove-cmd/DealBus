@@ -6,6 +6,7 @@ import type { Demande } from "@/lib/types";
 import { DevisForm } from "./devis-form";
 import { EnchereForm } from "./enchere-form";
 import { ItineraireMap } from "@/components/ItineraireMap";
+import { ORGANISMES, EQUIPEMENTS } from "@/lib/assistant-demande";
 
 export default async function LeadPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -62,6 +63,40 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
           allerRetour={d.type_trajet === "aller_retour"}
           montrerTemps
         />
+
+        {/* ---------- Ce que le client a précisé ---------- */}
+        <div className="card mt-6 mb-8 text-sm">
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <p className="font-mono text-[11px] uppercase tracking-wider text-blanc-faint">Ce que le client a précisé</p>
+            {typeof d.completude === "number" && d.completude > 0 && (
+              <span className={`tag ${d.completude >= 70 ? "bg-vert-dim text-vert" : "bg-ambre-dim text-ambre"}`}>Demande complète {d.completude} %</span>
+            )}
+          </div>
+          <dl className="grid sm:grid-cols-[150px_1fr] gap-x-4 gap-y-2.5">
+            <dt className="font-mono text-[11px] uppercase tracking-wider text-blanc-faint pt-0.5">Groupe</dt>
+            <dd>{ORGANISMES.find((o) => o.id === d.organisme)?.label ?? "Non précisé"}{d.motif ? ` · ${d.motif}` : ""}</dd>
+            {d.type_trajet !== "aller_simple" && (
+              <>
+                <dt className="font-mono text-[11px] uppercase tracking-wider text-blanc-faint pt-0.5">Car sur place</dt>
+                <dd>{d.sur_place_repondu ? (d.vehicule_utilise_sur_place ? "Oui, le car et le chauffeur restent sur place" : "Non, dépose puis reprise") : "Le client ne sait pas"}</dd>
+              </>
+            )}
+            {d.heure_arrivee && (
+              <>
+                <dt className="font-mono text-[11px] uppercase tracking-wider text-blanc-faint pt-0.5">Arrivée souhaitée</dt>
+                <dd>{String(d.heure_arrivee).slice(0, 5).replace(":", "h")}</dd>
+              </>
+            )}
+            <dt className="font-mono text-[11px] uppercase tracking-wider text-blanc-faint pt-0.5">Équipements</dt>
+            <dd>{d.equipements?.length ? d.equipements.map((id) => EQUIPEMENTS.find((e) => e.id === id)?.label ?? id).join(" · ") : "Aucun équipement particulier"}</dd>
+            {d.precisions && (
+              <>
+                <dt className="font-mono text-[11px] uppercase tracking-wider text-blanc-faint pt-0.5">Précisions</dt>
+                <dd className="whitespace-pre-line text-blanc-dim">« {d.precisions} »</dd>
+              </>
+            )}
+          </dl>
+        </div>
 
         {d.mode === "devis" ? (
           monOffre ? (

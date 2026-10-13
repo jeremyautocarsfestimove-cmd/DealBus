@@ -15,6 +15,14 @@ export interface Demande {
   heure_retour: string | null;
   date_retour: string | null;
   passagers: number;
+  vehicule_utilise_sur_place?: boolean;
+  sur_place_repondu?: boolean;
+  organisme?: string | null;
+  motif?: string | null;
+  equipements?: string[] | null;
+  heure_arrivee?: string | null;
+  precisions?: string | null;
+  completude?: number | null;
   prix_estime: number | null;
   enchere_fin: string | null;
   created_at: string;
