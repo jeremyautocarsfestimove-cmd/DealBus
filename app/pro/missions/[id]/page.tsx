@@ -3,6 +3,7 @@ import { Nav } from "@/components/Nav";
 import { BackButton } from "@/components/BackButton";
 import { createClient } from "@/lib/supabase/server";
 import { AnnulerMission, DeclarerTerminee } from "../../pro-actions";
+import { EtatAnnulation } from "@/components/DemanderAnnulation";
 
 const eur = (n: number) => Number(n).toLocaleString("fr-FR") + " €";
 
@@ -78,9 +79,14 @@ export default async function MissionPage({ params }: { params: Promise<{ id: st
         )}
 
         {mission.statut === "a_venir" && (
-          <div className="flex gap-3 flex-wrap">
-            <DeclarerTerminee missionId={mission.id} />
-            <AnnulerMission missionId={mission.id} />
+          <div className="space-y-4">
+            <EtatAnnulation x={mission} cible="mission" />
+            {!(mission.annulation_demandee_at && !mission.annulation_decision) && (
+              <div className="flex gap-3 flex-wrap">
+                <DeclarerTerminee missionId={mission.id} />
+                <AnnulerMission missionId={mission.id} />
+              </div>
+            )}
           </div>
         )}
       </main>

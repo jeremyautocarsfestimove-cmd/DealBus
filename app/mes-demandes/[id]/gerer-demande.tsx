@@ -24,11 +24,7 @@ export function GererDemande({ demandeId, nbOffres }: { demandeId: string; nbOff
 
   return (
     <div className="flex flex-wrap items-center gap-3">
-      {nbOffres === 0 ? (
-        <Link href={`/demande?modifier=${demandeId}`} className="btn-ghost text-[13px] py-2 px-4">✎ Modifier ma demande</Link>
-      ) : (
-        <span className="font-mono text-[11px] text-blanc-faint">Modification impossible : {nbOffres} offre{nbOffres > 1 ? "s" : ""} déjà reçue{nbOffres > 1 ? "s" : ""}.</span>
-      )}
+      <Link href={`/demande?modifier=${demandeId}`} className="btn-ghost text-[13px] py-2 px-4">✎ Modifier ma demande</Link>
       <button className="font-mono text-[11px] uppercase tracking-wider text-blanc-faint hover:text-[#E8735D] transition" onClick={() => setConfirm(true)}>
         Clore sans donner suite
       </button>
@@ -36,9 +32,7 @@ export function GererDemande({ demandeId, nbOffres }: { demandeId: string; nbOff
       <ConfirmModal
         open={confirm}
         title="Clore cette demande ?"
-        message={nbOffres > 0
-          ? "Les transporteurs ayant répondu seront informés que leur offre n'est pas retenue. Vous pourrez déposer une nouvelle demande."
-          : "La demande ne sera plus diffusée aux transporteurs. Vous pourrez en déposer une nouvelle."}
+        message="Aucune offre reçue : la demande ne sera plus diffusée aux transporteurs. Vous pourrez en déposer une nouvelle."
         confirmLabel="Clore la demande"
         danger
         busy={busy}

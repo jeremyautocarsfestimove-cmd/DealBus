@@ -7,6 +7,7 @@ import { RetenirOffre, EnchereCliente, AvisForm } from "./client-actions";
 import { ItineraireMap } from "@/components/ItineraireMap";
 import { Messagerie } from "@/components/Messagerie";
 import { GererDemande } from "./gerer-demande";
+import { DemanderAnnulation, EtatAnnulation } from "@/components/DemanderAnnulation";
 
 const eur = (n: number) => Number(n).toLocaleString("fr-FR") + " €";
 
@@ -161,6 +162,15 @@ export default async function DemandeDetailPage({ params }: { params: Promise<{ 
                 </p>
               )}
 
+              {mission.statut === "a_venir" && (
+                <div className="mt-4 space-y-3">
+                  <EtatAnnulation x={mission} cible="mission" />
+                  {!(mission.annulation_demandee_at && !mission.annulation_decision) && (
+                    <DemanderAnnulation cible="mission" id={mission.id} role="client" />
+                  )}
+                </div>
+              )}
+
               {mission.statut === "terminee_declaree" && !monAvis && user && (
                 <AvisForm
                   missionId={mission.id}
@@ -192,7 +202,7 @@ export default async function DemandeDetailPage({ params }: { params: Promise<{ 
             </p>
           </>
         ) : d.mode === "devis" ? (
-          <DevisView demandeId={id} />
+          <DevisView demandeId={id} demande={d} />
         ) : (
           <>
             <h1 className="h-display text-4xl mb-3">Enchère en direct.</h1>
@@ -204,7 +214,7 @@ export default async function DemandeDetailPage({ params }: { params: Promise<{ 
   );
 }
 
-async function DevisView({ demandeId }: { demandeId: string }) {
+async function DevisView({ demandeId, demande }: { demandeId: string; demande: any }) {
   const supabase = await createClient();
   // Deux requêtes séparées : la jointure sur une VUE (transporteurs_anonymes)
   // peut échouer silencieusement après recréation de la vue — plus jamais ça.
@@ -235,7 +245,17 @@ async function DevisView({ demandeId }: { demandeId: string }) {
           ? "Profils anonymisés, un seul prix chacun — les transporteurs répondent en tir unique."
           : "Les transporteurs vérifiés de votre zone ont été prévenus. Tant qu'aucune offre n'est reçue, vous pouvez encore modifier votre demande."}
       </p>
-      <div className="mb-10"><GererDemande demandeId={demandeId} nbOffres={list.length} /></div>
+      <div className="mb-10 space-y-3">
+        <EtatAnnulation x={demande} cible="demande" />
+        {!(demande.annulation_demandee_at && !demande.annulation_decision) && (
+          list.length === 0
+            ? <GererDemande demandeId={demandeId} nbOffres={0} />
+            : <div className="flex flex-wrap items-center gap-3">
+                <span className="font-mono text-[11px] text-blanc-faint">Modification impossible : {list.length} offre{list.length > 1 ? "s" : ""} déjà reçue{list.length > 1 ? "s" : ""}.</span>
+                <DemanderAnnulation cible="demande" id={demandeId} role="client" label="Demander l'annulation de ma demande" />
+              </div>
+        )}
+      </div>
 
       <div className="grid md:grid-cols-3 gap-4">
         {list.map((o) => (

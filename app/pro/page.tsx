@@ -375,7 +375,10 @@ export default async function ProPage() {
                         <p className="font-mono text-xs text-blanc mt-2">Contact client : {m.client?.nom ?? "—"} · {m.client?.telephone ?? "tél. non renseigné"}{m.client?.email ? ` · ${m.client.email}` : ""}</p>
                         <Link href={`/pro/missions/${m.id}`} className="inline-block mt-3 font-mono text-[11px] uppercase tracking-wider text-blanc-dim hover:text-blanc transition">Voir la mission →</Link>
                       </div>
-                      {m.statut === "a_venir" && (
+                      {m.statut === "a_venir" && m.annulation_demandee_at && !m.annulation_decision && (
+                        <span className="tag bg-ambre-dim text-ambre-fort shrink-0">Annulation en attente de DealBus</span>
+                      )}
+                      {m.statut === "a_venir" && !(m.annulation_demandee_at && !m.annulation_decision) && (
                         <div className="flex gap-2 shrink-0 whitespace-nowrap sm:justify-end">
                           <DeclarerTerminee missionId={m.id} />
                           <AnnulerMission missionId={m.id} />

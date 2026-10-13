@@ -16,7 +16,7 @@ export default async function MesDemandesPage() {
 
   const { data: missions } = await supabase
     .from("missions")
-    .select("demande_id, statut, annulation_motif")
+    .select("demande_id, statut, annulation_motif, annulation_demandee_at, annulation_decision")
     .eq("client_id", user!.id);
 
   // Messages non lus (écrits par les transporteurs) par demande
@@ -48,6 +48,9 @@ export default async function MesDemandesPage() {
               (mission.statut === "annulee" || mission.statut === "litige");
 
             const annulationConfirmee = mission?.statut === "annulee";
+            const annulationEnAttente =
+              (!!mission?.annulation_demandee_at && !mission?.annulation_decision && mission?.statut === "a_venir") ||
+              (!!d.annulation_demandee_at && !d.annulation_decision);
 
             const enchereTerminee =
               d.mode === "enchere" &&
@@ -78,7 +81,12 @@ export default async function MesDemandesPage() {
                     )}
                   </span>
 
-                  {annulationSignalee ? (
+                  {annulationEnAttente ? (
+                    <span className="inline-flex items-center gap-2 rounded-lg border border-ambre/45 bg-ambre/10 px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-ambre-fort">
+                      <span className="inline-flex h-2 w-2 rounded-full bg-ambre" />
+                      Annulation en attente de DealBus
+                    </span>
+                  ) : annulationSignalee ? (
                     <span className="inline-flex items-center gap-2 rounded-lg border border-[#E8735D]/40 bg-[#E8735D]/10 px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-[#E8735D]">
                       <span className="inline-flex h-2 w-2 rounded-full bg-[#E8735D]" />
                       {annulationConfirmee ? "Mission annulée" : "Annulation signalée"}

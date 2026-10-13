@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { AddressInput } from "@/components/AddressInput";
 import { ConfirmModal } from "@/components/ConfirmModal";
+import { DemanderAnnulation } from "@/components/DemanderAnnulation";
 
 /* ---------- Déclarer une mission terminée ---------- */
 export function DeclarerTerminee({ missionId }: { missionId: string }) {
@@ -171,74 +172,9 @@ export function PublierRetour({ transporteurId }: { transporteurId: string }) {
   );
 }
 
-/* ---------- Annuler une mission (motif obligatoire, tracé) ---------- */
+/* ---------- Annuler une mission : demande motivée, validée par DealBus ---------- */
 export function AnnulerMission({ missionId }: { missionId: string }) {
-  const router = useRouter();
-  const [busy, setBusy] = useState(false);
-  const [open, setOpen] = useState(false);
-  const [motif, setMotif] = useState("");
-  const [error, setError] = useState("");
-
-  async function run() {
-    setBusy(true);
-    setError("");
-
-    try {
-      const res = await fetch(`/api/missions/${missionId}/cancel`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ motif: motif.trim() }),
-      });
-      const payload = await res.json().catch(() => ({}));
-
-      if (!res.ok) {
-        throw new Error(payload.error || "Impossible d'annuler la mission");
-      }
-
-      setMotif("");
-      router.refresh();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Une erreur est survenue");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <>
-      <div>
-        <button className="btn-ghost text-xs px-4 py-2 disabled:opacity-50" disabled={busy} onClick={() => { setError(""); setOpen(true); }}>
-          Annuler la mission
-        </button>
-        {error && <p className="mt-2 font-mono text-xs text-[#E8735D]">{error}</p>}
-      </div>
-      <ConfirmModal
-        open={open}
-        title="Annuler cette mission ?"
-        danger
-        confirmLabel="Confirmer l'annulation"
-        confirmDisabled={!motif.trim()}
-        busy={busy}
-        onConfirm={() => { setOpen(false); run(); }}
-        onCancel={() => { setOpen(false); setMotif(""); }}
-      >
-        <div>
-          <label className="label">Motif de l&apos;annulation (obligatoire)</label>
-          <textarea
-            className="input min-h-[90px] resize-none"
-            placeholder="Ex. le client a annulé son événement…"
-            value={motif}
-            onChange={(e) => setMotif(e.target.value)}
-          />
-          <p className="mt-3 text-[12px] text-blanc-dim bg-ambre-dim border border-ambre/40 rounded-sm px-3.5 py-2.5">
-            Les annulations sont tracées et vérifiées auprès du client. Un trajet déclaré
-            annulé mais réalisé en direct constitue un contournement : commission due
-            rétroactivement et exclusion de la plateforme.
-          </p>
-        </div>
-      </ConfirmModal>
-    </>
-  );
+  return <DemanderAnnulation cible="mission" id={missionId} role="transporteur" label="Demander l'annulation" />;
 }
 
 /* ---------- Types de véhicules (partagé) ---------- */

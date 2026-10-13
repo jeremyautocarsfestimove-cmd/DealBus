@@ -13,6 +13,7 @@ export const eur = (n: number) => Number(n).toLocaleString("fr-FR") + " €";
 export const jour = (d: string | null) => (d ? new Date(d).toLocaleDateString("fr-FR") : "—");
 
 /** Un dossier d'annulation est « à traiter » tant qu'un admin ne l'a pas tranché. */
-export function aTraiter(m: { statut: string; client_confirmation?: string | null }) {
-  return m.statut === "litige" || (m.statut === "annulee" && m.client_confirmation !== "bien_annule");
+export function aTraiter(m: { statut: string; client_confirmation?: string | null; annulation_demandee_at?: string | null; annulation_decision?: string | null }) {
+  const enAttente = !!m.annulation_demandee_at && !m.annulation_decision;
+  return enAttente || m.statut === "litige" || (m.statut === "annulee" && m.client_confirmation !== "bien_annule");
 }

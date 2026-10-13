@@ -1,3 +1,4 @@
+import { envoyer, echap, url } from "@/lib/annulations";
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -30,21 +31,69 @@ export async function POST(req: Request) {
     if (entity === "demande" && action === "annuler") {
       const { error } = await admin.from("demandes").update({ statut: "annulee" }).eq("id", id);
       if (error) throw error;
+    } else if (entity === "demande" && (action === "valider_annulation" || action === "refuser_annulation")) {
+      const { data: d } = await admin.from("demandes").select("id, numero, client_id, depart_adresse, arrivee_adresse, annulation_motif").eq("id", id).single();
+      if (!d) throw new Error("Demande introuvable");
+      const valide = action === "valider_annulation";
+      const { error } = await admin.from("demandes")
+        .update(valide
+          ? { statut: "annulee", annulation_decision: "validee", annulation_decidee_at: new Date().toISOString() }
+          : { annulation_decision: "refusee", annulation_decidee_at: new Date().toISOString() })
+        .eq("id", id);
+      if (error) throw error;
+      if (valide) await admin.from("offres").update({ statut: "non_retenue" }).eq("demande_id", id).in("statut", ["envoyee", "consultee"]);
+      const { data: cu } = await admin.auth.admin.getUserById(d.client_id);
+      const trajet = `${d.depart_adresse} → ${d.arrivee_adresse}`;
+      if (cu?.user?.email) {
+        await envoyer(cu.user.email, valide ? `✅ Demande #${d.numero} annulée` : `Annulation refusée — demande #${d.numero}`,
+          valide ? "Votre demande est annulée" : "Votre demande d'annulation n'a pas été retenue",
+          valide
+            ? [`DealBus a validé l'annulation de votre demande <strong>#${d.numero} ${echap(trajet)}</strong>. Les transporteurs ayant répondu en sont informés.`]
+            : [`Après examen, DealBus ne valide pas l'annulation de votre demande <strong>#${d.numero} ${echap(trajet)}</strong>. Elle reste ouverte. Pour toute précision, écrivez-nous depuis la bulle Aide.`],
+          { label: "Voir ma demande", url: url(`/mes-demandes/${id}`) });
+      }
+      if (valide) {
+        const { data: offres } = await admin.from("offres").select("transporteur_id").eq("demande_id", id);
+        for (const o of offres ?? []) {
+          const { data: tu } = await admin.auth.admin.getUserById(o.transporteur_id);
+          if (tu?.user?.email) await envoyer(tu.user.email, `Demande #${d.numero} annulée par le client`, "Demande annulée",
+            [`La demande <strong>#${d.numero} ${echap(trajet)}</strong> sur laquelle vous aviez fait une offre a été annulée par le client, avec validation de DealBus.`, `<strong>Motif :</strong> « ${echap(d.annulation_motif ?? "")} »`]);
+        }
+      }
     } else if (entity === "mission" && (action === "facturer" || action === "payer")) {
       const { error } = await admin.from("missions")
         .update({ facturation: action === "facturer" ? "facturee" : "payee" })
         .eq("id", id);
       if (error) throw error;
-    } else if (entity === "mission" && action === "valider_annulation") {
-      // Annulation considérée comme légitime par l'administration.
-      // La mission reste annulée et n'est plus traitée comme une commission à facturer.
+    } else if (entity === "mission" && (action === "valider_annulation" || action === "refuser_annulation")) {
+      // Décision sur une demande d'annulation (client ou transporteur).
+      const { data: m } = await admin.from("missions")
+        .select("id, client_id, transporteur_id, annulation_motif, annulation_demandee_par, annulation_demandee_role, demande:demandes(id, numero, depart_adresse, arrivee_adresse)")
+        .eq("id", id).single();
+      if (!m) throw new Error("Mission introuvable");
+      const valide = action === "valider_annulation";
       const { error } = await admin.from("missions")
-        .update({
-          statut: "annulee",
-          client_confirmation: "bien_annule",
-        })
+        .update(valide
+          ? { statut: "annulee", annulee_par: m.annulation_demandee_par, annulee_at: new Date().toISOString(), client_confirmation: "bien_annule", annulation_decision: "validee", annulation_decidee_at: new Date().toISOString() }
+          : { annulation_decision: "refusee", annulation_decidee_at: new Date().toISOString() })
         .eq("id", id);
       if (error) throw error;
+      /* eslint-disable @typescript-eslint/no-explicit-any */
+      const d: any = Array.isArray(m.demande) ? m.demande[0] : m.demande;
+      const trajet = d ? `${d.depart_adresse} → ${d.arrivee_adresse}` : "la mission";
+      const [{ data: cu }, { data: tu }] = await Promise.all([admin.auth.admin.getUserById(m.client_id), admin.auth.admin.getUserById(m.transporteur_id)]);
+      const demandeurRole = m.annulation_demandee_role ?? "transporteur";
+      const emailDemandeur = demandeurRole === "client" ? cu?.user?.email : tu?.user?.email;
+      const emailAutre = demandeurRole === "client" ? tu?.user?.email : cu?.user?.email;
+      if (valide) {
+        const paras = [`DealBus a validé l'annulation de la mission <strong>${echap(trajet)}</strong>, demandée par ${demandeurRole === "client" ? "le client" : "le transporteur"}.`, `<strong>Motif :</strong> « ${echap(m.annulation_motif ?? "")} »`];
+        if (emailDemandeur) await envoyer(emailDemandeur, `✅ Annulation validée — ${trajet}`, "Annulation validée", paras, { label: "Voir le dossier", url: url(demandeurRole === "client" ? `/mes-demandes/${d?.id ?? ""}` : `/pro/missions/${id}`) });
+        if (emailAutre) await envoyer(emailAutre, `🚫 Mission annulée — ${trajet}`, "La mission est annulée", [...paras, demandeurRole === "client" ? "Aucune commission n'est due sur cette mission." : "Votre demande peut être relancée depuis votre espace : les transporteurs de votre zone seront prévenus en priorité."], { label: "Voir le dossier", url: url(demandeurRole === "client" ? `/pro/missions/${id}` : `/mes-demandes/${d?.id ?? ""}`) });
+      } else if (emailDemandeur) {
+        await envoyer(emailDemandeur, `Annulation refusée — ${trajet}`, "Votre demande d'annulation n'a pas été retenue",
+          [`Après examen, DealBus ne valide pas l'annulation de la mission <strong>${echap(trajet)}</strong>. La mission reste prévue aux conditions convenues.`, "Si vous souhaitez apporter des précisions, écrivez-nous depuis la bulle Aide."],
+          { label: "Voir le dossier", url: url(demandeurRole === "client" ? `/mes-demandes/${d?.id ?? ""}` : `/pro/missions/${id}`) });
+      }
     } else if (entity === "mission" && action === "mettre_litige") {
       // L'annulation est contestée / nécessite un contrôle manuel.
       const { error } = await admin.from("missions")

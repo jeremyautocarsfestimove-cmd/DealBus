@@ -24,10 +24,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     );
   }
 
-  const [{ count: aValider }, { data: dossiers }, { count: supportNonLus }] = await Promise.all([
+  const [{ count: aValider }, { data: dossiers }, { count: supportNonLus }, { count: demandesAnnul }] = await Promise.all([
     supabase.from("transporteurs").select("id", { count: "exact", head: true }).eq("statut", "en_attente"),
-    supabase.from("missions").select("statut, client_confirmation").in("statut", ["annulee", "litige"]),
+    supabase.from("missions").select("statut, client_confirmation, annulation_demandee_at, annulation_decision").or("statut.in.(annulee,litige),and(annulation_demandee_at.not.is.null,annulation_decision.is.null)"),
     supabase.from("support_messages").select("id", { count: "exact", head: true }).eq("auteur", "user").is("lu_le", null),
+    supabase.from("demandes").select("id", { count: "exact", head: true }).not("annulation_demandee_at", "is", null).is("annulation_decision", null),
   ]);
 
   return (
@@ -37,7 +38,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <AdminMenu
           alertes={{
             transporteurs: aValider ?? 0,
-            litiges: (dossiers ?? []).filter(aTraiter).length,
+            litiges: (dossiers ?? []).filter(aTraiter).length + (demandesAnnul ?? 0),
             support: supportNonLus ?? 0,
           }}
         />

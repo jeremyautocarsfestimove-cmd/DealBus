@@ -7,13 +7,21 @@ export const metadata = { title: "Annulations & litiges — Administration" };
 export default async function AdminLitigesPage() {
   const supabase = await createClient();
   const { data } = await supabase.from("missions")
-    .select("*, demande:demandes(numero, depart_adresse, arrivee_adresse), retour:retours_vide(depart_adresse, arrivee_adresse), transporteur:transporteurs(raison_sociale)")
-    .in("statut", ["annulee", "litige"])
+    .select("*, demande:demandes(id, numero, depart_adresse, arrivee_adresse, date_aller), retour:retours_vide(depart_adresse, arrivee_adresse), transporteur:transporteurs(raison_sociale), client:profiles!missions_client_id_fkey(nom)")
+    .or("statut.in.(annulee,litige),and(annulation_demandee_at.not.is.null,annulation_decision.is.null)")
     .order("created_at", { ascending: false });
+
+  // Demandes (sans mission) dont le client demande l'annulation
+  const { data: demandesAnnul } = await supabase.from("demandes")
+    .select("id, numero, depart_adresse, arrivee_adresse, date_aller, annulation_motif, annulation_demandee_at, client:profiles(nom)")
+    .not("annulation_demandee_at", "is", null).is("annulation_decision", null)
+    .order("annulation_demandee_at", { ascending: false });
 
   /* eslint-disable @typescript-eslint/no-explicit-any */
   const dossiers = (data ?? []) as any[];
-  const restants = dossiers.filter(aTraiter);
+  const enAttente = dossiers.filter((m) => m.annulation_demandee_at && !m.annulation_decision && m.statut === "a_venir");
+  const autres = dossiers.filter((m) => !enAttente.includes(m));
+  const restants = dossiers.filter(aTraiter).length + (demandesAnnul ?? []).length;
 
   return (
     <main>
@@ -26,15 +34,75 @@ export default async function AdminLitigesPage() {
           </p>
         </div>
         <div className="flex gap-2 flex-wrap">
-          <span className={`tag ${restants.length ? TAG_ALERTE : "bg-vert-dim text-vert"}`}>
-            {restants.length} à traiter
+          <span className={`tag ${restants ? TAG_ALERTE : "bg-vert-dim text-vert"}`}>
+            {restants} à traiter
           </span>
           <span className="tag bg-asphalte-3 text-blanc-dim">{dossiers.length} total</span>
         </div>
       </div>
 
+      {(enAttente.length > 0 || (demandesAnnul ?? []).length > 0) && (
+        <div className="mb-10">
+          <h2 className="h-display text-2xl mb-1">Demandes d&apos;annulation à valider</h2>
+          <p className="text-sm text-blanc-dim mb-4">Rien n&apos;est annulé tant que vous n&apos;avez pas tranché. Les deux parties sont prévenues par email de votre décision.</p>
+          <div className="space-y-3">
+            {enAttente.map((m) => (
+              <div key={m.id} className="card border-ambre/50">
+                <div className="flex items-start justify-between gap-5 flex-wrap">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2.5 flex-wrap mb-2">
+                      <span className="tag bg-ambre-dim text-ambre-fort">Mission · demandée par {m.annulation_demandee_role === "client" ? "le client" : "le transporteur"}</span>
+                      <span className="font-mono text-[11px] text-blanc-faint">{m.annulation_demandee_at ? new Date(m.annulation_demandee_at).toLocaleString("fr-FR") : ""}</span>
+                    </div>
+                    <p className="font-semibold text-lg">#{m.demande?.numero} — {m.demande?.depart_adresse} → {m.demande?.arrivee_adresse}</p>
+                    <p className="font-mono text-xs text-blanc-faint mt-1.5">
+                      {m.demande?.date_aller ? `Départ ${new Date(m.demande.date_aller).toLocaleDateString("fr-FR")} · ` : ""}{m.transporteur?.raison_sociale ?? "?"} · client {m.client?.nom ?? "?"} · mission {eur(m.prix_final)} · commission {eur(m.commission_montant)}
+                    </p>
+                    <div className="mt-4 rounded-sm border border-ligne bg-asphalte px-4 py-3 max-w-3xl">
+                      <p className="font-mono text-[10px] uppercase tracking-wider text-blanc-faint mb-1">Motif</p>
+                      <p className="text-sm text-blanc-dim">« {m.annulation_motif} »</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 flex-wrap justify-end">
+                    <PilotageAction entity="mission" id={m.id} action="valider_annulation" label="Valider l'annulation" primary
+                      confirm="Valider : la mission passe en annulée, aucune commission, les deux parties sont prévenues." />
+                    <PilotageAction entity="mission" id={m.id} action="refuser_annulation" label="Refuser"
+                      confirm="Refuser : la mission reste prévue, le demandeur est prévenu." />
+                  </div>
+                </div>
+              </div>
+            ))}
+            {(demandesAnnul ?? []).map((d: any) => (
+              <div key={d.id} className="card border-ambre/50">
+                <div className="flex items-start justify-between gap-5 flex-wrap">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2.5 flex-wrap mb-2">
+                      <span className="tag bg-ambre-dim text-ambre-fort">Demande · offres reçues · client</span>
+                      <span className="font-mono text-[11px] text-blanc-faint">{new Date(d.annulation_demandee_at).toLocaleString("fr-FR")}</span>
+                    </div>
+                    <p className="font-semibold text-lg">#{d.numero} — {d.depart_adresse} → {d.arrivee_adresse}</p>
+                    <p className="font-mono text-xs text-blanc-faint mt-1.5">Départ {new Date(d.date_aller).toLocaleDateString("fr-FR")} · client {d.client?.nom ?? "?"}</p>
+                    <div className="mt-4 rounded-sm border border-ligne bg-asphalte px-4 py-3 max-w-3xl">
+                      <p className="font-mono text-[10px] uppercase tracking-wider text-blanc-faint mb-1">Motif</p>
+                      <p className="text-sm text-blanc-dim">« {d.annulation_motif} »</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 flex-wrap justify-end">
+                    <PilotageAction entity="demande" id={d.id} action="valider_annulation" label="Valider l'annulation" primary
+                      confirm="Valider : la demande est annulée, les transporteurs ayant répondu sont prévenus." />
+                    <PilotageAction entity="demande" id={d.id} action="refuser_annulation" label="Refuser"
+                      confirm="Refuser : la demande reste ouverte, le client est prévenu." />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <h2 className="h-display text-2xl mb-4">Annulations et litiges</h2>
       <div className="space-y-3">
-        {dossiers.map((m) => {
+        {autres.map((m) => {
           const traite = m.statut === "annulee" && m.client_confirmation === "bien_annule";
 
           return (
@@ -104,7 +172,7 @@ export default async function AdminLitigesPage() {
           );
         })}
 
-        {dossiers.length === 0 && (
+        {autres.length === 0 && (
           <div className="card text-center py-12">
             <p className="text-blanc-dim">Aucun dossier d&apos;annulation ou de litige.</p>
           </div>

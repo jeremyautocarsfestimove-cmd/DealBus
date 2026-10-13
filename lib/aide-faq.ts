@@ -64,7 +64,7 @@ export const FAQ: Faq[] = [
     id: "annulation", pour: ["client"],
     mots: ["annulation", "annuler", "imprevu", "rembourse", "remboursement"],
     question: "Que se passe-t-il en cas d'annulation ?",
-    reponse: "Les conditions d'annulation sont celles du transporteur retenu, jointes à son offre. Si c'est le transporteur qui annule, il doit le déclarer sur la plateforme : votre demande est relancée en priorité et l'annulation compte dans sa note. Dans tous les cas, écrivez-nous ici, nous suivons chaque dossier.",
+    reponse: "Une annulation, de votre côté comme de celui du transporteur, est une demande motivée que DealBus valide ou refuse ; tant qu'elle n'est pas validée, la mission reste prévue. Depuis votre demande : « Demander l'annulation », expliquez le motif, l'autre partie est informée et vous recevez la décision par email. Les conditions financières sont celles de l'offre du transporteur.",
   },
   {
     id: "messagerie", pour: ["client", "transporteur"],

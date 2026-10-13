@@ -257,9 +257,14 @@ export default function CguPage() {
         <Article n={13} titre="Annulations et vérifications">
           <p>
             Toute annulation d&apos;une Mission, qu&apos;elle émane du Client ou du
-            Transporteur, doit être déclarée sans délai sur la Plateforme avec indication du
-            motif. Les annulations sont enregistrées et horodatées. Une Mission régulièrement
-            annulée ne donne lieu à aucune commission.
+            Transporteur, prend la forme d&apos;une demande d&apos;annulation motivée,
+            déposée sans délai sur la Plateforme. L&apos;autre partie en est informée.
+            L&apos;annulation ne devient effective qu&apos;après validation par DealBus ;
+            jusque-là, la Mission reste prévue aux conditions convenues. DealBus peut refuser
+            une annulation dont le motif est manifestement insuffisant ou contraire aux
+            présentes conditions. Il en va de même d&apos;une Demande ayant déjà reçu des
+            Offres. Les demandes d&apos;annulation et les décisions sont enregistrées et
+            horodatées. Une Mission régulièrement annulée ne donne lieu à aucune commission.
           </p>
           <p>
             Afin de garantir la sincérité des déclarations, DealBus peut interroger le Client

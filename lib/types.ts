@@ -23,6 +23,10 @@ export interface Demande {
   heure_arrivee?: string | null;
   precisions?: string | null;
   completude?: number | null;
+  annulation_motif?: string | null;
+  annulation_demandee_at?: string | null;
+  annulation_decision?: "validee" | "refusee" | null;
+  annulation_decidee_at?: string | null;
   prix_estime: number | null;
   enchere_fin: string | null;
   created_at: string;
