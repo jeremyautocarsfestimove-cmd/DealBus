@@ -8,14 +8,14 @@ import { IllustrationsSprite, Illu, type IlluId } from "@/components/Illustratio
 // est le moyen simple d'y aller en car. Illustrations SVG intégrées
 // (components/Illustrations.tsx), un autocar ambre dans chaque scène.
 
-type Envie = { illu: IlluId; saison: string; titre: string; texte: string; prix: string; href: string; grande?: boolean };
+type Envie = { illu: IlluId; saison: string; titre: string; texte: string; href: string; grande?: boolean };
 const ENVIES: Envie[] = [
-  { illu: "noel", saison: "Décembre · Marchés de Noël", titre: "Strasbourg, Colmar, Reims", texte: "La sortie de fin d'année des CSE et des associations. Réservez tôt : les cars sont pleins dès novembre.", prix: "Depuis Paris · dès 1 450 € le car", href: "/location-autocar/trajet/paris-reims", grande: true },
-  { illu: "parc", saison: "Toute l'année", titre: "Parcs d'attractions", texte: "Disneyland, Astérix, Puy du Fou.", prix: "dès 590 €", href: "/location-autocar/trajet/paris-disneyland" },
-  { illu: "mer", saison: "Mai à septembre", titre: "Journée à la mer", texte: "Deauville, Étretat, Le Touquet.", prix: "dès 850 €", href: "/location-autocar/trajet/paris-deauville" },
-  { illu: "vigne", saison: "Septembre · Octobre", titre: "Vignobles & caves", texte: "Champagne, Loire, Bourgogne.", prix: "dès 720 €", href: "/location-autocar/trajet/paris-reims" },
-  { illu: "chateau", saison: "Printemps", titre: "Châteaux de la Loire", texte: "Chambord, Chenonceau, Amboise.", prix: "dès 980 €", href: "/demande?vers=Chambord" },
-  { illu: "londres", saison: "Séjours · 2 à 4 jours", titre: "Londres, Bruxelles, Amsterdam", texte: "Le car reste avec le groupe sur place : transferts, visites, retour. Un seul transporteur, un seul devis.", prix: "Londres depuis Paris · dès 2 100 €", href: "/location-autocar/trajet/paris-londres", grande: true },
+  { illu: "noel", saison: "Décembre · Marchés de Noël", titre: "Strasbourg, Colmar, Reims", texte: "La sortie de fin d'année des CSE et des associations. Réservez tôt : les cars sont pleins dès novembre.", href: "/location-autocar/trajet/paris-reims", grande: true },
+  { illu: "parc", saison: "Toute l'année", titre: "Parcs d'attractions", texte: "Disneyland, Astérix, Puy du Fou.", href: "/location-autocar/trajet/paris-disneyland" },
+  { illu: "mer", saison: "Mai à septembre", titre: "Journée à la mer", texte: "Deauville, Étretat, Le Touquet.", href: "/location-autocar/trajet/paris-deauville" },
+  { illu: "vigne", saison: "Septembre · Octobre", titre: "Vignobles & caves", texte: "Champagne, Loire, Bourgogne.", href: "/location-autocar/trajet/paris-reims" },
+  { illu: "chateau", saison: "Printemps", titre: "Châteaux de la Loire", texte: "Chambord, Chenonceau, Amboise.", href: "/demande?vers=Chambord" },
+  { illu: "londres", saison: "Séjours · 2 à 4 jours", titre: "Londres, Bruxelles, Amsterdam", texte: "Le car reste avec le groupe sur place : transferts, visites, retour. Un seul transporteur, un seul devis.", href: "/location-autocar/trajet/paris-londres", grande: true },
 ];
 
 const TYPES: { illu: IlluId; titre: string; sous: string; organisme: string }[] = [
@@ -33,14 +33,14 @@ const ETAPES = [
   { tag: "Vous décidez", tagCls: "bg-asphalte-3 text-blanc", titre: "Retenez, et partez", texte: "Coordonnées échangées avec le transporteur choisi, règlement direct avec lui. DealBus ne prend rien côté client." },
 ];
 
-type Dest = { illu: IlluId; titre: string; meta: string; texte: string; prix: string; href: string };
+type Dest = { illu: IlluId; titre: string; meta: string; texte: string; href: string };
 const DESTINATIONS: Dest[] = [
-  { illu: "parc", titre: "Disneyland Paris", meta: "Depuis Paris · 45 km · journée", texte: "La sortie la plus demandée par les écoles et les CSE. Dépose au parking cars, reprise le soir.", prix: "dès 590 € l'aller-retour", href: "/location-autocar/trajet/paris-disneyland" },
-  { illu: "msm", titre: "Mont-Saint-Michel", meta: "Depuis Paris · 360 km · journée ou 2 jours", texte: "Longue journée : les transporteurs prévoient souvent deux conducteurs, c'est inclus dans leur offre.", prix: "dès 1 380 €", href: "/location-autocar/trajet/paris-mont-saint-michel" },
-  { illu: "mer", titre: "Plages du Débarquement", meta: "Depuis Caen · 30 km · journée", texte: "Circuit mémoriel : Omaha Beach, cimetière américain, Arromanches. Le car suit le groupe toute la journée.", prix: "dès 420 €", href: "/location-autocar/trajet/caen-plages-du-debarquement" },
-  { illu: "vigne", titre: "Puy du Fou", meta: "Depuis Paris · 380 km · 2 jours", texte: "Nuit sur place : hébergement du chauffeur et immobilisation du car compris dans les offres.", prix: "dès 1 450 €", href: "/location-autocar/trajet/paris-puy-du-fou" },
-  { illu: "mer", titre: "Deauville · Honfleur", meta: "Depuis Paris · 200 km · journée", texte: "La journée à la mer des associations et des aînés. Arrêt possible à Honfleur sur le retour.", prix: "dès 890 €", href: "/location-autocar/trajet/paris-deauville" },
-  { illu: "londres", titre: "Londres", meta: "Depuis Paris · 460 km · 3 jours", texte: "Séjour avec le car sur place. Transporteurs habitués au tunnel et aux formalités de groupe.", prix: "dès 2 100 €", href: "/location-autocar/trajet/paris-londres" },
+  { illu: "parc", titre: "Disneyland Paris", meta: "Depuis Paris · 45 km · journée", texte: "La sortie la plus demandée par les écoles et les CSE. Dépose au parking cars, reprise le soir.", href: "/location-autocar/trajet/paris-disneyland" },
+  { illu: "msm", titre: "Mont-Saint-Michel", meta: "Depuis Paris · 360 km · journée ou 2 jours", texte: "Longue journée : les transporteurs prévoient souvent deux conducteurs, c'est inclus dans leur offre.", href: "/location-autocar/trajet/paris-mont-saint-michel" },
+  { illu: "mer", titre: "Plages du Débarquement", meta: "Depuis Caen · 30 km · journée", texte: "Circuit mémoriel : Omaha Beach, cimetière américain, Arromanches. Le car suit le groupe toute la journée.", href: "/location-autocar/trajet/caen-plages-du-debarquement" },
+  { illu: "vigne", titre: "Puy du Fou", meta: "Depuis Paris · 380 km · 2 jours", texte: "Nuit sur place : hébergement du chauffeur et immobilisation du car compris dans les offres.", href: "/location-autocar/trajet/paris-puy-du-fou" },
+  { illu: "mer", titre: "Deauville · Honfleur", meta: "Depuis Paris · 200 km · journée", texte: "La journée à la mer des associations et des aînés. Arrêt possible à Honfleur sur le retour.", href: "/location-autocar/trajet/paris-deauville" },
+  { illu: "londres", titre: "Londres", meta: "Depuis Paris · 460 km · 3 jours", texte: "Séjour avec le car sur place. Transporteurs habitués au tunnel et aux formalités de groupe.", href: "/location-autocar/trajet/paris-londres" },
 ];
 
 const CONFIANCE = [
@@ -98,7 +98,7 @@ export default function Home() {
           <div className="max-w-6xl mx-auto px-7">
             <div className="grid lg:grid-cols-[1fr_auto] gap-6 lg:items-end mb-9">
               <div><p className={eyebrow}>Envies du moment</p><h2 className={h2}>Où partir cette saison ?</h2></div>
-              <p className="text-blanc-dim max-w-sm text-[14.5px]">Des idées de sorties par saison, avec les ordres de prix constatés sur la plateforme. Un clic, et votre demande est pré-remplie.</p>
+              <p className="text-blanc-dim max-w-sm text-[14.5px]">Des idées de sorties par saison. Un clic, et votre demande est pré-remplie.</p>
             </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {ENVIES.map((e) => (
@@ -109,7 +109,6 @@ export default function Home() {
                     <p className="font-mono text-[10.5px] uppercase tracking-[.12em] text-ambre mb-1.5">{e.saison}</p>
                     <h3 className="h-display text-3xl">{e.titre}</h3>
                     <p className="text-[13.5px] text-white/85 mt-1.5 max-w-md">{e.texte}</p>
-                    <span className="inline-block mt-2.5 font-mono text-xs bg-white/15 border border-white/30 px-2.5 py-1 rounded-sm">{e.prix}</span>
                   </div>
                 </Link>
               ))}
@@ -180,8 +179,7 @@ export default function Home() {
                     <h4 className="h-display text-2xl">{d.titre}</h4>
                     <p className="font-mono text-[11px] text-blanc-faint tracking-wide mt-1">{d.meta}</p>
                     <p className="text-[13.5px] text-blanc-dim mt-2">{d.texte}</p>
-                    <div className="flex justify-between items-center mt-3 pt-3 border-t border-ligne">
-                      <b className="font-mono text-[13px] text-ambre-fort">{d.prix}</b>
+                    <div className="flex justify-end items-center mt-3 pt-3 border-t border-ligne">
                       <span className="font-mono text-[10.5px] uppercase tracking-[.1em]">Demander →</span>
                     </div>
                   </div>
