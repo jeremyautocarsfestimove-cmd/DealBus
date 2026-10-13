@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Nav } from "@/components/Nav";
 import { createClient } from "@/lib/supabase/client";
@@ -19,7 +19,10 @@ function messageClair(brut: string): string {
 }
 
 export default function NouveauMotDePassePage() {
-  const supabase = createClient();
+  // Client Supabase créé à la demande, côté navigateur uniquement : cette page
+  // est prérendue au build, où les variables NEXT_PUBLIC_* peuvent manquer.
+  const clientRef = useRef<ReturnType<typeof createClient> | null>(null);
+  const supabase = () => (clientRef.current ??= createClient());
   const [etat, setEtat] = useState<Etat>("verification");
   const [compte, setCompte] = useState<string | null>(null);
   const [motif, setMotif] = useState<string | null>(null);
@@ -54,12 +57,12 @@ export default function NouveauMotDePassePage() {
 
       // Le client browser (@supabase/ssr, flow PKCE) échange déjà le ?code=
       // automatiquement au démarrage : getSession attend cette initialisation.
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session } } = await supabase().auth.getSession();
       let ouverte = session;
 
       // Filet 1 : le code n'a pas été consommé automatiquement
       if (!ouverte && code) {
-        const { data, error: err } = await supabase.auth.exchangeCodeForSession(code);
+        const { data, error: err } = await supabase().auth.exchangeCodeForSession(code);
         if (err) {
           if (!actif) return;
           setMotif(
@@ -76,7 +79,7 @@ export default function NouveauMotDePassePage() {
       // Filet 2 : modèle d'email basé sur {{ .TokenHash }} plutôt que sur
       // {{ .ConfirmationURL }} — fonctionne alors depuis n'importe quel appareil.
       if (!ouverte && tokenHash && type === "recovery") {
-        const { data, error: err } = await supabase.auth.verifyOtp({
+        const { data, error: err } = await supabase().auth.verifyOtp({
           token_hash: tokenHash,
           type: "recovery",
         });
@@ -121,17 +124,17 @@ export default function NouveauMotDePassePage() {
 
     setSaving(true);
     try {
-      const { error: err } = await supabase.auth.updateUser({ password: mdp });
+      const { error: err } = await supabase().auth.updateUser({ password: mdp });
       if (err) { setError(messageClair(err.message)); return; }
 
       // Le cache de la barre de navigation est reconstruit à la volée
       try { localStorage.removeItem("dealbus_nav"); } catch { /* sans importance */ }
 
       // Destination selon le rôle, avec le même filet que la page de connexion
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user } } = await supabase().auth.getUser();
       const lecture = (async () => {
         if (!user) return "/login";
-        const { data: p } = await supabase
+        const { data: p } = await supabase()
           .from("profiles").select("role").eq("id", user.id).maybeSingle();
         const role = p?.role ?? "client";
         if (role === "transporteur") return "/pro";
