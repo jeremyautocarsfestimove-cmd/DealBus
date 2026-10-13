@@ -95,7 +95,7 @@ export function Nav() {
     ];
 
   return (
-    <header className="sombre sticky top-0 z-50 bg-asphalte/95 backdrop-blur border-b border-ligne">
+    <header className="sombre sticky top-0 z-[100] bg-asphalte/95 backdrop-blur border-b border-ligne">
       <nav className="max-w-6xl mx-auto px-7 py-4 flex items-center justify-between">
         <Link href="/" className="text-ambre"><Logo /></Link>
 

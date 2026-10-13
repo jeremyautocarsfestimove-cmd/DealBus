@@ -57,7 +57,7 @@ export const FAQ: Faq[] = [
     id: "modifier", pour: ["client"],
     mots: ["modifier", "changer", "erreur", "corriger", "supprimer", "annuler ma demande", "clore", "date", "horaire", "passagers"],
     question: "Je me suis trompé dans ma demande",
-    reponse: "Une demande ne se modifie pas une fois diffusée, pour que les offres restent comparables. Déposez une nouvelle demande avec les bons éléments, puis clôturez l'ancienne depuis « Mes demandes » (bouton « Ne pas donner suite »). Si des offres ont déjà été reçues, prévenez les transporteurs par la messagerie.",
+    reponse: "Tant qu'aucune offre n'a été reçue, vous pouvez modifier votre demande depuis « Mes demandes » (bouton « Modifier ma demande »). Dès qu'une offre est arrivée, elle n'est plus modifiable, pour que les offres restent comparables : clôturez-la (« Clore sans donner suite ») et déposez-en une nouvelle.",
     lien: { label: "Mes demandes", href: "/mes-demandes" },
   },
   {

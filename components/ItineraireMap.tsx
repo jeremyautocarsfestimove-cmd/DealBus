@@ -113,7 +113,7 @@ export function ItineraireMap({ depart, arrivee, allerRetour = false, montrerTem
   const kmTotal = km !== null && allerRetour ? km * 2 : km;
 
   return (
-    <div className="rounded border border-ligne overflow-hidden mb-8">
+    <div className="rounded border border-ligne overflow-hidden mb-8 relative isolate">
       <div ref={conteneur} className="h-64 w-full bg-asphalte-2" />
       <div className="flex items-center justify-between gap-3 flex-wrap px-4 py-3 bg-asphalte-2/60 border-t border-ligne font-mono text-xs">
         {km === null ? (

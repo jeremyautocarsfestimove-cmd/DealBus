@@ -41,6 +41,8 @@ function DemandeWizard() {
   const router = useRouter();
   const params = useSearchParams();
   const supabase = createClient();
+  const modifierId = params.get("modifier");
+  const [chargement, setChargement] = useState(!!modifierId);
   const [step, setStep] = useState(1);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -81,6 +83,43 @@ function DemandeWizard() {
     mode: "devis" as DemandeMode,
   });
   const set = (k: string, v: unknown) => setForm((f) => ({ ...f, [k]: v }));
+
+  // Mode modification : pré-remplir depuis la demande existante (RLS : seul son client y accède)
+  useEffect(() => {
+    if (!modifierId) return;
+    let actif = true;
+    (async () => {
+      const { data: d } = await supabase.from("demandes").select("*").eq("id", modifierId).maybeSingle();
+      if (!actif) return;
+      if (!d) { setError("Demande introuvable ou non modifiable."); setChargement(false); return; }
+      if (d.statut !== "ouverte") { setError("Cette demande n'est plus ouverte."); setChargement(false); return; }
+      setForm((f) => ({
+        ...f,
+        type_trajet: d.type_trajet,
+        depart_adresse: d.depart_adresse,
+        depart_departement: d.depart_departement ?? "",
+        arrivee_adresse: d.arrivee_adresse,
+        date_aller: String(d.date_aller),
+        heure_aller: d.heure_aller ? String(d.heure_aller).slice(0, 5) : "",
+        heure_arrivee: d.heure_arrivee ? String(d.heure_arrivee).slice(0, 5) : "",
+        date_retour: d.date_retour ? String(d.date_retour) : "",
+        heure_retour: d.heure_retour ? String(d.heure_retour).slice(0, 5) : "",
+        passagers: String(d.passagers),
+        vehicule_utilise_sur_place: !!d.vehicule_utilise_sur_place,
+        sur_place_repondu: !!d.sur_place_repondu,
+        organisme: d.organisme ?? "",
+        motif: d.motif ?? "",
+        equipements: d.equipements ?? [],
+        budget: d.budget ?? "",
+        precisions: d.precisions ?? "",
+        mode: d.mode,
+      }));
+      setChargement(false);
+    })();
+    return () => { actif = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [modifierId]);
+
   const toggleEquipement = (id: string) =>
     set("equipements", form.equipements.includes(id) ? form.equipements.filter((e) => e !== id) : [...form.equipements, id]);
 
@@ -207,6 +246,23 @@ function DemandeWizard() {
     setError(null);
     const e1 = erreurEtape(1) ?? erreurEtape(2) ?? validerEnchereFin();
     if (e1) { setError(e1); setSaving(false); return; }
+    if (modifierId) {
+      const res = await fetch("/api/demandes/modifier", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "modifier", demande_id: modifierId, champs: {
+          type_trajet: form.type_trajet, depart_adresse: form.depart_adresse, depart_departement: form.depart_departement,
+          arrivee_adresse: form.arrivee_adresse, date_aller: form.date_aller, heure_aller: form.heure_aller || null,
+          heure_arrivee: form.heure_arrivee || null, date_retour: form.date_retour || null, heure_retour: form.heure_retour || null,
+          passagers: Number(form.passagers), vehicule_utilise_sur_place: form.vehicule_utilise_sur_place, sur_place_repondu: form.sur_place_repondu,
+          organisme: form.organisme || null, motif: form.motif || null, equipements: form.equipements, budget: form.budget || null,
+          precisions: form.precisions || null, completude: score,
+        } }),
+      });
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok) { setError(j.error ?? "Erreur"); setSaving(false); return; }
+      router.push(`/mes-demandes/${modifierId}`);
+      return;
+    }
     const { data: { user } } = await supabase.auth.getUser();
     if (user) { await insertDemande(user.id); return; }
     setNeedAuth(true);
@@ -302,8 +358,14 @@ function DemandeWizard() {
     <>
       <Nav />
       <main className="max-w-6xl mx-auto px-7 py-12">
-        <p className="eyebrow mb-3">Demande de devis</p>
-        <h1 className="h-display text-4xl mb-8">Décrivez votre déplacement.</h1>
+        <p className="eyebrow mb-3">{modifierId ? "Modification" : "Demande de devis"}</p>
+        <h1 className="h-display text-4xl mb-8">{modifierId ? "Modifiez votre demande." : "Décrivez votre déplacement."}</h1>
+        {modifierId && (
+          <p className="text-[13px] text-blanc-dim bg-ambre-dim border border-ambre/40 rounded-sm px-4 py-3 mb-6 max-w-2xl">
+            Possible tant qu&apos;aucune offre n&apos;a été reçue. Les transporteurs de votre zone verront la version mise à jour.
+          </p>
+        )}
+        {chargement && <p className="text-sm text-blanc-faint mb-6">Chargement de votre demande…</p>}
 
         {/* Stepper */}
         <div className="grid grid-cols-2 sm:grid-cols-4 border border-ligne rounded-sm overflow-hidden mb-7 bg-asphalte-2">
@@ -485,7 +547,7 @@ function DemandeWizard() {
             {step === 4 && (
               <div className="space-y-5">
                 <p className="text-sm text-blanc-dim leading-relaxed">
-                  Votre demande est prête. Elle sera diffusée, anonymement, aux transporteurs vérifiés
+                  {modifierId ? "Votre demande mise à jour remplace la précédente. Elle reste diffusée, anonymement, aux transporteurs vérifiés" : "Votre demande est prête. Elle sera diffusée, anonymement, aux transporteurs vérifiés"}
                   {form.depart_departement ? ` qui desservent le ${form.depart_departement}` : " de votre région"}.
                   Les premières offres arrivent généralement dans la journée.
                 </p>
@@ -544,7 +606,7 @@ function DemandeWizard() {
               </button>
             ) : (
               <button className="btn-primary disabled:opacity-50" disabled={saving} onClick={submit}>
-                {saving ? "Envoi…" : "Envoyer ma demande →"}
+                {saving ? "Envoi…" : modifierId ? "Enregistrer les modifications →" : "Envoyer ma demande →"}
               </button>
             )}
           </div>

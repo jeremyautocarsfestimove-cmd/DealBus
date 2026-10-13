@@ -215,7 +215,7 @@ export function AideWidget({ ouvertParDefaut = false, pleinePage = false }: { ou
   if (pleinePage) return panneau;
 
   return (
-    <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-3">
+    <div className="fixed bottom-5 right-5 z-[90] flex flex-col items-end gap-3">
       {ouvert && panneau}
       {!ouvert && (
         <button onClick={() => setOuvert(true)}

@@ -6,6 +6,7 @@ import type { Demande, Offre, TransporteurAnonyme } from "@/lib/types";
 import { RetenirOffre, EnchereCliente, AvisForm } from "./client-actions";
 import { ItineraireMap } from "@/components/ItineraireMap";
 import { Messagerie } from "@/components/Messagerie";
+import { GererDemande } from "./gerer-demande";
 
 const eur = (n: number) => Number(n).toLocaleString("fr-FR") + " €";
 
@@ -228,10 +229,13 @@ async function DevisView({ demandeId }: { demandeId: string }) {
 
   return (
     <>
-      <h1 className="h-display text-4xl mb-3">Comparez vos offres.</h1>
-      <p className="text-blanc-dim mb-10 max-w-xl">
-        Profils anonymisés, un seul prix chacun — les transporteurs répondent en tir unique.
+      <h1 className="h-display text-4xl mb-3">{list.length ? "Comparez vos offres." : "Votre demande est diffusée."}</h1>
+      <p className="text-blanc-dim mb-5 max-w-xl">
+        {list.length
+          ? "Profils anonymisés, un seul prix chacun — les transporteurs répondent en tir unique."
+          : "Les transporteurs vérifiés de votre zone ont été prévenus. Tant qu'aucune offre n'est reçue, vous pouvez encore modifier votre demande."}
       </p>
+      <div className="mb-10"><GererDemande demandeId={demandeId} nbOffres={list.length} /></div>
 
       <div className="grid md:grid-cols-3 gap-4">
         {list.map((o) => (
