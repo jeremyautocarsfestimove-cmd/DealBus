@@ -6,6 +6,7 @@ import type { Demande } from "@/lib/types";
 import { DevisForm } from "./devis-form";
 import { EnchereForm } from "./enchere-form";
 import { ItineraireMap } from "@/components/ItineraireMap";
+import { Messagerie } from "@/components/Messagerie";
 import { calcItineraire } from "@/lib/itineraire";
 import {
   ORGANISMES, EQUIPEMENTS, TARIFS_DEFAUT, BAREME,
@@ -34,6 +35,10 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
     cout_immobilisation: Number(moi?.cout_immobilisation ?? TARIFS_DEFAUT.cout_immobilisation),
     marge_pct: Number(moi?.marge_pct ?? TARIFS_DEFAUT.marge_pct),
   };
+
+  // Mission conclue avec moi ? (identités révélées → messagerie sans filtre)
+  const { data: maMission } = await supabase
+    .from("missions").select("id").eq("demande_id", id).eq("transporteur_id", user!.id).maybeSingle();
 
   // Devis déjà envoyé ? (tir unique)
   const { data: monOffre } = await supabase
@@ -163,6 +168,13 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
         </div>
 
         <ItineraireMap depart={d.depart_adresse} arrivee={d.arrivee_adresse} allerRetour={d.type_trajet === "aller_retour"} montrerTemps />
+
+        <div className="mt-8 mb-8">
+          <h2 className="h-display text-2xl mb-1">Une question au client ?</h2>
+          <p className="text-sm text-blanc-dim mb-4">Horaires, parking, hôtel du groupe, matériel… Le client reçoit aussi votre message par email. Le prix, lui, passe par votre offre.</p>
+          <Messagerie demandeId={id} transporteurId={user!.id} role="transporteur"
+            interlocuteur={`Client de la demande #${d.numero}`} anonyme={!maMission} />
+        </div>
 
         <div className="mt-8">
           {d.mode === "devis" ? (

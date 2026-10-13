@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { Demande, Offre, TransporteurAnonyme } from "@/lib/types";
 import { RetenirOffre, EnchereCliente, AvisForm } from "./client-actions";
 import { ItineraireMap } from "@/components/ItineraireMap";
+import { Messagerie } from "@/components/Messagerie";
 
 const eur = (n: number) => Number(n).toLocaleString("fr-FR") + " €";
 
@@ -174,6 +175,13 @@ export default async function DemandeDetailPage({ params }: { params: Promise<{ 
                 </p>
               )}
             </div>
+
+            {!annulationConfirmee && (
+              <div className="max-w-xl mt-5">
+                <Messagerie demandeId={id} transporteurId={mission.transporteur_id} role="client"
+                  interlocuteur={mission.transporteur?.raison_sociale ?? "Votre transporteur"} anonyme={false} />
+              </div>
+            )}
           </>
         ) : d.statut !== "ouverte" ? (
           <>
@@ -283,6 +291,16 @@ async function DevisView({ demandeId }: { demandeId: string }) {
             )}
 
             <RetenirOffre offreId={o.id} />
+
+            <details className="mt-4 group">
+              <summary className="cursor-pointer font-mono text-[11.5px] uppercase tracking-wider text-blanc-faint hover:text-blanc-dim">
+                Poser une question au transporteur ▾
+              </summary>
+              <div className="mt-3">
+                <Messagerie demandeId={demandeId} transporteurId={o.transporteur_id} role="client"
+                  interlocuteur={`Transporteur #${o.transporteur?.numero_anonyme ?? ""}`} anonyme />
+              </div>
+            </details>
           </div>
         ))}
 

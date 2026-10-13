@@ -197,7 +197,40 @@ export default function CguPage() {
           </p>
         </Article>
 
-        <Article n={11} titre="Commission">
+        <Article n={11} titre="Messagerie">
+          <p>
+            DealBus met à la disposition des Clients et des Transporteurs un espace d&apos;échange
+            de messages rattaché à chaque Demande. Chaque message est également transmis par
+            email à son destinataire. La messagerie sert uniquement à échanger sur la Demande
+            concernée : questions sur le trajet, les horaires, le groupe, les équipements ou
+            les conditions d&apos;une Offre.
+          </p>
+          <p>Les Utilisateurs, et en particulier les Transporteurs, s&apos;engagent à :</p>
+          <ul className="list-disc pl-5 space-y-1">
+            <li>répondre dans un délai raisonnable aux messages reçus ;</li>
+            <li>communiquer tout prix exclusivement par la publication d&apos;une Offre, jamais dans un message ;</li>
+            <li>ne pas indiquer, avant la Sélection, d&apos;adresse email, de numéro de téléphone, de raison sociale, de nom d&apos;établissement, d&apos;adresse de site internet ou de réseau social, ni solliciter ces éléments auprès de l&apos;autre partie ;</li>
+            <li>ne pas utiliser la messagerie pour promouvoir ses propres services ou ceux d&apos;un tiers, ni pour inciter l&apos;autre partie à poursuivre l&apos;échange hors de la Plateforme ;</li>
+            <li>ne pas tenter de contourner la Plateforme par quelque moyen que ce soit ;</li>
+            <li>s&apos;exprimer correctement et avec courtoisie, sans propos dénigrants, injurieux ou portant atteinte aux droits d&apos;un tiers.</li>
+          </ul>
+          <p>
+            La Plateforme applique des contrôles automatiques : un message contenant des
+            coordonnées avant la Sélection, ou un prix hors Offre, est refusé à l&apos;envoi.
+            Toute infraction constatée peut donner lieu à un avertissement, à la suspension
+            temporaire du compte ou à sa suppression définitive sans préavis, et au refus
+            d&apos;accès à tout ou partie du Service.
+          </p>
+          <p>
+            Les messages sont publiés sous la seule responsabilité de leurs auteurs. DealBus
+            peut consulter les échanges en cas de litige ou de signalement et se réserve le droit
+            de supprimer tout message manifestement incohérent, injurieux, illicite ou contraire
+            aux bonnes mœurs. Après la Sélection, les deux parties concernées peuvent librement
+            échanger leurs coordonnées et poursuivre leurs échanges par tout moyen.
+          </p>
+        </Article>
+
+        <Article n={12} titre="Commission">
           <p>
             L&apos;usage de la Plateforme est intégralement gratuit pour les Clients. Les
             Transporteurs sont redevables d&apos;une commission uniquement en cas de succès,
@@ -221,7 +254,7 @@ export default function CguPage() {
           </p>
         </Article>
 
-        <Article n={12} titre="Annulations et vérifications">
+        <Article n={13} titre="Annulations et vérifications">
           <p>
             Toute annulation d&apos;une Mission, qu&apos;elle émane du Client ou du
             Transporteur, doit être déclarée sans délai sur la Plateforme avec indication du
@@ -239,13 +272,13 @@ export default function CguPage() {
           </p>
         </Article>
 
-        <Article n={13} titre="Loyauté de la mise en relation — droit de suite">
+        <Article n={14} titre="Loyauté de la mise en relation — droit de suite">
           <p>
             La valeur du service rendu par DealBus réside dans la mise en relation. En
             conséquence, toute prestation de transport conclue entre un Client et un
             Transporteur mis en relation par la Plateforme, portant sur la Demande ayant donné
             lieu à cette mise en relation ou en découlant directement, donne lieu à commission
-            dans les conditions de l&apos;article 11 — y compris lorsqu&apos;elle est
+            dans les conditions de l&apos;article 12 — y compris lorsqu&apos;elle est
             conclue, modifiée ou réglée en dehors de la Plateforme, et ce pendant une durée de
             douze (12) mois suivant la révélation des identités.
           </p>
@@ -264,7 +297,7 @@ export default function CguPage() {
           </p>
         </Article>
 
-        <Article n={14} titre="Obligations des Transporteurs">
+        <Article n={15} titre="Obligations des Transporteurs">
           <p>Le Transporteur s&apos;engage, pendant toute la durée de son inscription, à :</p>
           <p>
             — détenir et maintenir en cours de validité l&apos;ensemble des titres, licences,
@@ -282,7 +315,7 @@ export default function CguPage() {
           </p>
         </Article>
 
-        <Article n={15} titre="Avis et réputation">
+        <Article n={16} titre="Avis et réputation">
           <p>
             À l&apos;issue d&apos;une Mission déclarée réalisée, le Client peut publier une
             évaluation du Transporteur (note de 1 à 5 et commentaire facultatif). Les
@@ -302,7 +335,7 @@ export default function CguPage() {
           </p>
         </Article>
 
-        <Article n={16} titre="Suspension et clôture des comptes">
+        <Article n={17} titre="Suspension et clôture des comptes">
           <p>
             DealBus peut adresser un avertissement, suspendre temporairement ou clôturer
             définitivement un compte, sans indemnité, en cas de manquement aux présentes CGU,
@@ -319,7 +352,7 @@ export default function CguPage() {
           </p>
         </Article>
 
-        <Article n={17} titre="Données personnelles">
+        <Article n={18} titre="Données personnelles">
           <p>
             DealBus traite les données personnelles des Utilisateurs en qualité de responsable
             de traitement, aux fins de fourniture du service (gestion des comptes, mise en
@@ -340,7 +373,7 @@ export default function CguPage() {
           </p>
         </Article>
 
-        <Article n={18} titre="Propriété intellectuelle">
+        <Article n={19} titre="Propriété intellectuelle">
           <p>
             La Plateforme, sa marque, son identité visuelle, ses textes, son code, ses bases de
             données et l&apos;ensemble de leurs éléments constitutifs sont la propriété
@@ -352,7 +385,7 @@ export default function CguPage() {
           </p>
         </Article>
 
-        <Article n={19} titre="Responsabilité de DealBus">
+        <Article n={20} titre="Responsabilité de DealBus">
           <p>
             DealBus est tenue d&apos;une obligation de moyens quant à la disponibilité et au
             bon fonctionnement de la Plateforme, et ne saurait répondre des interruptions dues
@@ -372,7 +405,7 @@ export default function CguPage() {
           </p>
         </Article>
 
-        <Article n={20} titre="Droit applicable et litiges">
+        <Article n={21} titre="Droit applicable et litiges">
           <p>
             Les présentes CGU sont soumises au droit français. En cas de différend, les parties
             rechercheront prioritairement une solution amiable. Le Client consommateur peut

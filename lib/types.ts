@@ -31,6 +31,7 @@ export interface Demande {
 export interface Offre {
   id: string;
   demande_id: string;
+  transporteur_id: string;
   statut: "envoyee" | "consultee" | "retenue" | "non_retenue";
   prix_ttc: number;
   vehicule_type: string;
