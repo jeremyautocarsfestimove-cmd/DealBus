@@ -39,7 +39,7 @@ export function QuickDemandeForm() {
         {TYPES.map((t) => (
           <button
             key={t.id}
-            onClick={() => setType(t.id)}
+            onClick={() => { setType(t.id); if (t.id === "aller_simple") { set("date_retour", ""); set("heure_retour", ""); } }}
             className={`pb-3 text-sm font-semibold border-b-2 -mb-px transition
               ${type === t.id ? "text-ambre border-ambre" : "text-blanc-faint border-transparent hover:text-blanc-dim"}`}
           >
@@ -81,15 +81,15 @@ export function QuickDemandeForm() {
               value={form.heure_aller} onChange={(e) => set("heure_aller", e.target.value)} />
           </div>
         </div>
-        {type === "aller_retour" ? (
+        {type !== "aller_simple" ? (
           <div className="grid grid-cols-[1fr_110px] gap-2.5">
             <div>
-              <label className="label">Retour</label>
-              <input className="input" type="date"
+              <label className="label">{type === "circuit" ? "Fin du circuit" : "Retour"}</label>
+              <input className="input" type="date" min={form.date_aller || undefined}
                 value={form.date_retour} onChange={(e) => set("date_retour", e.target.value)} />
             </div>
             <div>
-              <label className="label">Départ à</label>
+              <label className="label">{type === "circuit" ? "Retour vers" : "Départ à"}</label>
               <input className="input" type="time"
                 value={form.heure_retour} onChange={(e) => set("heure_retour", e.target.value)} />
             </div>
@@ -103,7 +103,7 @@ export function QuickDemandeForm() {
         )}
       </div>
 
-      {type === "aller_retour" && (
+      {type !== "aller_simple" && (
         <div className="mb-4">
           <label className="label">Passagers</label>
           <input className="input" type="number" min={1} placeholder="Ex. 50"

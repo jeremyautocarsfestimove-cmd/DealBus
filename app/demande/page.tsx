@@ -209,7 +209,7 @@ function DemandeWizard() {
             <div className="space-y-4">
               <div className="flex gap-6 border-b border-ligne-strong mb-6">
                 {(["aller_retour", "aller_simple", "circuit"] as const).map((t) => (
-                  <button key={t} onClick={() => set("type_trajet", t)}
+                  <button key={t} onClick={() => { set("type_trajet", t); if (t === "aller_simple") { set("date_retour", ""); set("heure_retour", ""); } }}
                     className={`pb-3 text-sm font-semibold border-b-2 -mb-px transition
                       ${form.type_trajet === t ? "text-ambre border-ambre" : "text-blanc-faint border-transparent"}`}>
                     {t === "aller_retour" ? "Aller-retour" : t === "aller_simple" ? "Aller simple" : "Circuit"}
@@ -252,15 +252,15 @@ function DemandeWizard() {
                     value={form.heure_aller} onChange={(e) => set("heure_aller", e.target.value)} />
                 </div>
               </div>
-              {form.type_trajet === "aller_retour" && (
+              {form.type_trajet !== "aller_simple" && (
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="label">Retour — date</label>
-                    <input className="input" type="date"
+                    <label className="label">{form.type_trajet === "circuit" ? "Fin du circuit — date" : "Retour — date"}</label>
+                    <input className="input" type="date" min={form.date_aller || undefined}
                       value={form.date_retour} onChange={(e) => set("date_retour", e.target.value)} />
                   </div>
                   <div>
-                    <label className="label">Départ à</label>
+                    <label className="label">{form.type_trajet === "circuit" ? "Retour vers" : "Départ à"}</label>
                     <input className="input" type="time"
                       value={form.heure_retour} onChange={(e) => set("heure_retour", e.target.value)} />
                   </div>
