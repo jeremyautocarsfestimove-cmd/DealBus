@@ -82,7 +82,7 @@ export function Nav() {
   const entrees: { href: string; label: string; aide?: string }[] =
     role === "transporteur" ? [
       { href: "/pro", label: "Mon espace", aide: "Leads, offres, missions" },
-      { href: "/pro#profil", label: "Mon profil", aide: "Dépôt, zones, véhicules, tarifs" },
+      { href: "/pro#profil", label: "Mon profil", aide: "Dépôt, zones, véhicules" },
       { href: "/compte", label: "Mon compte", aide: "Email, mot de passe" },
     ] : role === "admin" ? [
       { href: "/admin", label: "Administration" },

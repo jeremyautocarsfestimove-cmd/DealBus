@@ -88,8 +88,8 @@ export const FAQ: Faq[] = [
   {
     id: "parametres", pour: ["transporteur"],
     mots: ["depot", "haut-le-pied", "haut le pied", "calculateur", "cout de revient", "tarifs", "parametres", "marge"],
-    question: "À quoi servent les paramètres de devis ?",
-    reponse: "Dans « Mon profil → Paramètres de devis », renseignez l'adresse de votre dépôt et vos coûts (km, heure, nuit, immobilisation, marge). Chaque fiche de demande calcule alors votre haut-le-pied réel et pré-remplit le calculateur. Vous restez libre du prix final.",
+    question: "À quoi sert l'adresse de mon dépôt ?",
+    reponse: "Dans « Mon profil → Mon dépôt », renseignez l'adresse de départ de vos véhicules. Chaque fiche de demande calcule alors votre haut-le-pied réel (kilomètres et temps dépôt ↔ prise en charge), le kilométrage total et le nombre de conducteurs probable. Elle n'est jamais diffusée.",
     lien: { label: "Mon profil", href: "/pro" },
   },
   {

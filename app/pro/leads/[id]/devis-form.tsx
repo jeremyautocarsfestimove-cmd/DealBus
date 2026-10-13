@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { TYPES_VEHICULES } from "../../pro-actions";
 import { INCLUS, coutDeRevient, eur, type PlanMission, type Tarifs } from "@/lib/assistant-demande";
+import { FEATURES } from "@/lib/features";
 
 type Vehicule = { id: string; type: string; marque_modele: string | null; places: number; annee: number | null };
 
@@ -114,9 +115,9 @@ export function DevisForm({
     : null;
 
   return (
-    <div className="grid lg:grid-cols-2 gap-5 items-start">
-      {/* ---------- Calculateur de coût de revient ---------- */}
-      <div className="card">
+    <div className={`grid gap-5 items-start ${FEATURES.calculateur ? "lg:grid-cols-2" : "max-w-2xl"}`}>
+      {/* ---------- Calculateur de coût de revient (en suspens : FEATURES.calculateur) ---------- */}
+      {FEATURES.calculateur && <div className="card">
         <h3 className="h-display text-xl mb-1">Coût de revient estimé</h3>
         <p className="text-[12.5px] text-blanc-dim mb-4">Pré-rempli avec les données de la demande et vos paramètres. Modifiez les tarifs pour cette mission si besoin.</p>
         <table className="w-full text-[13px]">
@@ -164,7 +165,7 @@ export function DevisForm({
             )}
           </div>
         </div>
-      </div>
+      </div>}
 
       {/* ---------- L'offre ---------- */}
       <div className="card space-y-4">
@@ -182,9 +183,9 @@ export function DevisForm({
         )}
         <div>
           <label className="label">Votre prix (TTC, tout compris)</label>
-          <input className="input font-mono text-lg" type="number" placeholder={String(Math.round(calc.prixTTC))}
+          <input className="input font-mono text-lg" type="number" placeholder={FEATURES.calculateur ? String(Math.round(calc.prixTTC)) : "Ex. 2590"}
             value={form.prix_ttc} onChange={(e) => set("prix_ttc", e.target.value)} />
-          {margeReelle !== null && (
+          {FEATURES.calculateur && margeReelle !== null && (
             <p className={`font-mono text-[11px] mt-1.5 ${margeReelle < 5 ? "text-[#E8735D]" : margeReelle < 12 ? "text-ambre" : "text-vert"}`}>
               {margeReelle < 0 ? `Sous votre coût de revient (${margeReelle} %)` : `Marge nette après commission : ${margeReelle} %`}
               {fourchette && prixSaisi > fourchette.max ? " · au-dessus de la fourchette vue par le client" : ""}

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { AddressInput } from "@/components/AddressInput";
 import { TARIFS_DEFAUT } from "@/lib/assistant-demande";
+import { FEATURES } from "@/lib/features";
 
 // Dépôt et coûts de revient du transporteur : alimentent le calcul du
 // haut-le-pied sur chaque lead et le calculateur du formulaire de devis.
@@ -71,27 +72,28 @@ export function ParametresDevis({
 
   return (
     <div className="card mt-5">
-      <h3 className="h-display text-xl mb-1">Paramètres de devis</h3>
+      <h3 className="h-display text-xl mb-1">{FEATURES.calculateur ? "Paramètres de devis" : "Mon dépôt"}</h3>
       <p className="text-sm text-blanc-dim mb-5">
-        Votre dépôt sert à calculer le haut-le-pied sur chaque demande. Vos coûts pré-remplissent le
-        calculateur du formulaire de devis : vous restez libre du prix final. Laissez vide pour utiliser le barème DealBus.
+        {FEATURES.calculateur
+          ? "Votre dépôt sert à calculer le haut-le-pied sur chaque demande. Vos coûts pré-remplissent le calculateur du formulaire de devis : vous restez libre du prix final. Laissez vide pour utiliser le barème DealBus."
+          : "Votre dépôt sert à calculer le haut-le-pied (kilomètres et temps dépôt ↔ prise en charge) sur chaque demande."}
       </p>
       <div className="mb-4">
         <label className="label">Adresse du dépôt (jamais diffusée)</label>
         <AddressInput value={form.depot_adresse} onChange={(v) => set("depot_adresse", v)}
           onSelect={(s) => set("depot_adresse", s.label)} placeholder="Adresse de départ de vos véhicules" />
       </div>
-      <div className="grid sm:grid-cols-3 gap-4 mb-4">
+      {FEATURES.calculateur && <div className="grid sm:grid-cols-3 gap-4 mb-4">
         {champ("cout_km", "Coût kilométrique", TARIFS_DEFAUT.cout_km, "€ HT/km")}
         {champ("cout_heure", "Coût horaire conducteur", TARIFS_DEFAUT.cout_heure, "€ HT/h")}
         {champ("marge_pct", "Marge cible", TARIFS_DEFAUT.marge_pct, "%")}
         {champ("cout_nuit", "Nuit conducteur (hôtel + repas)", TARIFS_DEFAUT.cout_nuit, "€ HT")}
         {champ("cout_immobilisation", "Immobilisation sur place", TARIFS_DEFAUT.cout_immobilisation, "€ HT/jour")}
-      </div>
+      </div>}
       {error && <p className="font-mono text-sm text-[#E8735D] mb-3">{error}</p>}
       {ok && <p className="font-mono text-sm text-vert mb-3">{ok}</p>}
       <button className="btn-primary disabled:opacity-50" disabled={busy} onClick={enregistrer}>
-        {busy ? "Enregistrement…" : "Enregistrer mes paramètres"}
+        {busy ? "Enregistrement…" : FEATURES.calculateur ? "Enregistrer mes paramètres" : "Enregistrer mon dépôt"}
       </button>
     </div>
   );

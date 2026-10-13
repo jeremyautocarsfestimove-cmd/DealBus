@@ -4,4 +4,5 @@
 export const FEATURES = {
   enchere: false,   // mode enchère inversée sur les demandes
   retours: false,   // trajets retour à vide publiés par les transporteurs
+  calculateur: false, // calculateur de coût de revient dans le formulaire de devis (pas encore au point)
 } as const;
