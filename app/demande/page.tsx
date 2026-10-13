@@ -75,7 +75,7 @@ function DemandeWizard() {
     passagers: params.get("passagers") ?? "",
     vehicule_utilise_sur_place: false,
     sur_place_repondu: false,
-    organisme: "",
+    organisme: params.get("organisme") ?? "",
     motif: "",
     equipements: [] as string[],
     budget: "",
