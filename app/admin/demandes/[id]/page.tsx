@@ -1,4 +1,5 @@
 import { EcrireMessage } from "../../ecrire-message";
+import { RelancerClient } from "../../relancer-client";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BackButton } from "@/components/BackButton";
@@ -76,6 +77,10 @@ export default async function DetailDemandePage({ params }: { params: Promise<{ 
         </span>
         <EcrireMessage userId={demande.client_id} demandeId={id} label="Écrire au client"
           suggestion={`Bonjour,\n\nNous avons relu votre demande #${demande.numero} (${demande.depart_adresse} → ${demande.arrivee_adresse}) et un point nous semble à vérifier : \n\nPouvez-vous nous confirmer ? Les transporteurs chiffreront plus juste.\n\nL'équipe DealBus`} />
+        {demande.statut === "ouverte" && !mission && (
+          <RelancerClient demandeId={id} nbOffres={offres.filter((o) => ["envoyee", "consultee"].includes(o.statut)).length}
+            relanceeLe={demande.relancee_le ?? null} nbRelances={demande.nb_relances ?? 0} />
+        )}
       </div>
 
       {/* ---------- Le trajet ---------- */}
