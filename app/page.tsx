@@ -31,10 +31,22 @@ const ENVIES = [
   { label: "Londres", href: "/location-autocar/trajet/paris-londres" },
 ];
 
-const ETAPES_DEVIS = [
-  "Le trajet est envoyé, anonymisé, aux transporteurs de votre région disponibles à ces dates.",
-  "Chaque transporteur répond avec prix, véhicule et conditions — en un seul envoi, définitif.",
-  "Vous comparez ; identités et coordonnées ne sont partagées qu'à la sélection.",
+const ETAPES = [
+  {
+    tag: "2 min", tagCls: "bg-ambre-dim text-ambre-fort",
+    titre: "Décrivez le trajet",
+    texte: "Départ, arrivée, dates, nombre de passagers. Pas de nom, pas de téléphone : la demande part anonymisée aux transporteurs de votre région.",
+  },
+  {
+    tag: "24 h", tagCls: "bg-bleunuit text-bleunuit-fort",
+    titre: "Recevez les offres",
+    texte: "Les autocaristes vérifiés répondent chacun avec une offre unique et définitive : prix ferme, véhicule, année, conditions.",
+  },
+  {
+    tag: "Vous décidez", tagCls: "bg-vert-dim text-vert",
+    titre: "Choisissez, ou pas",
+    texte: "Vous retenez une offre : les coordonnées s'échangent, vous réglez le transporteur directement. Ou vous ne donnez pas suite.",
+  },
 ];
 
 const ETAPES_ENCHERE = [
@@ -126,45 +138,37 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ---------- 4. DEUX PARCOURS — gris clair ---------- */}
+        {/* ---------- 4. COMMENT ÇA MARCHE — trois étapes ---------- */}
         <section id="comment-ca-marche" className="bg-asphalte-2 border-y border-ligne py-24">
           <div className="max-w-6xl mx-auto px-7">
-            <p className="eyebrow mb-4">{FEATURES.enchere ? "Deux façons de recevoir vos offres" : "Comment ça marche"}</p>
-            <h2 className="h-display text-4xl md:text-5xl mb-3">{FEATURES.enchere ? "Vous choisissez le rythme." : "Des offres fermes, comparables."}</h2>
-            <p className="text-blanc-dim max-w-lg mb-12 leading-relaxed">
-              {FEATURES.enchere
-                ? "Même formulaire de départ, deux mécaniques différentes : de la comparaison posée, ou de la pression concurrentielle immédiate."
-                : "Un seul formulaire, plusieurs transporteurs vérifiés qui répondent chacun avec une offre unique et détaillée. Pas de démarchage, pas de marchandage."}
-            </p>
-
-            <div className={`grid gap-5 ${FEATURES.enchere ? "md:grid-cols-2" : "md:grid-cols-1 max-w-2xl"}`}>
-              <div className="bg-asphalte border border-ligne border-t-[3px] border-t-bleunuit-fort p-9">
-                <div className="flex items-center gap-3 mb-5">
-                  <span className="w-9 h-9 rounded-sm bg-bleunuit text-bleunuit-fort flex items-center justify-center font-mono font-semibold">D</span>
-                  <h3 className="h-display text-2xl">Devis</h3>
-                </div>
-                <p className="text-sm text-blanc-dim mb-6 leading-relaxed">
-                  Vous recevez plusieurs propositions détaillées — note, ancienneté, véhicule,
-                  avis clients — sous profil masqué. Vous comparez à votre rythme.
-                </p>
-                <ul className="text-sm text-blanc-dim divide-y divide-ligne">
-                  {ETAPES_DEVIS.map((e, i) => (
-                    <li key={e} className="flex gap-3.5 py-3">
-                      <span className="font-mono text-xs text-bleunuit-fort pt-0.5">0{i + 1}</span>{e}
-                    </li>
-                  ))}
-                </ul>
+            <div className="grid lg:grid-cols-[1fr_auto] gap-8 lg:items-end mb-12">
+              <div>
+                <p className="eyebrow mb-4">Comment ça marche</p>
+                <h2 className="h-display text-4xl md:text-5xl mb-3">Trois étapes, zéro coup de fil.</h2>
               </div>
+              <p className="text-blanc-dim max-w-md leading-relaxed text-[15px]">
+                Vous ne contactez personne : les transporteurs disponibles viennent à vous,
+                sans connaître votre identité tant que vous n&apos;avez pas choisi.
+              </p>
+            </div>
 
-              {FEATURES.enchere && <div className="bg-asphalte border border-ligne border-t-[3px] border-t-vert p-9">
+            <div className="grid md:grid-cols-3 gap-5">
+              {ETAPES.map((e, i) => (
+                <div key={e.titre} className="relative bg-asphalte border border-ligne rounded p-8 shadow-carte">
+                  <span className={`absolute top-7 right-7 tag ${e.tagCls}`}>{e.tag}</span>
+                  <p className="h-display text-6xl text-ambre mb-5">0{i + 1}</p>
+                  <h3 className="h-display text-2xl mb-2.5">{e.titre}</h3>
+                  <p className="text-sm text-blanc-dim leading-relaxed">{e.texte}</p>
+                </div>
+              ))}
+            </div>
+
+            {FEATURES.enchere && (
+              <div className="mt-8 bg-asphalte border border-ligne border-t-[3px] border-t-vert p-9 max-w-2xl">
                 <div className="flex items-center gap-3 mb-5">
                   <span className="w-9 h-9 rounded-sm bg-vert-dim text-vert flex items-center justify-center font-mono font-semibold">E</span>
                   <h3 className="h-display text-2xl">Enchère</h3>
                 </div>
-                <p className="text-sm text-blanc-dim mb-6 leading-relaxed">
-                  Votre demande devient anonyme. Les transporteurs se répondent entre eux
-                  sans se voir, le prix baisse en temps réel pendant une fenêtre définie.
-                </p>
                 <ul className="text-sm text-blanc-dim divide-y divide-ligne">
                   {ETAPES_ENCHERE.map((e, i) => (
                     <li key={e} className="flex gap-3.5 py-3">
@@ -172,8 +176,8 @@ export default function Home() {
                     </li>
                   ))}
                 </ul>
-              </div>}
-            </div>
+              </div>
+            )}
           </div>
         </section>
 
