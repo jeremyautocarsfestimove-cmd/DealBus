@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Logo } from "./Logo";
 import { FEATURES } from "@/lib/features";
@@ -65,10 +65,34 @@ export function Nav() {
   }
 
   const { checked, name, role } = state;
-  const espaceHref =
-    role === "transporteur" ? "/pro"
-    : role === "admin" ? "/admin"
-    : "/mes-demandes";
+  const [menuOuvert, setMenuOuvert] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Fermeture du menu au clic extérieur et à la touche Échap
+  useEffect(() => {
+    if (!menuOuvert) return;
+    const clic = (e: MouseEvent) => { if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOuvert(false); };
+    const touche = (e: KeyboardEvent) => { if (e.key === "Escape") setMenuOuvert(false); };
+    document.addEventListener("mousedown", clic);
+    document.addEventListener("keydown", touche);
+    return () => { document.removeEventListener("mousedown", clic); document.removeEventListener("keydown", touche); };
+  }, [menuOuvert]);
+
+  // Entrées du menu déroulant selon le rôle
+  const entrees: { href: string; label: string; aide?: string }[] =
+    role === "transporteur" ? [
+      { href: "/pro", label: "Mon espace", aide: "Leads, offres, missions" },
+      { href: "/pro#profil", label: "Mon profil", aide: "Dépôt, zones, véhicules, tarifs" },
+      { href: "/compte", label: "Mon compte", aide: "Email, mot de passe" },
+    ] : role === "admin" ? [
+      { href: "/admin", label: "Administration" },
+      { href: "/admin/support", label: "Support" },
+      { href: "/compte", label: "Mon compte" },
+    ] : [
+      { href: "/mes-demandes", label: "Mes demandes", aide: "Offres reçues, messagerie" },
+      { href: "/demande", label: "Nouvelle demande" },
+      { href: "/compte", label: "Mon compte", aide: "Email, mot de passe" },
+    ];
 
   return (
     <header className="sombre sticky top-0 z-50 bg-asphalte/95 backdrop-blur border-b border-ligne">
@@ -79,28 +103,57 @@ export function Nav() {
         {checked && role !== "transporteur" && role !== "admin" && (
           <div className="hidden md:flex items-center gap-8 text-sm text-blanc-dim">
             <Link href="/demande" className="hover:text-blanc transition">Faire une demande</Link>
-            <Link href="/mes-demandes" className="hover:text-blanc transition">Mes demandes</Link>
+            <Link href="/#comment-ca-marche" className="hover:text-blanc transition">Comment ça marche</Link>
             {FEATURES.retours && <Link href="/retours" className="hover:text-blanc transition">Retours à vide</Link>}
-            <Link href="/pro" className="text-vert hover:opacity-80 transition">Inscription transporteur</Link>
+            {!name && <Link href="/pro" className="text-vert hover:opacity-80 transition">Inscription transporteur</Link>}
           </div>
         )}
 
         {!checked ? (
           <span className="w-28" />
         ) : name ? (
-          <div className="flex items-center gap-3">
-            <Link href={espaceHref} className="flex items-center gap-2.5 text-sm font-semibold hover:text-ambre-fort transition">
+          <div className="relative" ref={menuRef}>
+            <button
+              onClick={() => setMenuOuvert((o) => !o)}
+              aria-expanded={menuOuvert}
+              aria-haspopup="menu"
+              className={`flex items-center gap-2.5 text-sm font-semibold rounded-sm pl-1 pr-2.5 py-1 transition border
+                ${menuOuvert ? "bg-asphalte-2 border-ligne-strong" : "border-transparent hover:bg-asphalte-2"}`}
+            >
               <span className="w-7 h-7 rounded-full bg-ambre text-encre flex items-center justify-center font-mono text-xs font-bold uppercase">
                 {name.charAt(0)}
               </span>
               <span className="hidden sm:block max-w-[140px] truncate">{name}</span>
-            </Link>
-            <Link href="/compte" className="hidden sm:block font-mono text-[11px] text-blanc-faint hover:text-blanc-dim uppercase tracking-wider transition">
-              Mon compte
-            </Link>
-            <button onClick={logout} className="font-mono text-[11px] text-blanc-faint hover:text-blanc-dim uppercase tracking-wider transition">
-              Déconnexion
+              <span className={`text-blanc-faint text-[10px] transition ${menuOuvert ? "rotate-180" : ""}`}>▼</span>
             </button>
+
+            {menuOuvert && (
+              <div role="menu" className="absolute right-0 mt-2 w-64 bg-asphalte border border-ligne-strong rounded shadow-2xl overflow-hidden">
+                <div className="px-4 py-3 border-b border-ligne">
+                  <p className="font-semibold text-sm truncate">{name}</p>
+                  <p className="font-mono text-[10.5px] uppercase tracking-wider text-blanc-faint">
+                    {role === "transporteur" ? "Transporteur" : role === "admin" ? "Administration" : "Client"}
+                  </p>
+                </div>
+                <ul className="py-1.5">
+                  {entrees.map((e) => (
+                    <li key={e.href}>
+                      <Link href={e.href} role="menuitem" onClick={() => setMenuOuvert(false)}
+                        className="block px-4 py-2.5 hover:bg-asphalte-2 transition">
+                        <span className="block text-sm">{e.label}</span>
+                        {e.aide && <span className="block text-[11.5px] text-blanc-faint">{e.aide}</span>}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+                <div className="border-t border-ligne py-1.5">
+                  <button role="menuitem" onClick={() => { setMenuOuvert(false); logout(); }}
+                    className="w-full text-left px-4 py-2.5 text-sm text-[#E8735D] hover:bg-asphalte-2 transition">
+                    Déconnexion
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <Link href="/login" className="btn-ghost text-xs px-4 py-2">Connexion →</Link>
