@@ -49,29 +49,30 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
     .from("bids").select("prix_ttc").eq("demande_id", id).order("prix_ttc", { ascending: true }).limit(1).maybeSingle();
 
   // ---------- Calculs : km client, haut-le-pied depuis le dépôt ----------
-  let km: number | null = d.distance_km ? Number(d.distance_km) : null;
-  if (!km) {
-    const itin = await calcItineraire(d.depart_adresse, d.arrivee_adresse);
-    km = itin?.km ?? null;
-  }
+  // Itinéraire client : toujours recalculé (durée OSRM), en cache 24 h côté fetch
+  const itin = await calcItineraire(d.depart_adresse, d.arrivee_adresse);
+  const km: number | null = itin?.km ?? (d.distance_km ? Number(d.distance_km) : null);
+  const routeMin: number | null = itin?.minutes ?? null;
   let hlpAller: number | null = null, hlpRetour: number | null = null;
+  let hlpAllerMin: number | null = null, hlpRetourMin: number | null = null;
   if (moi?.depot_adresse && km) {
     const [a, b] = await Promise.all([
       calcItineraire(moi.depot_adresse, d.depart_adresse),
       d.type_trajet === "aller_simple" ? calcItineraire(d.arrivee_adresse, moi.depot_adresse) : null,
     ]);
-    hlpAller = a?.km ?? null;
+    hlpAller = a?.km ?? null; hlpAllerMin = a?.minutes ?? null;
     hlpRetour = d.type_trajet === "aller_simple" ? (b?.km ?? null) : hlpAller;
+    hlpRetourMin = d.type_trajet === "aller_simple" ? (b?.minutes ?? null) : hlpAllerMin;
   }
 
   const entree = {
-    type_trajet: d.type_trajet, km,
+    type_trajet: d.type_trajet, km, routeMin,
     date_aller: String(d.date_aller), heure_aller: d.heure_aller ? String(d.heure_aller).slice(0, 5) : "",
     date_retour: d.date_retour ? String(d.date_retour) : "", heure_retour: d.heure_retour ? String(d.heure_retour).slice(0, 5) : "",
     passagers: d.passagers, vehicule_utilise_sur_place: !!d.vehicule_utilise_sur_place,
   };
   const analyse = analyser(entree);
-  const plan = planifier(entree, hlpAller, hlpRetour);
+  const plan = planifier(entree, hlpAller, hlpRetour, hlpAllerMin, hlpRetourMin);
   const gabarit = gabaritPour(d.passagers);
   const hFr = (h: string | null | undefined) => (h ? String(h).slice(0, 5).replace(":", "h") : "");
 
@@ -99,8 +100,8 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
 
         {/* ---------- Chiffres clés ---------- */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-          <div className="card py-4"><p className="h-display text-3xl">{km ? `${km} km` : "—"}</p><p className="font-mono text-[10px] uppercase tracking-wider text-blanc-faint mt-1">Aller, prise en charge → destination</p></div>
-          <div className="card py-4"><p className="h-display text-3xl text-ambre">{plan.hautLePiedKm !== null ? `${plan.hautLePiedKm} km` : "—"}</p><p className="font-mono text-[10px] uppercase tracking-wider text-blanc-faint mt-1">{moi?.depot_adresse ? "Haut-le-pied depuis votre dépôt" : "Haut-le-pied (dépôt non renseigné)"}</p></div>
+          <div className="card py-4"><p className="h-display text-3xl">{km ? `${km} km` : "—"}</p><p className="font-mono text-[10px] uppercase tracking-wider text-blanc-faint mt-1">Aller, prise en charge → destination{analyse.routeMin ? ` · ${fmtDuree(analyse.routeMin)} de route` : ""}</p></div>
+          <div className="card py-4"><p className="h-display text-3xl text-ambre">{plan.hautLePiedKm !== null ? `${plan.hautLePiedKm} km` : "—"}</p><p className="font-mono text-[10px] uppercase tracking-wider text-blanc-faint mt-1">{moi?.depot_adresse ? `Haut-le-pied dépôt ↔ prise en charge${hlpAller !== null && hlpRetour !== null ? ` (${hlpAller} + ${hlpRetour} km)` : ""}` : "Haut-le-pied (dépôt non renseigné)"}</p></div>
           <div className="card py-4"><p className="h-display text-3xl">{plan.kmTotal !== null ? `${plan.kmTotal} km` : "—"}</p><p className="font-mono text-[10px] uppercase tracking-wider text-blanc-faint mt-1">Kilométrage total estimé</p></div>
           <div className="card py-4"><p className={`h-display text-3xl ${plan.deuxConducteurs ? "text-[#E8735D]" : "text-vert"}`}>{plan.deuxConducteurs ? "2 conducteurs" : "1 conducteur"}</p><p className="font-mono text-[10px] uppercase tracking-wider text-blanc-faint mt-1">{plan.deuxConducteurs ? "Probables, selon vos horaires" : "Suffisant sur chaque journée"}</p></div>
         </div>
@@ -108,6 +109,11 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
         <div className="grid lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] gap-5 mb-8">
           <div className="card text-sm">
             <p className="font-mono text-[11px] uppercase tracking-wider text-blanc-faint mb-4">Ce que DealBus a calculé</p>
+            {analyse.horairesIncoherents && (
+              <p className="mb-4 text-[12.5px] bg-[#3a2020] border border-[#E8735D]/40 rounded-sm px-3.5 py-2.5 text-blanc-dim">
+                <strong className="text-[#E8735D]">Horaires du client incohérents</strong> : le retour est prévu avant l&apos;arrivée à destination. Le plan ci-dessous suppose 2 h sur place ; demandez confirmation au client par la messagerie avant de chiffrer.
+              </p>
+            )}
             <dl className="divide-y divide-ligne">
               {plan.journees.map((j) => (
                 <div key={j.titre} className="grid sm:grid-cols-[130px_1fr] gap-x-4 py-2.5">

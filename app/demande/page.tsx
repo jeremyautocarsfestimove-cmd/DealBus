@@ -86,6 +86,7 @@ function DemandeWizard() {
 
   // ---------- Kilométrage : calculé dès que les deux adresses sont posées ----------
   const [km, setKm] = useState<number | null>(null);
+  const [routeMin, setRouteMin] = useState<number | null>(null);
   const [kmEtat, setKmEtat] = useState<"idle" | "calcul" | "ok" | "ko">("idle");
   useEffect(() => {
     const de = form.depart_adresse.trim(), vers = form.arrivee_adresse.trim();
@@ -97,14 +98,15 @@ function DemandeWizard() {
         const r = await fetch(`/api/itineraire?depart=${encodeURIComponent(de)}&arrivee=${encodeURIComponent(vers)}`);
         const j = await r.json();
         if (!actif) return;
-        if (r.ok && j.km) { setKm(Number(j.km)); setKmEtat("ok"); } else { setKm(null); setKmEtat("ko"); }
-      } catch { if (actif) { setKm(null); setKmEtat("ko"); } }
+        if (r.ok && j.km) { setKm(Number(j.km)); setRouteMin(j.minutes ? Number(j.minutes) : null); setKmEtat("ok"); }
+        else { setKm(null); setRouteMin(null); setKmEtat("ko"); }
+      } catch { if (actif) { setKm(null); setRouteMin(null); setKmEtat("ko"); } }
     }, 700);
     return () => { actif = false; clearTimeout(t); };
   }, [form.depart_adresse, form.arrivee_adresse]);
 
   const analyse = analyser({
-    type_trajet: form.type_trajet, km,
+    type_trajet: form.type_trajet, km, routeMin,
     date_aller: form.date_aller, heure_aller: form.heure_aller,
     date_retour: form.date_retour, heure_retour: form.heure_retour,
     passagers: Number(form.passagers) || 0,
@@ -119,6 +121,10 @@ function DemandeWizard() {
       if (!form.date_aller) return "Indiquez la date de départ.";
       if (form.type_trajet !== "aller_simple" && !form.date_retour) return "Indiquez la date de retour (ou de fin du circuit).";
       if (form.date_retour && form.date_retour < form.date_aller) return "La date de retour est avant la date d'aller.";
+      if (form.type_trajet !== "aller_simple" && form.date_retour === form.date_aller && form.heure_aller && form.heure_retour && form.heure_retour <= form.heure_aller) {
+        return "Le retour part avant l'aller : vérifiez l'heure du retour, ou la date s'il y a une nuit sur place.";
+      }
+      if (analyse.horairesIncoherents) return "Le retour part avant l'arrivée estimée à destination : vérifiez l'heure du retour, ou la date s'il y a une nuit sur place.";
       if (!(Number(form.passagers) > 0)) return "Indiquez le nombre de passagers.";
     }
     if (n === 2) {
@@ -238,6 +244,11 @@ function DemandeWizard() {
       {step === 1 ? (
         <>
           <dl className="text-[13px]">
+            {analyse.km && (
+              <div className="py-2 border-b border-ligne text-[12px] text-blanc-faint leading-snug">
+                Itinéraire calculé : <span className="text-blanc">{form.depart_adresse}</span> → <span className="text-blanc">{form.arrivee_adresse}</span>. Si ce n&apos;est pas le bon lieu, choisissez-le dans la liste de suggestions.
+              </div>
+            )}
             <div className="flex justify-between gap-3 py-2 border-b border-ligne"><dt className="text-blanc-faint">Distance aller</dt>
               <dd className="font-mono font-semibold">{kmEtat === "calcul" ? "calcul…" : analyse.km ? `${analyse.km} km` : kmEtat === "ko" ? "introuvable" : "—"}</dd></div>
             <div className="flex justify-between gap-3 py-2 border-b border-ligne"><dt className="text-blanc-faint">Temps de route estimé</dt>

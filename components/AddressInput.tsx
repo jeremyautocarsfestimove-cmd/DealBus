@@ -8,6 +8,15 @@ type Suggestion = {
   postcode: string;
   dept: string;       // département français ("" si étranger)
   country: string;    // "France", "Belgique", …
+  genre?: "lieu" | "commune" | "adresse";   // pour l'affichage et le classement
+};
+
+// Photon : clés OSM considérées comme des lieux (monuments, parcs, gares, communes…)
+const CLES_LIEU = new Set(["tourism", "historic", "leisure", "amenity", "natural", "railway", "aeroway", "sport"]);
+const DEPT_DEPUIS_CP = (cp?: string) => {
+  if (!cp) return "";
+  if (cp.startsWith("20")) return Number(cp) < 20200 ? "2A" : "2B";
+  return cp.startsWith("97") || cp.startsWith("98") ? cp.slice(0, 3) : cp.slice(0, 2);
 };
 
 /**
@@ -54,51 +63,66 @@ export function AddressInput({
 
       try {
         const requests: Promise<Suggestion[]>[] = [
-          // --- France : BAN ---
+          // --- France : BAN (adresses précises) ---
           fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(q)}&limit=4`, { signal })
             .then((r) => r.json())
             .then((data) =>
               (data.features ?? []).map(
-                (f: { properties: { label: string; city: string; postcode: string; context: string } }) => ({
+                (f: { properties: { label: string; city: string; postcode: string; context: string; type?: string } }) => ({
                   label: f.properties.label,
                   city: f.properties.city,
                   postcode: f.properties.postcode ?? "",
                   dept: (f.properties.context ?? "").split(",")[0].trim() || f.properties.postcode?.slice(0, 2) || "",
                   country: "France",
+                  genre: (f.properties.type === "municipality" ? "commune" : "adresse") as Suggestion["genre"],
                 })
               )
             )
             .catch(() => [] as Suggestion[]),
+          // --- Lieux et communes : Photon (OpenStreetMap), France comprise ---
+          // La BAN ne connaît que des adresses : « Mont Saint Michel » y devient une rue
+          // de Challes-les-Eaux. Photon connaît les monuments, parcs, gares, communes.
+          fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=8&lang=fr`, { signal })
+            .then((r) => r.json())
+            .then((data) =>
+              (data.features ?? [])
+                .filter((f: { properties: { countrycode?: string; osm_key?: string; osm_value?: string } }) => {
+                  const p = f.properties;
+                  const fr = p.countrycode === "FR";
+                  const lieu = CLES_LIEU.has(p.osm_key ?? "");
+                  const commune = p.osm_key === "place" && ["city", "town", "village", "municipality"].includes(p.osm_value ?? "");
+                  if (fr) return lieu || commune;                  // en France : jamais les rues (la BAN s'en charge)
+                  return mode === "international";                 // à l'étranger : tout, si autorisé
+                })
+                .slice(0, 5)
+                .map((f: { properties: { name?: string; city?: string; postcode?: string; country?: string; countrycode?: string; osm_key?: string; osm_value?: string } }) => {
+                  const p = f.properties;
+                  const fr = p.countrycode === "FR";
+                  const commune = p.osm_key === "place";
+                  const ville = p.city && p.city !== p.name ? p.city : "";
+                  const label = fr
+                    ? `${p.name ?? ""}${p.postcode || ville ? `, ${[p.postcode, ville].filter(Boolean).join(" ")}` : ""}`
+                    : `${[p.name, ville].filter(Boolean).join(", ")}${p.country ? `, ${p.country}` : ""}`;
+                  return {
+                    label,
+                    city: p.city ?? p.name ?? "",
+                    postcode: p.postcode ?? "",
+                    dept: fr ? DEPT_DEPUIS_CP(p.postcode) : "",
+                    country: fr ? "France" : (p.country ?? ""),
+                    genre: (commune ? "commune" : "lieu") as Suggestion["genre"],
+                  };
+                })
+            )
+            .catch(() => [] as Suggestion[]),
         ];
 
-        if (mode === "international") {
-          // --- Monde : Photon (OpenStreetMap) ---
-          requests.push(
-            fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=5&lang=fr`, { signal })
-              .then((r) => r.json())
-              .then((data) =>
-                (data.features ?? [])
-                  .filter((f: { properties: { countrycode?: string } }) =>
-                    f.properties.countrycode && f.properties.countrycode !== "FR")
-                  .slice(0, 4)
-                  .map((f: { properties: { name?: string; city?: string; postcode?: string; country?: string } }) => {
-                    const p = f.properties;
-                    const parts = [p.name, p.city && p.city !== p.name ? p.city : null].filter(Boolean);
-                    return {
-                      label: `${parts.join(", ")}${p.country ? `, ${p.country}` : ""}`,
-                      city: p.city ?? p.name ?? "",
-                      postcode: p.postcode ?? "",
-                      dept: "",
-                      country: p.country ?? "",
-                    };
-                  })
-              )
-              .catch(() => [] as Suggestion[])
-          );
-        }
-
         const results = await Promise.all(requests);
-        const list = results.flat().slice(0, 7);
+        const ordre = { lieu: 0, commune: 1, adresse: 2 } as const;
+        const vus = new Set<string>();
+        const list = results.flat()
+          .filter((x) => { const k = x.label.toLowerCase(); if (vus.has(k)) return false; vus.add(k); return true; })
+          .sort((a, b) => ordre[a.genre ?? "adresse"] - ordre[b.genre ?? "adresse"])
+          .slice(0, 7);
         setSuggestions(list);
         setOpen(list.length > 0);
       } catch {
@@ -131,13 +155,13 @@ export function AddressInput({
               >
                 <span className="text-blanc flex-1 truncate">{s.label}</span>
                 <span className="text-blanc-faint text-[11px] font-mono shrink-0">
-                  {s.country === "France" ? s.postcode : s.country}
+                  {s.genre === "lieu" ? "Lieu" : s.genre === "commune" ? "Commune" : s.country === "France" ? s.postcode : s.country}
                 </span>
               </button>
             </li>
           ))}
           <li className="px-3.5 py-1.5 text-right font-mono text-[9.5px] text-blanc-faint border-t border-ligne">
-            {mode === "international" ? "BAN · OpenStreetMap" : "Base Adresse Nationale"}
+            Base Adresse Nationale · OpenStreetMap
           </li>
         </ul>
       )}

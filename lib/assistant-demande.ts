@@ -103,6 +103,7 @@ function joursEntre(a: string, b: string): number {
 export type EntreeAssistant = {
   type_trajet: string;
   km: number | null;
+  routeMin?: number | null;         // durée réelle (OSRM) si connue, sinon km / vitesse moyenne
   date_aller: string;
   heure_aller: string;
   date_retour: string;
@@ -124,18 +125,23 @@ export type Analyse = {
   deuxConducteurs: boolean;
   alertes: Alerte[];
   fourchette: { min: number; max: number } | null;  // TTC
+  horairesIncoherents: boolean;
 };
 
 export function analyser(e: EntreeAssistant): Analyse {
   const alertes: Alerte[] = [];
   const km = e.km;
-  const routeMin = km ? minutesDeRoute(km) : null;
+  const routeMin = e.routeMin ?? (km ? minutesDeRoute(km) : null);
   const pauseMin = routeMin ? minutesDePause(routeMin) : null;
   const gabarit = gabaritPour(e.passagers);
   const depart = toMin(e.heure_aller);
   const retour = toMin(e.heure_retour);
   const nuits = e.type_trajet === "aller_simple" ? 0 : joursEntre(e.date_aller, e.date_retour);
   const memeJour = e.type_trajet !== "aller_simple" && !!e.date_retour && nuits === 0;
+
+  // Aller-retour dans la journée : le retour doit partir après l'arrivée
+  const horairesIncoherents = memeJour && routeMin !== null && depart !== null && retour !== null
+    && retour < depart + routeMin + (pauseMin ?? 0);
 
   let arriveeMin: number | null = null;
   let amplitudeJ1Min: number | null = null;
@@ -146,7 +152,7 @@ export function analyser(e: EntreeAssistant): Analyse {
     amplitudeJ1Min = routeMin + (pauseMin ?? 0);
     if (memeJour) {
       // aller-retour dans la journée : amplitude du départ au retour au point de départ
-      if (retour !== null) {
+      if (retour !== null && !horairesIncoherents) {
         const finRetour = retour + routeMin + (pauseMin ?? 0);
         amplitudeJ1Min = Math.max(finRetour - depart, amplitudeJ1Min);
       } else {
@@ -162,6 +168,13 @@ export function analyser(e: EntreeAssistant): Analyse {
   }
 
   // ---------- Alertes ----------
+  if (horairesIncoherents && routeMin !== null && depart !== null) {
+    alertes.push({
+      niveau: "attention",
+      titre: "Horaires à revoir",
+      texte: `Avec ${fmtDuree(routeMin + (pauseMin ?? 0))} de route, l'arrivée est vers ${fmtHeure(depart + routeMin + (pauseMin ?? 0))} : le retour ne peut pas partir à ${e.heure_retour}. Vérifiez l'heure ou la date de retour.`,
+    });
+  }
   if (nuits > 0) {
     alertes.push({
       niveau: "info",
@@ -177,7 +190,7 @@ export function analyser(e: EntreeAssistant): Analyse {
       titre: "Second conducteur probable",
       texte: "Le temps de conduite ou l'amplitude dépasse ce qu'un seul conducteur peut faire dans la journée. Les offres incluront sans doute un second chauffeur ou un départ plus tôt.",
     });
-  } else if (routeMin !== null && depart !== null) {
+  } else if (routeMin !== null && depart !== null && !horairesIncoherents) {
     alertes.push({
       niveau: "ok",
       titre: "Horaires réalistes",
@@ -217,7 +230,7 @@ export function analyser(e: EntreeAssistant): Analyse {
     fourchette = { min: arrondi(ttc * 0.9), max: arrondi(ttc * 1.12) };
   }
 
-  return { km, routeMin, pauseMin, gabarit, arriveeMin, amplitudeJ1Min, nuits, deuxConducteurs, alertes, fourchette };
+  return { km, routeMin, pauseMin, gabarit, arriveeMin, amplitudeJ1Min, nuits, deuxConducteurs, alertes, fourchette, horairesIncoherents };
 }
 
 // ---------- Score de complétude ----------
@@ -296,17 +309,18 @@ export type PlanMission = {
   deuxConducteurs: boolean;
 };
 
-export function planifier(e: EntreeAssistant, hlpAllerKm: number | null, hlpRetourKm: number | null): PlanMission {
+export function planifier(e: EntreeAssistant, hlpAllerKm: number | null, hlpRetourKm: number | null, hlpAllerMin?: number | null, hlpRetourMin?: number | null): PlanMission {
   const a = analyser(e);
   const km = e.km ?? 0;
   const routeMin = a.routeMin ?? 0;
+  const retourIncoherent = a.horairesIncoherents;
   const pauseMin = a.pauseMin ?? 0;
   const trajets = e.type_trajet === "aller_simple" ? 1 : 2;
   const hlpA = hlpAllerKm ?? BAREME.hautLePiedKm / 2;
   const hlpR = hlpRetourKm ?? BAREME.hautLePiedKm / 2;
   const hautLePiedKm = e.km ? Math.round(hlpA + hlpR) : null;
   const kmTotal = e.km ? Math.round(km * trajets + (hautLePiedKm ?? 0)) : null;
-  const hlpAMin = minutesDeRoute(hlpA), hlpRMin = minutesDeRoute(hlpR);
+  const hlpAMin = hlpAllerMin ?? minutesDeRoute(hlpA), hlpRMin = hlpRetourMin ?? minutesDeRoute(hlpR);
   const depart = e.heure_aller ? (() => { const [h, m] = e.heure_aller.split(":").map(Number); return h * 60 + m; })() : 8 * 60;
   const retour = e.heure_retour ? (() => { const [h, m] = e.heure_retour.split(":").map(Number); return h * 60 + m; })() : 17 * 60;
   const journees: Journee[] = [];
@@ -317,12 +331,13 @@ export function planifier(e: EntreeAssistant, hlpAllerKm: number | null, hlpReto
 
   const segAller = routeMin + pauseMin;
   if (trajets === 2 && a.nuits === 0) {
-    // Aller-retour dans la journée
+    // Aller-retour dans la journée (si le retour est incohérent : 2 h sur place par défaut)
     const debut = depart - hlpAMin;
-    const fin = retour + segAller + hlpRMin;
+    const retourEff = retourIncoherent ? depart + segAller + 120 : retour;
+    const fin = retourEff + segAller + hlpRMin;
     journees.push({
       titre: "Journée unique",
-      detail: `Dépôt ${fmtHeure(debut)} → prise en charge ${fmtHeure(depart)} → arrivée ${fmtHeure(depart + segAller)} · retour ${fmtHeure(retour)} → dépose ${fmtHeure(retour + segAller)} → dépôt ${fmtHeure(fin)}`,
+      detail: `Dépôt ${fmtHeure(debut)} → prise en charge ${fmtHeure(depart)} → arrivée ${fmtHeure(depart + segAller)} · retour ${fmtHeure(retourEff)}${retourIncoherent ? " (heure client incohérente, 2 h sur place supposées)" : ""} → dépose ${fmtHeure(retourEff + segAller)} → dépôt ${fmtHeure(fin)}`,
       conduiteMin: 2 * routeMin + hlpAMin + hlpRMin,
       amplitudeMin: fin - debut,
     });

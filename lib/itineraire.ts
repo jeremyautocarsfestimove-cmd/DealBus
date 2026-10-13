@@ -28,8 +28,13 @@ async function geocode(adresse: string): Promise<Coords | null> {
 
 export type Itineraire = {
   km: number;                     // aller simple, arrondi
+  minutes: number;                // durée de route OSRM × facteur autocar, hors pauses
   geometry: Coords[];             // tracé GeoJSON [lon,lat][]
 };
+
+// OSRM calcule pour une voiture : un autocar roule moins vite (110 km/h max sur
+// autoroute, montées, agglomérations) → +20 % sur la durée.
+export const FACTEUR_AUTOCAR = 1.2;
 
 export async function calcItineraire(depart: string, arrivee: string): Promise<Itineraire | null> {
   const [a, b] = await Promise.all([geocode(depart), geocode(arrivee)]);
@@ -44,6 +49,7 @@ export async function calcItineraire(depart: string, arrivee: string): Promise<I
     if (!route) return null;
     return {
       km: Math.round(route.distance / 1000),
+      minutes: Math.round((route.duration / 60) * FACTEUR_AUTOCAR),
       geometry: route.geometry.coordinates as Coords[],
     };
   } catch {
