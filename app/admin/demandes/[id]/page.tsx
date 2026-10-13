@@ -84,7 +84,7 @@ export default async function DetailDemandePage({ params }: { params: Promise<{ 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-y-5 gap-x-6 text-sm">
           <div><p className="text-blanc-faint text-[12px] mb-1">Type</p><p className="font-semibold">{String(demande.type_trajet).replace("_", " ")}</p></div>
           <div><p className="text-blanc-faint text-[12px] mb-1">Aller</p><p className="font-semibold">{jour(demande.date_aller)}{demande.heure_aller ? ` · ${String(demande.heure_aller).slice(0, 5).replace(":", "h")}` : ""}</p></div>
-          <div><p className="text-blanc-faint text-[12px] mb-1">Retour</p><p className="font-semibold">{demande.date_retour ? jour(demande.date_retour) : "—"}</p></div>
+          <div><p className="text-blanc-faint text-[12px] mb-1">Retour</p><p className="font-semibold">{demande.date_retour ? `${jour(demande.date_retour)}${demande.heure_retour ? ` · ${String(demande.heure_retour).slice(0, 5).replace(":", "h")}` : ""}` : "—"}</p></div>
           <div><p className="text-blanc-faint text-[12px] mb-1">Passagers</p><p className="font-semibold">{demande.passagers}</p></div>
           <div><p className="text-blanc-faint text-[12px] mb-1">Distance</p><p className="font-semibold font-mono">{km ? `${km} km` : "non calculée"}</p></div>
           <div><p className="text-blanc-faint text-[12px] mb-1">Estimation affichée</p><p className="font-semibold font-mono">{demande.prix_estime ? eur(demande.prix_estime) : "—"}</p></div>
