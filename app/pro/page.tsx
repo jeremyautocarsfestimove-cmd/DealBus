@@ -65,6 +65,17 @@ export default async function ProPage() {
   // ---------- Données du tableau de bord ----------
   const { data: monProfil } = await supabase
     .from("profiles").select("nom, telephone, email").eq("id", user!.id).maybeSingle();
+  // Messages non lus (écrits par les clients) par demande
+  const { data: nonLus } = await supabase
+    .from("messages").select("demande_id")
+    .eq("transporteur_id", user!.id).neq("auteur_id", user!.id).is("lu_le", null);
+  const nonLusParDemande = new Map<string, number>();
+  for (const m of nonLus ?? []) nonLusParDemande.set(m.demande_id, (nonLusParDemande.get(m.demande_id) ?? 0) + 1);
+  const badgeNonLus = (demandeId: string | undefined) => {
+    const n = demandeId ? nonLusParDemande.get(demandeId) : 0;
+    return n ? <span className="tag bg-ambre text-encre normal-case">💬 {n} nouveau{n > 1 ? "x" : ""} message{n > 1 ? "s" : ""}</span> : null;
+  };
+
   const [{ data: leads }, { data: offres }, { data: mesBids }, { data: missions }, { data: retours }, { data: avis }] =
     await Promise.all([
       supabase.from("demandes").select("*").eq("statut", "ouverte").order("created_at", { ascending: false }),
@@ -207,6 +218,7 @@ export default async function ProPage() {
                           {d.mode === "enchere" ? "Enchère" : "Devis"}
                         </span>
                         {d.depart_adresse} <span className="text-blanc-faint font-sans normal-case font-normal">→</span> {d.arrivee_adresse}
+                        {badgeNonLus(d.id)}
                       </span>
                       {d.mode === "enchere" ? (
                         <span className="inline-flex items-center gap-2 rounded-full border border-vert/30 bg-vert-dim px-3 py-1.5 font-mono text-[10.5px] uppercase tracking-[0.12em] text-vert">
@@ -275,15 +287,15 @@ export default async function ProPage() {
                 {offresActives.map((o) => {
                   const statut = OFFRE_STATUT[o.statut] ?? { label: o.statut, cls: "bg-asphalte-3 text-blanc-dim" };
                   return (
-                    <div key={o.id} className="card flex items-center justify-between gap-4 flex-wrap">
+                    <Link key={o.id} href={`/pro/leads/${o.demande_id}`} className="card flex items-center justify-between gap-4 flex-wrap hover:border-ligne-strong transition">
                       <div>
-                        <p className="font-semibold">#{o.demande?.numero} — {o.demande?.depart_adresse} → {o.demande?.arrivee_adresse}</p>
+                        <p className="font-semibold flex items-center gap-3 flex-wrap">#{o.demande?.numero} — {o.demande?.depart_adresse} → {o.demande?.arrivee_adresse} {badgeNonLus(o.demande_id)}</p>
                         <p className="font-mono text-xs text-blanc-faint mt-1.5">
                           Votre offre : <strong className="text-blanc">{eur(o.prix_ttc)}</strong> · {o.vehicule_type} {o.vehicule_places} pl. · envoyée le {new Date(o.created_at).toLocaleDateString("fr-FR")}
                         </p>
                       </div>
                       <span className={`tag ${statut.cls}`}>{statut.label}</span>
-                    </div>
+                    </Link>
                   );
                 })}
                 {offresActives.length === 0 && <p className="text-blanc-dim text-sm">Aucun devis en cours.</p>}

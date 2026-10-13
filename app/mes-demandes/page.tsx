@@ -19,6 +19,13 @@ export default async function MesDemandesPage() {
     .select("demande_id, statut, annulation_motif")
     .eq("client_id", user!.id);
 
+  // Messages non lus (écrits par les transporteurs) par demande
+  const { data: nonLus } = await supabase
+    .from("messages").select("demande_id")
+    .neq("auteur_id", user!.id).is("lu_le", null);
+  const nonLusParDemande = new Map<string, number>();
+  for (const m of nonLus ?? []) nonLusParDemande.set(m.demande_id, (nonLusParDemande.get(m.demande_id) ?? 0) + 1);
+
   const missionParDemande = new Map(
     (missions ?? [])
       .filter((m) => m.demande_id)
@@ -66,6 +73,9 @@ export default async function MesDemandesPage() {
                     {d.depart_adresse}
                     <span className="text-blanc-faint font-sans normal-case font-normal">→</span>
                     {d.arrivee_adresse}
+                    {nonLusParDemande.get(d.id) && (
+                      <span className="tag bg-ambre text-encre normal-case">💬 {nonLusParDemande.get(d.id)} nouveau{(nonLusParDemande.get(d.id) ?? 0) > 1 ? "x" : ""} message{(nonLusParDemande.get(d.id) ?? 0) > 1 ? "s" : ""}</span>
+                    )}
                   </span>
 
                   {annulationSignalee ? (

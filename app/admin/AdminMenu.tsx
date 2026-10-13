@@ -18,6 +18,7 @@ const MENU: Categorie[] = [
       { href: "/admin/demandes", label: "Demandes" },
       { href: "/admin/missions", label: "Missions & commissions" },
       { href: "/admin/litiges", label: "Annulations & litiges", alerte: "litiges" },
+      { href: "/admin/messagerie", label: "Messagerie" },
       { href: "/admin/retours", label: "Retours à vide" },
     ],
   },
