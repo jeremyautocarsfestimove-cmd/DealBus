@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-type Entree = { href: string; label: string; exact?: boolean; alerte?: "transporteurs" | "litiges" | "support" };
+type Entree = { href: string; label: string; exact?: boolean; alerte?: "transporteurs" | "litiges" | "support" | "maintenance" };
 type Categorie = { titre: string | null; entrees: Entree[] };
 
 const MENU: Categorie[] = [
@@ -38,9 +38,13 @@ const MENU: Categorie[] = [
       { href: "/admin/reseaux", label: "Réseaux sociaux" },
     ],
   },
+  {
+    titre: "Réglages",
+    entrees: [{ href: "/admin/parametres", label: "Paramètres du site", alerte: "maintenance" }],
+  },
 ];
 
-export function AdminMenu({ alertes }: { alertes: { transporteurs: number; litiges: number; support: number } }) {
+export function AdminMenu({ alertes }: { alertes: { transporteurs: number; litiges: number; support: number; maintenance: number } }) {
   const chemin = usePathname();
   const [ouvert, setOuvert] = useState(false);
 

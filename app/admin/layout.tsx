@@ -2,6 +2,8 @@ import { Nav } from "@/components/Nav";
 import { createClient } from "@/lib/supabase/server";
 import { AdminMenu } from "./AdminMenu";
 import { aTraiter } from "./helpers";
+import Link from "next/link";
+import { lireMaintenance } from "@/lib/maintenance";
 
 export const metadata = { title: "Administration — DealBus" };
 
@@ -24,22 +26,32 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     );
   }
 
-  const [{ count: aValider }, { data: dossiers }, { count: supportNonLus }, { count: demandesAnnul }] = await Promise.all([
+  const [{ count: aValider }, { data: dossiers }, { count: supportNonLus }, { count: demandesAnnul }, maintenance] = await Promise.all([
     supabase.from("transporteurs").select("id", { count: "exact", head: true }).eq("statut", "en_attente"),
     supabase.from("missions").select("statut, client_confirmation, annulation_demandee_at, annulation_decision").or("statut.in.(annulee,litige),and(annulation_demandee_at.not.is.null,annulation_decision.is.null)"),
     supabase.from("support_messages").select("id", { count: "exact", head: true }).eq("auteur", "user").is("lu_le", null),
     supabase.from("demandes").select("id", { count: "exact", head: true }).not("annulation_demandee_at", "is", null).is("annulation_decision", null),
+    lireMaintenance(true),
   ]);
 
   return (
     <>
       <Nav />
+      {maintenance.actif && (
+        <div className="bg-[#C2410C] text-white">
+          <div className="max-w-[1400px] mx-auto px-5 lg:px-8 py-2 flex flex-wrap items-center justify-between gap-2 text-sm">
+            <span><strong>Site en travaux.</strong> Les visiteurs voient la page d&apos;attente ; vous voyez le site normalement.</span>
+            <Link href="/admin/parametres" className="font-mono text-[11px] uppercase tracking-wider underline underline-offset-2">Rouvrir le site</Link>
+          </div>
+        </div>
+      )}
       <div className="max-w-[1400px] mx-auto px-5 lg:px-8 pt-8 pb-16 lg:grid lg:grid-cols-[230px_minmax(0,1fr)] lg:gap-8">
         <AdminMenu
           alertes={{
             transporteurs: aValider ?? 0,
             litiges: (dossiers ?? []).filter(aTraiter).length + (demandesAnnul ?? 0),
             support: supportNonLus ?? 0,
+            maintenance: maintenance.actif ? 1 : 0,
           }}
         />
         <div className="min-w-0">{children}</div>
