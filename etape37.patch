@@ -1,0 +1,107 @@
+--- a/app/page.tsx
++++ b/app/page.tsx
+@@ -140,31 +140,35 @@
+         </section>
+ 
+         {/* ---------- 4. LE CŒUR ---------- */}
+-        <section className="sombre py-20" id="comment-ca-marche">
+-          <div className="max-w-6xl mx-auto px-7 grid lg:grid-cols-[1.1fr_1fr] gap-12 items-center">
+-            <div>
++        {/* Photo réaliste en fond (public/img/route.webp, format panoramique),
++            voile sombre pour la lisibilité, 3 étapes côte à côte, preuves dessous. */}
++        <section className="sombre relative py-20 text-blanc overflow-hidden" id="comment-ca-marche">
++          <Illu id="route" titre="Autocar de tourisme sur une route côtière" />
++          <div className="absolute inset-0 bg-encre/75" />
++          <div className="absolute inset-0 bg-gradient-to-b from-encre/40 via-transparent to-encre/60" />
++          <div className="relative max-w-6xl mx-auto px-7">
++            <div className="max-w-3xl">
+               <p className="font-mono text-[11px] uppercase tracking-[.14em] text-ambre">Le principe DealBus</p>
+               <h2 className="h-display text-4xl md:text-5xl mt-3 mb-4">Vous choisissez la destination.<br />Les transporteurs viennent à vous.</h2>
+-              <p className="text-[17px] text-blanc-dim max-w-xl mb-6">Plus d&apos;appels à dix autocaristes pour comparer des devis incomparables. Une seule demande, anonyme, et des offres fermes de professionnels vérifiés.</p>
+-              <div className="grid gap-3">
+-                {ETAPES.map((e, i) => (
+-                  <div key={e.titre} className="grid grid-cols-[54px_1fr] gap-4 bg-asphalte-2 border border-ligne rounded-md px-5 py-4">
++              <p className="text-[17px] text-white/85 max-w-xl">Plus d&apos;appels à dix autocaristes pour comparer des devis incomparables. Une seule demande, anonyme, et des offres fermes de professionnels vérifiés.</p>
++            </div>
++            <div className="grid md:grid-cols-3 gap-4 mt-10">
++              {ETAPES.map((e, i) => (
++                <div key={e.titre} className="bg-encre/55 backdrop-blur-sm border border-white/15 rounded-lg px-5 py-5">
++                  <div className="flex items-start justify-between gap-3">
+                     <span className="h-display text-5xl text-ambre">0{i + 1}</span>
+-                    <div>
+-                      <span className={`tag float-right ${e.tagCls}`}>{e.tag}</span>
+-                      <h3 className="h-display text-2xl">{e.titre}</h3>
+-                      <p className="text-sm text-blanc-dim mt-1">{e.texte}</p>
+-                    </div>
++                    <span className={`tag ${e.tagCls}`}>{e.tag}</span>
+                   </div>
+-                ))}
+-              </div>
+-              <div className="flex flex-wrap gap-7 mt-7 pt-6 border-t border-ligne">
+-                {[["100 %", "Licences & RC Pro contrôlées"], ["1 seul", "Devis par transporteur, ferme"], ["24 h", "Premières offres, en général"]].map(([n, l]) => (
+-                  <div key={l}><p className="h-display text-4xl">{n}</p><p className="font-mono text-[10.5px] uppercase tracking-wider text-blanc-faint mt-1">{l}</p></div>
+-                ))}
+-              </div>
++                  <h3 className="h-display text-2xl mt-3">{e.titre}</h3>
++                  <p className="text-sm text-white/80 mt-1.5">{e.texte}</p>
++                </div>
++              ))}
++            </div>
++            <div className="flex flex-wrap gap-x-12 gap-y-4 mt-10 pt-6 border-t border-white/15">
++              {[["100 %", "Licences & RC Pro contrôlées"], ["1 seul", "Devis par transporteur, ferme"], ["24 h", "Premières offres, en général"]].map(([n, l]) => (
++                <div key={l}><p className="h-display text-4xl">{n}</p><p className="font-mono text-[10.5px] uppercase tracking-wider text-white/70 mt-1">{l}</p></div>
++              ))}
+             </div>
+-            <div className="relative rounded-lg overflow-hidden min-h-[420px]"><Illu id="car" titre="Autocar de nuit, vitres éclairées" /></div>
+           </div>
+         </section>
+ 
+@@ -177,24 +181,23 @@
+             </div>
+             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+               {DESTINATIONS.map((d) => (
+-                <Link key={d.titre} href={d.href} className="bg-asphalte border border-ligne rounded-lg overflow-hidden hover:border-ligne-strong transition group">
++                <Link key={d.titre} href={d.href} className="bg-asphalte border border-ligne rounded-lg overflow-hidden hover:border-ligne-strong transition group flex flex-col">
+                   <div className="relative h-[150px] overflow-hidden">
+                     {photoVille(d.photo)
+                       ? <Image src={photoVille(d.photo)!} alt={d.titre} fill sizes="(max-width: 640px) 100vw, 33vw" className="object-cover transition group-hover:scale-[1.03] duration-500" />
+                       : <Illu id={d.illu} className="transition group-hover:scale-[1.03] duration-500" />}
+                   </div>
+-                  <div className="p-4 pb-5">
++                  <div className="p-4 pb-5 flex flex-col flex-1">
+                     <h4 className="h-display text-2xl">{d.titre}</h4>
+                     <p className="font-mono text-[11px] text-blanc-faint tracking-wide mt-1">{d.meta}</p>
+                     <p className="text-[13.5px] text-blanc-dim mt-2">{d.texte}</p>
+-                    <div className="flex justify-end items-center mt-3 pt-3 border-t border-ligne">
++                    <div className="mt-auto"><div className="flex justify-end items-center mt-3 pt-3 border-t border-ligne">
+                       <span className="font-mono text-[10.5px] uppercase tracking-[.1em]">Demander →</span>
+-                    </div>
++                    </div></div>
+                   </div>
+                 </Link>
+               ))}
+             </div>
+-            <p className="font-mono text-[11px] text-blanc-faint mt-4 tracking-wide uppercase">Prix indicatifs constatés sur la plateforme, autocar complet. Seules les offres des transporteurs font foi.</p>
+           </div>
+         </section>
+ 
+--- a/scripts/photos-villes.sh
++++ b/scripts/photos-villes.sh
+@@ -22,7 +22,7 @@
+ strasbourg|Strasbourg
+ colmar|Colmar
+ reims|Cathédrale Notre-Dame de Reims
+-disneyland-paris|Disneyland Paris
++disneyland-paris|Parc Disneyland
+ parc-asterix|Parc Astérix
+ puy-du-fou|Puy du Fou
+ deauville|Deauville
+@@ -38,7 +38,7 @@
+ bruxelles|Bruxelles
+ amsterdam|Amsterdam
+ mont-saint-michel|Mont-Saint-Michel
+-plages-debarquement|Omaha Beach
++plages-debarquement|Arromanches-les-Bains
+ honfleur|Honfleur
+ "
+ 

@@ -22,7 +22,7 @@ LISTE="
 strasbourg|Strasbourg
 colmar|Colmar
 reims|Cathédrale Notre-Dame de Reims
-disneyland-paris|Disneyland Paris
+disneyland-paris|Parc Disneyland
 parc-asterix|Parc Astérix
 puy-du-fou|Puy du Fou
 deauville|Deauville
@@ -38,7 +38,7 @@ londres|Londres
 bruxelles|Bruxelles
 amsterdam|Amsterdam
 mont-saint-michel|Mont-Saint-Michel
-plages-debarquement|Omaha Beach
+plages-debarquement|Arromanches-les-Bains
 honfleur|Honfleur
 "
 

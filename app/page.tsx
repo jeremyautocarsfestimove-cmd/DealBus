@@ -181,24 +181,23 @@ export default function Home() {
             </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {DESTINATIONS.map((d) => (
-                <Link key={d.titre} href={d.href} className="bg-asphalte border border-ligne rounded-lg overflow-hidden hover:border-ligne-strong transition group">
+                <Link key={d.titre} href={d.href} className="bg-asphalte border border-ligne rounded-lg overflow-hidden hover:border-ligne-strong transition group flex flex-col">
                   <div className="relative h-[150px] overflow-hidden">
                     {photoVille(d.photo)
                       ? <Image src={photoVille(d.photo)!} alt={d.titre} fill sizes="(max-width: 640px) 100vw, 33vw" className="object-cover transition group-hover:scale-[1.03] duration-500" />
                       : <Illu id={d.illu} className="transition group-hover:scale-[1.03] duration-500" />}
                   </div>
-                  <div className="p-4 pb-5">
+                  <div className="p-4 pb-5 flex flex-col flex-1">
                     <h4 className="h-display text-2xl">{d.titre}</h4>
                     <p className="font-mono text-[11px] text-blanc-faint tracking-wide mt-1">{d.meta}</p>
                     <p className="text-[13.5px] text-blanc-dim mt-2">{d.texte}</p>
-                    <div className="flex justify-end items-center mt-3 pt-3 border-t border-ligne">
+                    <div className="mt-auto"><div className="flex justify-end items-center mt-3 pt-3 border-t border-ligne">
                       <span className="font-mono text-[10.5px] uppercase tracking-[.1em]">Demander →</span>
-                    </div>
+                    </div></div>
                   </div>
                 </Link>
               ))}
             </div>
-            <p className="font-mono text-[11px] text-blanc-faint mt-4 tracking-wide uppercase">Prix indicatifs constatés sur la plateforme, autocar complet. Seules les offres des transporteurs font foi.</p>
           </div>
         </section>
 

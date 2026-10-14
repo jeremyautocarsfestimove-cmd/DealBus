@@ -92,11 +92,16 @@
   "plages-debarquement": {
     "auteur": "Auteur inconnu",
     "licence": "Licence libre",
-    "source": "https://commons.wikimedia.org/wiki/File:Seconde-guerre-mondiale-debarquement-LCVP-6juin1944.jpg?utm_source=fr.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+    "source": "https://commons.wikimedia.org/wiki/File:Arromanches-les-Bains_à_marée_basse_(juillet_2025).JPG?utm_source=fr.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
   },
   "honfleur": {
     "auteur": "Auteur inconnu",
     "licence": "Licence libre",
     "source": "https://commons.wikimedia.org/wiki/File:20210825_Honfleur_-25.jpg?utm_source=fr.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+  },
+  "disneyland-paris": {
+    "auteur": "Auteur inconnu",
+    "licence": "Licence libre",
+    "source": "https://commons.wikimedia.org/wiki/File:Sleeping_Beauty_Castle_Disneyland_Anaheim_2013.jpg?utm_source=fr.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
   }
 }
