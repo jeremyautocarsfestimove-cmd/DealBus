@@ -53,9 +53,12 @@ export default async function VoyagePage({ params }: { params: Params }) {
             <span className="eyebrow">{v.saison}</span>
             <h1 className="h-display text-5xl md:text-6xl mt-4 mb-3 drop-shadow-[0_2px_20px_rgba(0,0,0,.3)]">{v.titre}</h1>
             <p className="text-lg max-w-2xl text-white/90 mb-6">{v.accroche} DealBus met en relation, chaque transporteur reste maître de son offre.</p>
-            <div className="flex flex-wrap gap-x-7 gap-y-2">
+            <div className="flex flex-wrap gap-2.5">
               {v.chiffres.map((c) => (
-                <div key={c.l}><b className="block h-display text-2xl text-ambre">{c.n}</b><span className="font-mono text-[11px] uppercase tracking-[.08em] text-white/75">{c.l}</span></div>
+                <div key={c.l} className="bg-encre/45 backdrop-blur-sm border border-white/15 rounded-md px-4 py-2.5">
+                  <b className="block h-display text-2xl text-ambre">{c.n}</b>
+                  <span className="font-mono text-[11px] uppercase tracking-[.08em] text-white/80">{c.l}</span>
+                </div>
               ))}
             </div>
           </div>
