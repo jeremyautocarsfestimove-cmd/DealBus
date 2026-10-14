@@ -43,6 +43,10 @@ body {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
 
+/* Listes natives des <select> : le navigateur les dessine sur fond blanc,
+   on force un texte sombre pour qu'elles restent lisibles sur les blocs sombres. */
+select option { color: #12151B; background-color: #FFFFFF; }
+
 .h-display { @apply font-condensed font-bold uppercase leading-none tracking-tight; }
 .eyebrow { @apply inline-block font-mono text-xs uppercase tracking-[0.14em] bg-ambre text-encre font-semibold px-2.5 py-1 rounded-sm; }
 .card { @apply bg-asphalte-2 border border-ligne rounded p-6 shadow-carte; }
