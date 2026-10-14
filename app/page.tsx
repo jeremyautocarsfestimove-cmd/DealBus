@@ -95,8 +95,23 @@ export default function Home() {
           </div>
         </header>
 
+        {/* ---------- 1b. RÉASSURANCE (sous le hero) ---------- */}
+        <section className="relative z-10 -mt-6 pb-4">
+          <div className="max-w-6xl mx-auto px-7 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {CONFIANCE.map((c) => (
+              <div key={c.titre} className="bg-asphalte border border-ligne rounded-lg p-5 shadow-carte flex gap-3.5">
+                <div className="w-10 h-10 shrink-0 rounded-full bg-ambre-dim flex items-center justify-center font-condensed font-bold text-ambre-fort text-lg">{c.ic}</div>
+                <div>
+                  <b className="block text-[15px] mb-0.5">{c.titre}</b>
+                  <p className="text-[13px] text-blanc-dim">{c.texte}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
         {/* ---------- 2. ENVIES DU MOMENT ---------- */}
-        <section className="py-20" id="envies">
+        <section className="pt-14 pb-20" id="envies">
           <div className="max-w-6xl mx-auto px-7">
             <div className="grid lg:grid-cols-[1fr_auto] gap-6 lg:items-end mb-9">
               <div><p className={eyebrow}>Envies du moment</p><h2 className={h2}>Où partir cette saison ?</h2></div>
@@ -198,19 +213,6 @@ export default function Home() {
                 </Link>
               ))}
             </div>
-          </div>
-        </section>
-
-        {/* ---------- 6. CONFIANCE ---------- */}
-        <section className="pb-20">
-          <div className="max-w-6xl mx-auto px-7 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {CONFIANCE.map((c) => (
-              <div key={c.titre} className="bg-asphalte border border-ligne rounded-lg p-6">
-                <div className="w-10 h-10 rounded-full bg-ambre-dim flex items-center justify-center font-condensed font-bold text-ambre-fort text-lg mb-3">{c.ic}</div>
-                <b className="block text-[15.5px] mb-1">{c.titre}</b>
-                <p className="text-[13.5px] text-blanc-dim">{c.texte}</p>
-              </div>
-            ))}
           </div>
         </section>
 
