@@ -155,7 +155,7 @@ export default function Home() {
                 ))}
               </div>
               <div className="flex flex-wrap gap-7 mt-7 pt-6 border-t border-ligne">
-                {[["0 €", "Pour le client, toujours"], ["100 %", "Licences & RC Pro contrôlées"], ["1 seul", "Devis par transporteur, ferme"]].map(([n, l]) => (
+                {[["100 %", "Licences & RC Pro contrôlées"], ["1 seul", "Devis par transporteur, ferme"], ["24 h", "Premières offres, en général"]].map(([n, l]) => (
                   <div key={l}><p className="h-display text-4xl">{n}</p><p className="font-mono text-[10.5px] uppercase tracking-wider text-blanc-faint mt-1">{l}</p></div>
                 ))}
               </div>

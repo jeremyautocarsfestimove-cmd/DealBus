@@ -50,7 +50,7 @@ export const VOYAGES: Voyage[] = [
     titre: "Marchés de Noël en autocar",
     titreCourt: "Marchés de Noël",
     accroche: "Strasbourg, Colmar, Reims, Lille, Metz, Montbéliard… et des dizaines d'autres. Décrivez votre sortie, les transporteurs de votre région vous font une offre ferme.",
-    chiffres: [{ n: "+30", l: "villes proposées" }, { n: "1 ou 2 j.", l: "à votre choix" }, { n: "24 h", l: "premières offres, en général" }, { n: "0 €", l: "pour le client" }],
+    chiffres: [{ n: "+30", l: "villes proposées" }, { n: "1 ou 2 j.", l: "à votre choix" }, { n: "24 h", l: "premières offres, en général" }],
     exemplesTitre: "Les plus demandés",
     exemplesIntro: "Trois destinations fréquentes à titre d'exemple. Toutes les villes qui ont un marché de Noël sont possibles : choisissez-en une, ou tapez la vôtre dans le formulaire.",
     exemples: [
@@ -75,7 +75,7 @@ export const VOYAGES: Voyage[] = [
     titre: "Parcs d'attractions en autocar",
     titreCourt: "Parcs d'attractions",
     accroche: "Disneyland Paris, Parc Astérix, Puy du Fou, Futuroscope, Nigloland, Walibi… La sortie classique des écoles, des CSE et des clubs. Décrivez votre groupe, les transporteurs répondent.",
-    chiffres: [{ n: "+15", l: "parcs en France" }, { n: "1 ou 2 j.", l: "selon le parc" }, { n: "24 h", l: "premières offres, en général" }, { n: "0 €", l: "pour le client" }],
+    chiffres: [{ n: "+15", l: "parcs en France" }, { n: "1 ou 2 j.", l: "selon le parc" }, { n: "24 h", l: "premières offres, en général" }],
     exemplesTitre: "Les plus demandés",
     exemplesIntro: "Trois exemples. Tous les parcs sont possibles : choisissez-en un, ou tapez le vôtre dans le formulaire.",
     exemples: [
@@ -99,7 +99,7 @@ export const VOYAGES: Voyage[] = [
     titre: "Journée à la mer en autocar",
     titreCourt: "Journée à la mer",
     accroche: "Deauville, Étretat, Le Touquet, Cabourg, Honfleur, Saint-Malo… La sortie d'été des associations, des centres de loisirs et des familles. Décrivez votre journée, les transporteurs répondent.",
-    chiffres: [{ n: "+20", l: "stations proposées" }, { n: "1 j.", l: "ou retour tardif" }, { n: "24 h", l: "premières offres, en général" }, { n: "0 €", l: "pour le client" }],
+    chiffres: [{ n: "+20", l: "stations proposées" }, { n: "1 j.", l: "ou retour tardif" }, { n: "24 h", l: "premières offres, en général" }],
     exemplesTitre: "Les plus demandées",
     exemplesIntro: "Trois exemples depuis l'Île-de-France. Toute station balnéaire est possible : choisissez-en une, ou tapez la vôtre.",
     exemples: [
@@ -123,7 +123,7 @@ export const VOYAGES: Voyage[] = [
     titre: "Vignobles et caves en autocar",
     titreCourt: "Vignobles & caves",
     accroche: "Champagne, Loire, Bourgogne, Alsace, Bordelais… Une journée ou un week-end entre vignes et caves, avec un conducteur qui ramène tout le monde. Décrivez votre sortie, les transporteurs répondent.",
-    chiffres: [{ n: "+10", l: "vignobles proposés" }, { n: "1 ou 2 j.", l: "à votre choix" }, { n: "24 h", l: "premières offres, en général" }, { n: "0 €", l: "pour le client" }],
+    chiffres: [{ n: "+10", l: "vignobles proposés" }, { n: "1 ou 2 j.", l: "à votre choix" }, { n: "24 h", l: "premières offres, en général" }],
     exemplesTitre: "Les plus demandés",
     exemplesIntro: "Trois exemples. Tous les vignobles sont possibles : choisissez-en un, ou tapez votre destination.",
     exemples: [
@@ -147,7 +147,7 @@ export const VOYAGES: Voyage[] = [
     titre: "Châteaux de la Loire en autocar",
     titreCourt: "Châteaux de la Loire",
     accroche: "Chambord, Chenonceau, Amboise, Blois, Cheverny, Villandry… Un ou deux châteaux dans la journée, ou un circuit sur 2 jours. Décrivez votre sortie, les transporteurs répondent.",
-    chiffres: [{ n: "+15", l: "châteaux proposés" }, { n: "1 ou 2 j.", l: "à votre choix" }, { n: "24 h", l: "premières offres, en général" }, { n: "0 €", l: "pour le client" }],
+    chiffres: [{ n: "+15", l: "châteaux proposés" }, { n: "1 ou 2 j.", l: "à votre choix" }, { n: "24 h", l: "premières offres, en général" }],
     exemplesTitre: "Les plus demandés",
     exemplesIntro: "Trois exemples. Tous les châteaux sont possibles : choisissez-en un, ou tapez votre destination.",
     exemples: [
@@ -171,7 +171,7 @@ export const VOYAGES: Voyage[] = [
     titre: "Séjours en Europe en autocar",
     titreCourt: "Séjours en Europe",
     accroche: "Londres, Bruxelles, Amsterdam, Barcelone, Berlin, Rome… Le car part avec le groupe et reste sur place : transferts, visites, retour. Décrivez votre séjour, les transporteurs répondent.",
-    chiffres: [{ n: "+20", l: "villes proposées" }, { n: "2 à 5 j.", l: "car sur place" }, { n: "24 h", l: "premières offres, en général" }, { n: "0 €", l: "pour le client" }],
+    chiffres: [{ n: "+20", l: "villes proposées" }, { n: "2 à 5 j.", l: "car sur place" }, { n: "24 h", l: "premières offres, en général" }],
     exemplesTitre: "Les plus demandés",
     exemplesIntro: "Trois exemples depuis Paris. Toute ville européenne est possible : choisissez-en une, ou tapez votre destination.",
     exemples: [
@@ -196,7 +196,7 @@ export const VOYAGES: Voyage[] = [
     titre: "Normandie et Bretagne en autocar",
     titreCourt: "Normandie & Bretagne",
     accroche: "Mont-Saint-Michel, plages du Débarquement, Honfleur, Saint-Malo, Giverny, Rouen… À la journée ou sur 2 jours. Décrivez votre sortie, les transporteurs répondent.",
-    chiffres: [{ n: "+15", l: "sites proposés" }, { n: "1 ou 2 j.", l: "à votre choix" }, { n: "24 h", l: "premières offres, en général" }, { n: "0 €", l: "pour le client" }],
+    chiffres: [{ n: "+15", l: "sites proposés" }, { n: "1 ou 2 j.", l: "à votre choix" }, { n: "24 h", l: "premières offres, en général" }],
     exemplesTitre: "Les plus demandés",
     exemplesIntro: "Trois exemples depuis Paris. Tous les sites sont possibles : choisissez-en un, ou tapez votre destination.",
     exemples: [
