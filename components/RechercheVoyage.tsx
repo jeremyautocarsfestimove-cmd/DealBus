@@ -12,18 +12,20 @@ const TYPES: { id: TypeTrajet; label: string }[] = [
   { id: "circuit", label: "Circuit" },
 ];
 
-// Barre de recherche du hero : type de trajet, destination, dates, passagers,
-// type d'organisme. Le point de départ se renseigne dans le parcours guidé /demande.
+// Barre de recherche du hero : type de trajet, départ, destination, dates,
+// passagers, type d'organisme. Pré-remplit le parcours guidé /demande.
 // Pas d'overflow-hidden ici ni sur le hero : la liste des villes doit déborder.
 export function RechercheVoyage() {
   const router = useRouter();
   const [type, setType] = useState<TypeTrajet>("aller_retour");
-  const [f, setF] = useState({ vers: "", date_aller: "", date_retour: "", passagers: "", organisme: "" });
+  const [f, setF] = useState({ de: "", dept: "", vers: "", date_aller: "", date_retour: "", passagers: "", organisme: "" });
   const set = (k: keyof typeof f, v: string) => setF((x) => ({ ...x, [k]: v }));
 
   function go() {
     const p = new URLSearchParams();
     p.set("type", type);
+    if (f.de.trim()) p.set("de", f.de.trim());
+    if (f.dept) p.set("dept", f.dept);
     if (f.vers.trim()) p.set("vers", f.vers.trim());
     if (f.date_aller) p.set("date_aller", f.date_aller);
     if (type !== "aller_simple" && f.date_retour) p.set("date_retour", f.date_retour);
@@ -36,8 +38,8 @@ export function RechercheVoyage() {
   const label = "block font-mono text-[10px] uppercase tracking-[.12em] text-blanc-faint mb-1";
   const champ = "w-full bg-transparent text-[15px] text-blanc placeholder:text-blanc-faint focus:outline-none";
   const colonnes = type === "aller_simple"
-    ? "lg:grid-cols-[2fr_.9fr_.7fr_1fr_auto]"
-    : "lg:grid-cols-[2fr_.9fr_.9fr_.7fr_1fr_auto]";
+    ? "lg:grid-cols-[1.4fr_1.4fr_.9fr_.7fr_1fr_auto]"
+    : "lg:grid-cols-[1.4fr_1.4fr_.9fr_.9fr_.7fr_1fr_auto]";
 
   return (
     <div className="relative z-20">
@@ -52,7 +54,12 @@ export function RechercheVoyage() {
       </div>
 
       <div className={`bg-asphalte text-blanc rounded-lg rounded-tl-none shadow-[0_20px_50px_rgba(0,0,0,.35)] grid sm:grid-cols-2 ${colonnes}`}>
-        <div className={`${cellule} sm:col-span-2 lg:col-span-1`}>
+        <div className={cellule}>
+          <span className={label}>Départ</span>
+          <AddressInput value={f.de} onChange={(v) => { set("de", v); set("dept", ""); }} onSelect={(s) => { set("de", s.label); set("dept", s.dept); }}
+            placeholder="Ville ou adresse" inputClassName={champ} />
+        </div>
+        <div className={cellule}>
           <span className={label}>Destination</span>
           <AddressInput value={f.vers} onChange={(v) => set("vers", v)} onSelect={(s) => set("vers", s.label)}
             placeholder="Ville, site ou adresse" mode="international" inputClassName={champ} />
