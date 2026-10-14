@@ -4,6 +4,7 @@ import { VILLES } from "@/lib/villes";
 import { DEPARTEMENTS } from "@/lib/departements";
 import { REGIONS } from "@/lib/regions";
 import { TRAJETS } from "@/lib/trajets";
+import { VOYAGES } from "@/lib/voyages";
 
 // IMPORTANT : ne jamais utiliser new Date() pour les pages éditoriales.
 // À chaque déploiement, toutes les URLs se déclareraient modifiées ; Google
@@ -29,6 +30,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/demande`, lastModified: MAJ_CONTENU, changeFrequency: "monthly", priority: 0.7 },
     { url: `${base}/pro`, lastModified: MAJ_CONTENU, changeFrequency: "monthly", priority: 0.7 },
 
+    ...VOYAGES.map((v) => ({
+      url: `${base}/voyages/${v.slug}`,
+      lastModified: MAJ_CONTENU,
+      changeFrequency: "monthly" as const,
+      priority: 0.8,
+    })),
     ...REGIONS.map((r) => ({
       url: `${base}/location-autocar/${r.slug}`,
       lastModified: MAJ_CONTENU,

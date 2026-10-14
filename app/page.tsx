@@ -10,12 +10,12 @@ import { IllustrationsSprite, Illu, type IlluId } from "@/components/Illustratio
 
 type Envie = { illu: IlluId; saison: string; titre: string; texte: string; href: string; grande?: boolean };
 const ENVIES: Envie[] = [
-  { illu: "noel", saison: "Décembre · Marchés de Noël", titre: "Strasbourg, Colmar, Reims", texte: "La sortie de fin d'année des CSE et des associations. Réservez tôt : les cars sont pleins dès novembre.", href: "/location-autocar/trajet/paris-reims", grande: true },
-  { illu: "parc", saison: "Toute l'année", titre: "Parcs d'attractions", texte: "Disneyland, Astérix, Puy du Fou.", href: "/location-autocar/trajet/paris-disneyland" },
-  { illu: "mer", saison: "Mai à septembre", titre: "Journée à la mer", texte: "Deauville, Étretat, Le Touquet.", href: "/location-autocar/trajet/paris-deauville" },
-  { illu: "vigne", saison: "Septembre · Octobre", titre: "Vignobles & caves", texte: "Champagne, Loire, Bourgogne.", href: "/location-autocar/trajet/paris-reims" },
-  { illu: "chateau", saison: "Printemps", titre: "Châteaux de la Loire", texte: "Chambord, Chenonceau, Amboise.", href: "/demande?vers=Chambord" },
-  { illu: "londres", saison: "Séjours · 2 à 4 jours", titre: "Londres, Bruxelles, Amsterdam", texte: "Le car reste avec le groupe sur place : transferts, visites, retour. Un seul transporteur, un seul devis.", href: "/location-autocar/trajet/paris-londres", grande: true },
+  { illu: "noel", saison: "Décembre · Marchés de Noël", titre: "Strasbourg, Colmar, Reims", texte: "La sortie de fin d'année des CSE et des associations. Réservez tôt : les cars sont pleins dès novembre.", href: "/voyages/marches-de-noel", grande: true },
+  { illu: "parc", saison: "Toute l'année", titre: "Parcs d'attractions", texte: "Disneyland, Astérix, Puy du Fou.", href: "/voyages/parcs-attractions" },
+  { illu: "mer", saison: "Mai à septembre", titre: "Journée à la mer", texte: "Deauville, Étretat, Le Touquet.", href: "/voyages/journee-mer" },
+  { illu: "vigne", saison: "Septembre · Octobre", titre: "Vignobles & caves", texte: "Champagne, Loire, Bourgogne.", href: "/voyages/vignobles" },
+  { illu: "chateau", saison: "Printemps", titre: "Châteaux de la Loire", texte: "Chambord, Chenonceau, Amboise.", href: "/voyages/chateaux-loire" },
+  { illu: "londres", saison: "Séjours · 2 à 4 jours", titre: "Londres, Bruxelles, Amsterdam", texte: "Le car reste avec le groupe sur place : transferts, visites, retour. Un seul transporteur, un seul devis.", href: "/voyages/sejours-europe", grande: true },
 ];
 
 const TYPES: { illu: IlluId; titre: string; sous: string; organisme: string }[] = [
@@ -35,12 +35,12 @@ const ETAPES = [
 
 type Dest = { illu: IlluId; titre: string; meta: string; texte: string; href: string };
 const DESTINATIONS: Dest[] = [
-  { illu: "parc", titre: "Disneyland Paris", meta: "Depuis Paris · 45 km · journée", texte: "La sortie la plus demandée par les écoles et les CSE. Dépose au parking cars, reprise le soir.", href: "/location-autocar/trajet/paris-disneyland" },
-  { illu: "msm", titre: "Mont-Saint-Michel", meta: "Depuis Paris · 360 km · journée ou 2 jours", texte: "Longue journée : les transporteurs prévoient souvent deux conducteurs, c'est inclus dans leur offre.", href: "/location-autocar/trajet/paris-mont-saint-michel" },
-  { illu: "mer", titre: "Plages du Débarquement", meta: "Depuis Caen · 30 km · journée", texte: "Circuit mémoriel : Omaha Beach, cimetière américain, Arromanches. Le car suit le groupe toute la journée.", href: "/location-autocar/trajet/caen-plages-du-debarquement" },
-  { illu: "vigne", titre: "Puy du Fou", meta: "Depuis Paris · 380 km · 2 jours", texte: "Nuit sur place : hébergement du chauffeur et immobilisation du car compris dans les offres.", href: "/location-autocar/trajet/paris-puy-du-fou" },
-  { illu: "mer", titre: "Deauville · Honfleur", meta: "Depuis Paris · 200 km · journée", texte: "La journée à la mer des associations et des aînés. Arrêt possible à Honfleur sur le retour.", href: "/location-autocar/trajet/paris-deauville" },
-  { illu: "londres", titre: "Londres", meta: "Depuis Paris · 460 km · 3 jours", texte: "Séjour avec le car sur place. Transporteurs habitués au tunnel et aux formalités de groupe.", href: "/location-autocar/trajet/paris-londres" },
+  { illu: "parc", titre: "Disneyland Paris", meta: "Depuis Paris · 45 km · journée", texte: "La sortie la plus demandée par les écoles et les CSE. Dépose au parking cars, reprise le soir.", href: "/voyages/parcs-attractions?vers=Disneyland%20Paris" },
+  { illu: "msm", titre: "Mont-Saint-Michel", meta: "Depuis Paris · 360 km · journée ou 2 jours", texte: "Longue journée : les transporteurs prévoient souvent deux conducteurs, c'est inclus dans leur offre.", href: "/voyages/normandie-bretagne?vers=Mont-Saint-Michel" },
+  { illu: "mer", titre: "Plages du Débarquement", meta: "Depuis Caen · 30 km · journée", texte: "Circuit mémoriel : Omaha Beach, cimetière américain, Arromanches. Le car suit le groupe toute la journée.", href: "/voyages/normandie-bretagne?vers=Plages%20du%20D%C3%A9barquement" },
+  { illu: "vigne", titre: "Puy du Fou", meta: "Depuis Paris · 380 km · 2 jours", texte: "Nuit sur place : hébergement du chauffeur et immobilisation du car compris dans les offres.", href: "/voyages/parcs-attractions?vers=Puy%20du%20Fou" },
+  { illu: "mer", titre: "Deauville · Honfleur", meta: "Depuis Paris · 200 km · journée", texte: "La journée à la mer des associations et des aînés. Arrêt possible à Honfleur sur le retour.", href: "/voyages/journee-mer?vers=Deauville" },
+  { illu: "londres", titre: "Londres", meta: "Depuis Paris · 460 km · 3 jours", texte: "Séjour avec le car sur place. Transporteurs habitués au tunnel et aux formalités de groupe.", href: "/voyages/sejours-europe?vers=Londres" },
 ];
 
 const CONFIANCE = [
