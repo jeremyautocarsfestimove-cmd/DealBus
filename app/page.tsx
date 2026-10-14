@@ -75,10 +75,10 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-b from-encre/10 via-transparent to-encre/70" />
           <div className="relative max-w-6xl mx-auto px-7 pt-24 pb-10 w-full">
             <span className="inline-flex items-center gap-2 bg-white/15 border border-white/30 rounded-full px-3 py-1.5 text-[12.5px] backdrop-blur-sm">
-              🚌 Voyages de groupe en autocar · devis gratuits de transporteurs vérifiés
+              Voyages de groupe en autocar · devis gratuits de transporteurs vérifiés
             </span>
             <h1 className="h-display text-5xl md:text-7xl mt-4 mb-3 drop-shadow-[0_2px_20px_rgba(0,0,0,.3)]">
-              Partez ensemble.<br /><span className="inline-block bg-white text-encre px-3 rounded-sm [box-decoration-break:clone]">On s&apos;occupe du car.</span>
+              Partez ensemble.<br /><span className="inline-block bg-white text-ambre px-3 rounded-sm [box-decoration-break:clone]">On s&apos;occupe du car.</span>
             </h1>
             <p className="text-lg max-w-2xl text-white/90 mb-7">
               Voyage scolaire, sortie d&apos;association, séminaire, mariage, tournoi… Dites-nous où vous allez :
@@ -98,7 +98,6 @@ export default function Home() {
           <div className="max-w-6xl mx-auto px-7">
             <div className="grid lg:grid-cols-[1fr_auto] gap-6 lg:items-end mb-9">
               <div><p className={eyebrow}>Envies du moment</p><h2 className={h2}>Où partir cette saison ?</h2></div>
-              <p className="text-blanc-dim max-w-sm text-[14.5px]">Des idées de sorties par saison. Un clic, et votre demande est pré-remplie.</p>
             </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {ENVIES.map((e) => (
@@ -121,7 +120,6 @@ export default function Home() {
           <div className="max-w-6xl mx-auto px-7">
             <div className="grid lg:grid-cols-[1fr_auto] gap-6 lg:items-end mb-9">
               <div><p className={eyebrow}>Pour tous les groupes</p><h2 className={h2}>Quel que soit le voyage.</h2></div>
-              <p className="text-blanc-dim max-w-sm text-[14.5px]">Chaque type de groupe a ses contraintes : ceintures pour les enfants, soute pour les séjours, horaires souples pour un mariage. La demande en tient compte.</p>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
               {TYPES.map((t) => (
