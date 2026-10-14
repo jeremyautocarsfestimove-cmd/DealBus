@@ -136,31 +136,35 @@ export default function Home() {
         </section>
 
         {/* ---------- 4. LE CŒUR ---------- */}
-        <section className="sombre py-20" id="comment-ca-marche">
-          <div className="max-w-6xl mx-auto px-7 grid lg:grid-cols-[1.1fr_1fr] gap-12 items-center">
-            <div>
+        {/* Photo réaliste en fond (public/img/route.webp, format panoramique),
+            voile sombre pour la lisibilité, 3 étapes côte à côte, preuves dessous. */}
+        <section className="sombre relative py-20 text-blanc overflow-hidden" id="comment-ca-marche">
+          <Illu id="route" titre="Autocar de tourisme sur une route côtière" />
+          <div className="absolute inset-0 bg-encre/75" />
+          <div className="absolute inset-0 bg-gradient-to-b from-encre/40 via-transparent to-encre/60" />
+          <div className="relative max-w-6xl mx-auto px-7">
+            <div className="max-w-3xl">
               <p className="font-mono text-[11px] uppercase tracking-[.14em] text-ambre">Le principe DealBus</p>
               <h2 className="h-display text-4xl md:text-5xl mt-3 mb-4">Vous choisissez la destination.<br />Les transporteurs viennent à vous.</h2>
-              <p className="text-[17px] text-blanc-dim max-w-xl mb-6">Plus d&apos;appels à dix autocaristes pour comparer des devis incomparables. Une seule demande, anonyme, et des offres fermes de professionnels vérifiés.</p>
-              <div className="grid gap-3">
-                {ETAPES.map((e, i) => (
-                  <div key={e.titre} className="grid grid-cols-[54px_1fr] gap-4 bg-asphalte-2 border border-ligne rounded-md px-5 py-4">
-                    <span className="h-display text-5xl text-ambre">0{i + 1}</span>
-                    <div>
-                      <span className={`tag float-right ${e.tagCls}`}>{e.tag}</span>
-                      <h3 className="h-display text-2xl">{e.titre}</h3>
-                      <p className="text-sm text-blanc-dim mt-1">{e.texte}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="flex flex-wrap gap-7 mt-7 pt-6 border-t border-ligne">
-                {[["100 %", "Licences & RC Pro contrôlées"], ["1 seul", "Devis par transporteur, ferme"], ["24 h", "Premières offres, en général"]].map(([n, l]) => (
-                  <div key={l}><p className="h-display text-4xl">{n}</p><p className="font-mono text-[10.5px] uppercase tracking-wider text-blanc-faint mt-1">{l}</p></div>
-                ))}
-              </div>
+              <p className="text-[17px] text-white/85 max-w-xl">Plus d&apos;appels à dix autocaristes pour comparer des devis incomparables. Une seule demande, anonyme, et des offres fermes de professionnels vérifiés.</p>
             </div>
-            <div className="relative rounded-lg overflow-hidden min-h-[420px]"><Illu id="car" titre="Autocar de nuit, vitres éclairées" /></div>
+            <div className="grid md:grid-cols-3 gap-4 mt-10">
+              {ETAPES.map((e, i) => (
+                <div key={e.titre} className="bg-encre/55 backdrop-blur-sm border border-white/15 rounded-lg px-5 py-5">
+                  <div className="flex items-start justify-between gap-3">
+                    <span className="h-display text-5xl text-ambre">0{i + 1}</span>
+                    <span className={`tag ${e.tagCls}`}>{e.tag}</span>
+                  </div>
+                  <h3 className="h-display text-2xl mt-3">{e.titre}</h3>
+                  <p className="text-sm text-white/80 mt-1.5">{e.texte}</p>
+                </div>
+              ))}
+            </div>
+            <div className="flex flex-wrap gap-x-12 gap-y-4 mt-10 pt-6 border-t border-white/15">
+              {[["100 %", "Licences & RC Pro contrôlées"], ["1 seul", "Devis par transporteur, ferme"], ["24 h", "Premières offres, en général"]].map(([n, l]) => (
+                <div key={l}><p className="h-display text-4xl">{n}</p><p className="font-mono text-[10.5px] uppercase tracking-wider text-white/70 mt-1">{l}</p></div>
+              ))}
+            </div>
           </div>
         </section>
 
