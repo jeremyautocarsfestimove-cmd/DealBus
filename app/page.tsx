@@ -4,7 +4,8 @@ import { Footer } from "@/components/Footer";
 import { RechercheVoyage } from "@/components/RechercheVoyage";
 import Image from "next/image";
 import { IllustrationsSprite, Illu, type IlluId } from "@/components/Illustrations";
-import { photoVille, photoGroupe } from "@/lib/photos-villes";
+import { photoVille, photoGroupe, photoImg } from "@/lib/photos-villes";
+import { AvisClients } from "@/components/AvisClients";
 
 // Accueil « voyage » : on donne envie de partir, puis on montre que DealBus
 // est le moyen simple d'y aller en car. Illustrations SVG intégrées
@@ -43,13 +44,6 @@ const DESTINATIONS: Dest[] = [
   { illu: "vigne", photo: "puy-du-fou", titre: "Puy du Fou", meta: "Depuis Paris · 380 km · 2 jours", texte: "Nuit sur place : hébergement du chauffeur et immobilisation du car compris dans les offres.", href: "/voyages/parcs-attractions?vers=Puy%20du%20Fou" },
   { illu: "mer", photo: "deauville", titre: "Deauville · Honfleur", meta: "Depuis Paris · 200 km · journée", texte: "La journée à la mer des associations et des aînés. Arrêt possible à Honfleur sur le retour.", href: "/voyages/journee-mer?vers=Deauville" },
   { illu: "londres", photo: "londres", titre: "Londres", meta: "Depuis Paris · 460 km · 3 jours", texte: "Séjour avec le car sur place. Transporteurs habitués au tunnel et aux formalités de groupe.", href: "/voyages/sejours-europe?vers=Londres" },
-];
-
-const CONFIANCE = [
-  { ic: "✓", titre: "Transporteurs vérifiés", texte: "Licence de transport et assurance RC Pro contrôlées par DealBus avant toute mise en relation, puis à échéance." },
-  { ic: "👁", titre: "Vous restez anonyme", texte: "Les transporteurs voient le trajet, jamais votre nom, votre école ou votre téléphone, jusqu'à votre choix." },
-  { ic: "€", titre: "Des prix fermes, comparables", texte: "Un seul devis par transporteur, tout compris, avec ce qui est inclus écrit noir sur blanc. Pas de marchandage." },
-  { ic: "🛟", titre: "Une équipe derrière", texte: "Une question, un doute, une annulation ? DealBus suit chaque dossier et répond dans la journée." },
 ];
 
 const FAQ = [
@@ -95,23 +89,8 @@ export default function Home() {
           </div>
         </header>
 
-        {/* ---------- 1b. RÉASSURANCE (sous le hero) ---------- */}
-        <section className="relative z-10 -mt-6 pb-4">
-          <div className="max-w-6xl mx-auto px-7 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {CONFIANCE.map((c) => (
-              <div key={c.titre} className="bg-asphalte border border-ligne rounded-lg p-5 shadow-carte flex gap-3.5">
-                <div className="w-10 h-10 shrink-0 rounded-full bg-ambre-dim flex items-center justify-center font-condensed font-bold text-ambre-fort text-lg">{c.ic}</div>
-                <div>
-                  <b className="block text-[15px] mb-0.5">{c.titre}</b>
-                  <p className="text-[13px] text-blanc-dim">{c.texte}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
         {/* ---------- 2. ENVIES DU MOMENT ---------- */}
-        <section className="pt-14 pb-20" id="envies">
+        <section className="py-20" id="envies">
           <div className="max-w-6xl mx-auto px-7">
             <div className="grid lg:grid-cols-[1fr_auto] gap-6 lg:items-end mb-9">
               <div><p className={eyebrow}>Envies du moment</p><h2 className={h2}>Où partir cette saison ?</h2></div>
@@ -216,23 +195,8 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ---------- 7. UN VOYAGE RACONTÉ (cas illustratif) ---------- */}
-        <section className="pb-20">
-          <div className="max-w-6xl mx-auto px-7">
-            <div className="bg-asphalte-2 border border-ligne rounded-lg p-8 md:p-10 grid lg:grid-cols-2 gap-10 items-center">
-              <div>
-                <p className={`${eyebrow} mb-4`}>Exemple de voyage · cas illustratif</p>
-                <blockquote className="font-serif text-[21px] leading-snug">« Classe de 6e, 53 élèves, deux jours au Puy du Fou. J&apos;ai décrit le trajet un lundi soir, j&apos;avais trois offres le mercredi. On a choisi celle qui incluait l&apos;hôtel du chauffeur. »</blockquote>
-                <p className="font-mono text-[11px] uppercase tracking-wider text-blanc-faint mt-4">Professeure principale · collège des Yvelines · exemple rédigé à partir d&apos;une demande type</p>
-              </div>
-              <div className="bg-asphalte border border-ligne rounded-md p-5 text-[13.5px] divide-y divide-ligne">
-                {[["Mantes-la-Jolie → Puy du Fou", "412 km"], ["12 et 13 mai, car sur place", "2 jours"], ["58 passagers, autocar 63 places", "soute, ceintures"], ["Offres reçues", "3 en 48 h"], ["Offre retenue, tout compris", "2 590 € TTC"]].map(([a, b], i) => (
-                  <div key={a} className="flex justify-between py-2"><span>{a}</span><b className={`font-mono ${i === 4 ? "text-ambre-fort" : ""}`}>{b}</b></div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
+        {/* ---------- 7. AVIS CLIENTS (réels, via /api/avis) ---------- */}
+        <AvisClients />
 
         {/* ---------- 8. TRANSPORTEURS ---------- */}
         <section className="bg-asphalte-2 border-y border-ligne py-20" id="transporteurs">
@@ -251,7 +215,9 @@ export default function Home() {
                 <Link href="/cgu#commission" className="btn-ghost">Voir le barème</Link>
               </div>
             </div>
-            <div className="relative rounded-lg overflow-hidden min-h-[360px]"><Illu id="car" titre="Conducteur devant son autocar, dépôt au petit matin" /></div>
+            <div className="relative rounded-lg overflow-hidden min-h-[360px]">
+              <Image src={photoImg("car") ?? "/img/pro.jpg"} alt="Conducteur devant son autocar" fill sizes="(max-width: 1024px) 100vw, 50vw" className="object-cover" />
+            </div>
           </div>
         </section>
 

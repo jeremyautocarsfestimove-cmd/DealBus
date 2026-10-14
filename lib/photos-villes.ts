@@ -21,7 +21,7 @@ function imagePublique(sousDossier: string, cle: string): string | null {
   let trouve: string | null = null;
   try {
     for (const ext of EXTENSIONS) {
-      if (fs.existsSync(path.join(process.cwd(), "public", "img", sousDossier, `${cle}.${ext}`))) { trouve = `/img/${sousDossier}/${cle}.${ext}`; break; }
+      if (fs.existsSync(path.join(process.cwd(), "public", "img", sousDossier, `${cle}.${ext}`))) { trouve = `/img/${sousDossier ? sousDossier + "/" : ""}${cle}.${ext}`; break; }
     }
   } catch { trouve = null; }
   cache.set(k, trouve);
@@ -35,6 +35,11 @@ export function photoVille(cle: string): string | null {
 // Photos des types de groupes (accueil) : public/img/groupes/<cle>.webp
 export function photoGroupe(cle: string): string | null {
   return imagePublique("groupes", cle);
+}
+
+// Image à la racine de public/img/<cle>.webp (ex. "car", "route")
+export function photoImg(cle: string): string | null {
+  return imagePublique("", cle);
 }
 
 export function creditsPhotos(cles: string[]): { cle: string; credit: Credit }[] {
