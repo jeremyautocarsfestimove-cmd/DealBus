@@ -1,0 +1,81 @@
+--- a/lib/photos-villes.ts
++++ b/lib/photos-villes.ts
+@@ -13,18 +13,29 @@
+ const cache = new Map<string, string | null>();
+ let credits: Record<string, Credit> | null = null;
+ 
+-export function photoVille(cle: string): string | null {
+-  if (cache.has(cle)) return cache.get(cle)!;
++// Cherche public/img/<sousDossier>/<cle>.(webp|jpg|png) ; null si absent.
++function imagePublique(sousDossier: string, cle: string): string | null {
++  const k = `${sousDossier}/${cle}`;
++  if (cache.has(k)) return cache.get(k)!;
+   let trouve: string | null = null;
+   try {
+     for (const ext of EXTENSIONS) {
+-      if (fs.existsSync(path.join(DOSSIER, `${cle}.${ext}`))) { trouve = `/img/villes/${cle}.${ext}`; break; }
++      if (fs.existsSync(path.join(process.cwd(), "public", "img", sousDossier, `${cle}.${ext}`))) { trouve = `/img/${sousDossier}/${cle}.${ext}`; break; }
+     }
+   } catch { trouve = null; }
+-  cache.set(cle, trouve);
++  cache.set(k, trouve);
+   return trouve;
+ }
+ 
++export function photoVille(cle: string): string | null {
++  return imagePublique("villes", cle);
++}
++
++// Photos des types de groupes (accueil) : public/img/groupes/<cle>.webp
++export function photoGroupe(cle: string): string | null {
++  return imagePublique("groupes", cle);
++}
++
+ export function creditsPhotos(cles: string[]): { cle: string; credit: Credit }[] {
+   if (credits === null) {
+     try { credits = JSON.parse(fs.readFileSync(path.join(DOSSIER, "credits.json"), "utf8")); }
+--- a/app/page.tsx
++++ b/app/page.tsx
+@@ -4,7 +4,7 @@
+ import { RechercheVoyage } from "@/components/RechercheVoyage";
+ import Image from "next/image";
+ import { IllustrationsSprite, Illu, type IlluId } from "@/components/Illustrations";
+-import { photoVille } from "@/lib/photos-villes";
++import { photoVille, photoGroupe } from "@/lib/photos-villes";
+ 
+ // Accueil « voyage » : on donne envie de partir, puis on montre que DealBus
+ // est le moyen simple d'y aller en car. Illustrations SVG intégrées
+@@ -20,13 +20,13 @@
+   { illu: "londres", saison: "Séjours · 2 à 4 jours", titre: "Londres, Bruxelles, Amsterdam", texte: "Le car reste avec le groupe sur place : transferts, visites, retour. Un seul transporteur, un seul devis.", href: "/voyages/sejours-europe", grande: true },
+ ];
+ 
+-const TYPES: { illu: IlluId; titre: string; sous: string; organisme: string }[] = [
+-  { illu: "parc", titre: "Écoles", sous: "Sorties, voyages scolaires", organisme: "ecole" },
+-  { illu: "vigne", titre: "Associations", sous: "Sorties annuelles, aînés", organisme: "association" },
+-  { illu: "londres", titre: "CSE & entreprises", sous: "Séminaires, arbres de Noël", organisme: "cse" },
+-  { illu: "chateau", titre: "Mariages", sous: "Navettes invités", organisme: "mariage" },
+-  { illu: "mer", titre: "Clubs sportifs", sous: "Matchs, tournois, stages", organisme: "club" },
+-  { illu: "route", titre: "Collectivités", sous: "Centres de loisirs, colos", organisme: "collectivite" },
++const TYPES: { illu: IlluId; photo: string; titre: string; sous: string; organisme: string }[] = [
++  { illu: "parc", photo: "ecoles", titre: "Écoles", sous: "Sorties, voyages scolaires", organisme: "ecole" },
++  { illu: "vigne", photo: "associations", titre: "Associations", sous: "Sorties annuelles, aînés", organisme: "association" },
++  { illu: "londres", photo: "cse", titre: "CSE & entreprises", sous: "Séminaires, arbres de Noël", organisme: "cse" },
++  { illu: "chateau", photo: "mariages", titre: "Mariages", sous: "Navettes invités", organisme: "mariage" },
++  { illu: "mer", photo: "clubs", titre: "Clubs sportifs", sous: "Matchs, tournois, stages", organisme: "club" },
++  { illu: "route", photo: "collectivites", titre: "Collectivités", sous: "Centres de loisirs, colos", organisme: "collectivite" },
+ ];
+ 
+ const ETAPES = [
+@@ -126,7 +126,11 @@
+             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+               {TYPES.map((t) => (
+                 <Link key={t.titre} href={`/demande?organisme=${t.organisme}`} className="bg-asphalte border border-ligne rounded-md overflow-hidden text-center pb-4 hover:border-ligne-strong transition">
+-                  <div className="relative h-24"><Illu id={t.illu} /></div>
++                  <div className="relative h-24 overflow-hidden">
++                    {photoGroupe(t.photo)
++                      ? <Image src={photoGroupe(t.photo)!} alt={t.titre} fill sizes="(max-width: 640px) 50vw, 16vw" className="object-cover" />
++                      : <Illu id={t.illu} />}
++                  </div>
+                   <b className="block text-[14.5px] mt-3">{t.titre}</b>
+                   <small className="block text-xs text-blanc-faint px-2">{t.sous}</small>
+                 </Link>
