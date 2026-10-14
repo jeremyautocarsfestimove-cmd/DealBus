@@ -13,16 +13,27 @@ const EXTENSIONS = ["webp", "jpg", "jpeg", "png"];
 const cache = new Map<string, string | null>();
 let credits: Record<string, Credit> | null = null;
 
-export function photoVille(cle: string): string | null {
-  if (cache.has(cle)) return cache.get(cle)!;
+// Cherche public/img/<sousDossier>/<cle>.(webp|jpg|png) ; null si absent.
+function imagePublique(sousDossier: string, cle: string): string | null {
+  const k = `${sousDossier}/${cle}`;
+  if (cache.has(k)) return cache.get(k)!;
   let trouve: string | null = null;
   try {
     for (const ext of EXTENSIONS) {
-      if (fs.existsSync(path.join(DOSSIER, `${cle}.${ext}`))) { trouve = `/img/villes/${cle}.${ext}`; break; }
+      if (fs.existsSync(path.join(process.cwd(), "public", "img", sousDossier, `${cle}.${ext}`))) { trouve = `/img/${sousDossier}/${cle}.${ext}`; break; }
     }
   } catch { trouve = null; }
-  cache.set(cle, trouve);
+  cache.set(k, trouve);
   return trouve;
+}
+
+export function photoVille(cle: string): string | null {
+  return imagePublique("villes", cle);
+}
+
+// Photos des types de groupes (accueil) : public/img/groupes/<cle>.webp
+export function photoGroupe(cle: string): string | null {
+  return imagePublique("groupes", cle);
 }
 
 export function creditsPhotos(cles: string[]): { cle: string; credit: Credit }[] {
