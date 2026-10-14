@@ -72,18 +72,18 @@ export default async function VoyagePage({ params }: { params: Params }) {
                 {v.exemples.map((e, i) => {
                   const photo = photoVille(e.photo);
                   return (
-                  <Link key={e.nom} href={`/voyages/${v.slug}?vers=${encodeURIComponent(e.nom)}#devis`} className="card p-0 overflow-hidden hover:border-ligne-strong transition group relative">
+                  <Link key={e.nom} href={`/voyages/${v.slug}?vers=${encodeURIComponent(e.nom)}#devis`} className="card !p-0 overflow-hidden hover:border-ligne-strong transition group relative flex flex-col">
                     <div className="relative h-36 overflow-hidden">
                       {photo
                         ? <Image src={photo} alt={e.nom} fill sizes="(max-width: 640px) 100vw, 33vw" className="object-cover transition group-hover:scale-[1.03] duration-500" />
                         : <Illu id={v.illu} className="transition group-hover:scale-[1.03] duration-500" />}
                     </div>
                     {i === 0 && <span className="absolute top-2.5 left-2.5 font-mono text-[10px] uppercase tracking-[.1em] bg-ambre text-encre px-2 py-0.5 rounded-sm">Exemple</span>}
-                    <div className="p-3.5">
+                    <div className="p-3.5 flex flex-col flex-1">
                       <h3 className="h-display text-xl">{e.nom}</h3>
                       <p className="font-mono text-[11px] text-blanc-faint mt-0.5 mb-2">{e.meta}</p>
                       <p className="text-[13.5px] text-blanc-dim">{e.texte}</p>
-                      <span className="inline-block mt-3 font-mono text-[10.5px] uppercase tracking-[.1em] border border-ligne-strong px-2.5 py-1 rounded-sm group-hover:bg-ambre group-hover:border-ambre group-hover:text-encre transition">Choisir →</span>
+                      <div className="mt-auto pt-3"><span className="inline-block font-mono text-[10.5px] uppercase tracking-[.1em] border border-ligne-strong px-2.5 py-1 rounded-sm group-hover:bg-ambre group-hover:border-ambre group-hover:text-encre transition">Choisir →</span></div>
                     </div>
                   </Link>
                   );
@@ -155,7 +155,7 @@ export default async function VoyagePage({ params }: { params: Params }) {
           </div>
 
           <aside id="devis" className="lg:sticky lg:top-24 lg:self-start">
-            <Suspense fallback={<div className="sombre bg-asphalte rounded-xl min-h-[520px]" />}>
+            <Suspense fallback={<div className="sombre bg-asphalte rounded-xl min-h-[420px]" />}>
               <FormulaireVoyage voyage={v} />
             </Suspense>
           </aside>
