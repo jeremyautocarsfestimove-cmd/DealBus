@@ -9,7 +9,8 @@ import path from "node:path";
 export type Credit = { auteur: string; licence: string; source: string };
 
 const DOSSIER = path.join(process.cwd(), "public", "img", "villes");
-const EXTENSIONS = ["webp", "jpg", "jpeg", "png"];
+// « webp.png » : nom que donne ChatGPT à ses PNG au téléchargement, accepté tel quel.
+const EXTENSIONS = ["webp", "jpg", "jpeg", "png", "webp.png", "webp.jpg"];
 const cache = new Map<string, string | null>();
 let credits: Record<string, Credit> | null = null;
 

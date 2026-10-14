@@ -161,7 +161,7 @@ export function IllustrationsSprite() {
 
 // Si une image existe dans public/img/<id>.(webp|png|jpg), elle remplace le
 // SVG de la même scène. Vérifié au build (page statique) : aucun coût au runtime.
-const EXTENSIONS = ["webp", "png", "jpg", "jpeg"];
+const EXTENSIONS = ["webp", "png", "jpg", "jpeg", "webp.png", "webp.jpg"];  // « webp.png » : nom donné par ChatGPT à ses PNG
 const cacheImages = new Map<IlluId, string | null>();
 
 function imagePour(id: IlluId): string | null {
