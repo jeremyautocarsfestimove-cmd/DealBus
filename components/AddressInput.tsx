@@ -30,12 +30,14 @@ export function AddressInput({
   onSelect,
   placeholder,
   mode = "fr",
+  inputClassName,
 }: {
   value: string;
   onChange: (v: string) => void;
   onSelect?: (s: Suggestion) => void;
   placeholder?: string;
   mode?: "fr" | "international";
+  inputClassName?: string;   // remplace la classe "input" (ex. barre de recherche du hero)
 }) {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [open, setOpen] = useState(false);
@@ -134,7 +136,7 @@ export function AddressInput({
   return (
     <div ref={wrapper} className="relative">
       <input
-        className="input"
+        className={inputClassName ?? "input"}
         placeholder={placeholder ?? "Adresse, ville ou lieu"}
         value={value}
         onChange={(e) => search(e.target.value)}
