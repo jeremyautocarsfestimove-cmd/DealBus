@@ -78,7 +78,7 @@ export default function Home() {
               Voyages de groupe en autocar · devis gratuits de transporteurs vérifiés
             </span>
             <h1 className="h-display text-5xl md:text-7xl mt-4 mb-3 drop-shadow-[0_2px_20px_rgba(0,0,0,.3)]">
-              Partez ensemble.<br /><span className="inline-block bg-white text-ambre px-3 rounded-sm [box-decoration-break:clone]">On s&apos;occupe du car.</span>
+              Partez ensemble.<br /><span className="inline-block bg-ambre text-white px-3 rounded-sm [box-decoration-break:clone]">On s&apos;occupe du car.</span>
             </h1>
             <p className="text-lg max-w-2xl text-white/90 mb-7">
               Voyage scolaire, sortie d&apos;association, séminaire, mariage, tournoi… Dites-nous où vous allez :
