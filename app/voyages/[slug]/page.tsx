@@ -6,7 +6,9 @@ import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { IllustrationsSprite, Illu } from "@/components/Illustrations";
 import { FormulaireVoyage } from "@/components/FormulaireVoyage";
+import Image from "next/image";
 import { VOYAGES, voyageParSlug } from "@/lib/voyages";
+import { photoVille, creditsPhotos } from "@/lib/photos-villes";
 
 type Params = Promise<{ slug: string }>;
 
@@ -31,6 +33,7 @@ export default async function VoyagePage({ params }: { params: Params }) {
   const v = voyageParSlug((await params).slug);
   if (!v) notFound();
   const autres = VOYAGES.filter((x) => x.slug !== v.slug);
+  const credits = creditsPhotos(v.exemples.map((e) => e.photo));
 
   return (
     <>
@@ -66,9 +69,15 @@ export default async function VoyagePage({ params }: { params: Params }) {
               <h2 className="h-display text-3xl mb-1">{v.exemplesTitre}</h2>
               <p className="text-blanc-dim max-w-2xl mb-5">{v.exemplesIntro}</p>
               <div className="grid sm:grid-cols-3 gap-3.5">
-                {v.exemples.map((e, i) => (
+                {v.exemples.map((e, i) => {
+                  const photo = photoVille(e.photo);
+                  return (
                   <Link key={e.nom} href={`/voyages/${v.slug}?vers=${encodeURIComponent(e.nom)}#devis`} className="card p-0 overflow-hidden hover:border-ligne-strong transition group relative">
-                    <div className="relative h-28 overflow-hidden"><Illu id={v.illu} className="transition group-hover:scale-[1.03] duration-500" /></div>
+                    <div className="relative h-36 overflow-hidden">
+                      {photo
+                        ? <Image src={photo} alt={e.nom} fill sizes="(max-width: 640px) 100vw, 33vw" className="object-cover transition group-hover:scale-[1.03] duration-500" />
+                        : <Illu id={v.illu} className="transition group-hover:scale-[1.03] duration-500" />}
+                    </div>
                     {i === 0 && <span className="absolute top-2.5 left-2.5 font-mono text-[10px] uppercase tracking-[.1em] bg-ambre text-encre px-2 py-0.5 rounded-sm">Exemple</span>}
                     <div className="p-3.5">
                       <h3 className="h-display text-xl">{e.nom}</h3>
@@ -77,7 +86,8 @@ export default async function VoyagePage({ params }: { params: Params }) {
                       <span className="inline-block mt-3 font-mono text-[10.5px] uppercase tracking-[.1em] border border-ligne-strong px-2.5 py-1 rounded-sm group-hover:bg-ambre group-hover:border-ambre group-hover:text-encre transition">Choisir →</span>
                     </div>
                   </Link>
-                ))}
+                  );
+                })}
               </div>
               <div className="flex flex-wrap gap-2 mt-3.5">
                 {v.autres.map((a) => (
@@ -134,6 +144,14 @@ export default async function VoyagePage({ params }: { params: Params }) {
                 ))}
               </div>
             </section>
+
+            {credits.length > 0 && (
+              <p className="font-mono text-[10.5px] text-blanc-faint leading-relaxed">
+                Photos des destinations : {credits.map((c, i) => (
+                  <span key={c.cle}>{i > 0 && " · "}<a href={c.credit.source} target="_blank" rel="noopener noreferrer" className="hover:text-blanc">{v.exemples.find((e) => e.photo === c.cle)?.nom}</a> {c.credit.auteur}, {c.credit.licence}</span>
+                ))} (Wikimedia Commons).
+              </p>
+            )}
           </div>
 
           <aside id="devis" className="lg:sticky lg:top-24 lg:self-start">

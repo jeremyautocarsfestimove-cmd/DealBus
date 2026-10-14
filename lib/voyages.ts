@@ -19,7 +19,7 @@ export type Voyage = {
   chiffres: { n: string; l: string }[];
   exemplesTitre: string;
   exemplesIntro: string;
-  exemples: { nom: string; meta: string; texte: string }[];
+  exemples: { nom: string; photo: string; meta: string; texte: string }[];   // photo : fichier public/img/villes/<photo>.webp
   autres: string[];           // autres destinations possibles (liste ouverte)
   reperes: { k: string; titre: string; texte: string }[];
   formules: Formule[];
@@ -54,9 +54,9 @@ export const VOYAGES: Voyage[] = [
     exemplesTitre: "Les plus demandés",
     exemplesIntro: "Trois destinations fréquentes à titre d'exemple. Toutes les villes qui ont un marché de Noël sont possibles : choisissez-en une, ou tapez la vôtre dans le formulaire.",
     exemples: [
-      { nom: "Strasbourg", meta: "Depuis Paris · ≈ 490 km · ≈ 5 h 15", texte: "Le plus grand marché de Noël de France, fin novembre à fin décembre. Depuis Paris la journée est longue : beaucoup de groupes partent sur 2 jours." },
-      { nom: "Colmar", meta: "Depuis Paris · ≈ 520 km · ≈ 5 h 30", texte: "Plusieurs marchés dans la vieille ville. Souvent combiné avec Strasbourg ou les villages alsaciens sur 2 jours." },
-      { nom: "Reims", meta: "Depuis Paris · ≈ 145 km · ≈ 1 h 45", texte: "Marché au pied de la cathédrale. À moins de 2 h de Paris : faisable dans la journée sans contrainte." },
+      { nom: "Strasbourg", photo: "strasbourg", meta: "Depuis Paris · ≈ 490 km · ≈ 5 h 15", texte: "Le plus grand marché de Noël de France, fin novembre à fin décembre. Depuis Paris la journée est longue : beaucoup de groupes partent sur 2 jours." },
+      { nom: "Colmar", photo: "colmar", meta: "Depuis Paris · ≈ 520 km · ≈ 5 h 30", texte: "Plusieurs marchés dans la vieille ville. Souvent combiné avec Strasbourg ou les villages alsaciens sur 2 jours." },
+      { nom: "Reims", photo: "reims", meta: "Depuis Paris · ≈ 145 km · ≈ 1 h 45", texte: "Marché au pied de la cathédrale. À moins de 2 h de Paris : faisable dans la journée sans contrainte." },
     ],
     autres: ["Lille", "Metz", "Nancy", "Mulhouse", "Montbéliard", "Amiens", "Rouen", "Kaysersberg", "Riquewihr", "Bruxelles", "Liège", "Aix-la-Chapelle", "Cologne"],
     reperes: [
@@ -79,9 +79,9 @@ export const VOYAGES: Voyage[] = [
     exemplesTitre: "Les plus demandés",
     exemplesIntro: "Trois exemples. Tous les parcs sont possibles : choisissez-en un, ou tapez le vôtre dans le formulaire.",
     exemples: [
-      { nom: "Disneyland Paris", meta: "Depuis Paris · ≈ 45 km · ≈ 1 h", texte: "La sortie la plus demandée. Le parc dispose d'un parking autocars dédié ; les groupes sont déposés à l'entrée." },
-      { nom: "Parc Astérix", meta: "Depuis Paris · ≈ 40 km · ≈ 50 min", texte: "Journée simple depuis l'Île-de-France. Ouverture saisonnière : vérifiez le calendrier du parc avant de fixer la date." },
-      { nom: "Puy du Fou", meta: "Depuis Paris · ≈ 380 km · ≈ 4 h", texte: "Généralement sur 2 jours avec la Cinéscénie en saison. Le transporteur précise dans son offre l'organisation de la nuit du conducteur." },
+      { nom: "Disneyland Paris", photo: "disneyland-paris", meta: "Depuis Paris · ≈ 45 km · ≈ 1 h", texte: "La sortie la plus demandée. Le parc dispose d'un parking autocars dédié ; les groupes sont déposés à l'entrée." },
+      { nom: "Parc Astérix", photo: "parc-asterix", meta: "Depuis Paris · ≈ 40 km · ≈ 50 min", texte: "Journée simple depuis l'Île-de-France. Ouverture saisonnière : vérifiez le calendrier du parc avant de fixer la date." },
+      { nom: "Puy du Fou", photo: "puy-du-fou", meta: "Depuis Paris · ≈ 380 km · ≈ 4 h", texte: "Généralement sur 2 jours avec la Cinéscénie en saison. Le transporteur précise dans son offre l'organisation de la nuit du conducteur." },
     ],
     autres: ["Futuroscope", "Nigloland", "Walibi Rhône-Alpes", "Parc Spirou", "Le Pal", "Vulcania", "Zoo de Beauval", "Marineland", "Europa-Park", "Efteling", "Plopsaland"],
     reperes: [
@@ -103,9 +103,9 @@ export const VOYAGES: Voyage[] = [
     exemplesTitre: "Les plus demandées",
     exemplesIntro: "Trois exemples depuis l'Île-de-France. Toute station balnéaire est possible : choisissez-en une, ou tapez la vôtre.",
     exemples: [
-      { nom: "Deauville", meta: "Depuis Paris · ≈ 200 km · ≈ 2 h 30", texte: "La plus proche des grandes plages normandes. Dépose près du front de mer selon les règles de la ville." },
-      { nom: "Étretat", meta: "Depuis Paris · ≈ 210 km · ≈ 2 h 45", texte: "Falaises et plage de galets. Stationnement autocars limité en été : le transporteur gère la dépose et le parking." },
-      { nom: "Le Touquet", meta: "Depuis Paris · ≈ 240 km · ≈ 2 h 45", texte: "Grande plage de sable, station adaptée aux groupes." },
+      { nom: "Deauville", photo: "deauville", meta: "Depuis Paris · ≈ 200 km · ≈ 2 h 30", texte: "La plus proche des grandes plages normandes. Dépose près du front de mer selon les règles de la ville." },
+      { nom: "Étretat", photo: "etretat", meta: "Depuis Paris · ≈ 210 km · ≈ 2 h 45", texte: "Falaises et plage de galets. Stationnement autocars limité en été : le transporteur gère la dépose et le parking." },
+      { nom: "Le Touquet", photo: "le-touquet", meta: "Depuis Paris · ≈ 240 km · ≈ 2 h 45", texte: "Grande plage de sable, station adaptée aux groupes." },
     ],
     autres: ["Cabourg", "Honfleur", "Trouville", "Fécamp", "Dieppe", "Berck", "Saint-Malo", "Granville", "Les Sables-d'Olonne", "La Baule", "Arcachon"],
     reperes: [
@@ -127,9 +127,9 @@ export const VOYAGES: Voyage[] = [
     exemplesTitre: "Les plus demandés",
     exemplesIntro: "Trois exemples. Tous les vignobles sont possibles : choisissez-en un, ou tapez votre destination.",
     exemples: [
-      { nom: "Champagne (Reims, Épernay)", meta: "Depuis Paris · ≈ 145 km · ≈ 1 h 45", texte: "Le plus proche de l'Île-de-France. Journée simple, caves ouvertes aux groupes sur réservation (à organiser par vos soins)." },
-      { nom: "Vallée de la Loire", meta: "Depuis Paris · ≈ 200 à 300 km · 2 h 30 à 3 h 30", texte: "Vouvray, Chinon, Saumur. Souvent combiné avec un château sur la journée ou sur 2 jours." },
-      { nom: "Bourgogne (Beaune)", meta: "Depuis Paris · ≈ 310 km · ≈ 3 h 30", texte: "Route des Grands Crus. Journée longue depuis Paris : 2 jours conseillés pour un programme complet." },
+      { nom: "Champagne (Reims, Épernay)", photo: "epernay", meta: "Depuis Paris · ≈ 145 km · ≈ 1 h 45", texte: "Le plus proche de l'Île-de-France. Journée simple, caves ouvertes aux groupes sur réservation (à organiser par vos soins)." },
+      { nom: "Vallée de la Loire", photo: "val-de-loire", meta: "Depuis Paris · ≈ 200 à 300 km · 2 h 30 à 3 h 30", texte: "Vouvray, Chinon, Saumur. Souvent combiné avec un château sur la journée ou sur 2 jours." },
+      { nom: "Bourgogne (Beaune)", photo: "beaune", meta: "Depuis Paris · ≈ 310 km · ≈ 3 h 30", texte: "Route des Grands Crus. Journée longue depuis Paris : 2 jours conseillés pour un programme complet." },
     ],
     autres: ["Alsace (Colmar, Riquewihr)", "Bordelais (Saint-Émilion)", "Sancerre", "Chablis", "Jura", "Côtes-du-Rhône", "Languedoc", "Provence", "Beaujolais"],
     reperes: [
@@ -151,9 +151,9 @@ export const VOYAGES: Voyage[] = [
     exemplesTitre: "Les plus demandés",
     exemplesIntro: "Trois exemples. Tous les châteaux sont possibles : choisissez-en un, ou tapez votre destination.",
     exemples: [
-      { nom: "Chambord", meta: "Depuis Paris · ≈ 180 km · ≈ 2 h 15", texte: "Le plus visité. Parking autocars à l'entrée du domaine ; souvent combiné avec Blois ou Cheverny." },
-      { nom: "Chenonceau", meta: "Depuis Paris · ≈ 230 km · ≈ 2 h 45", texte: "Se combine avec Amboise dans la journée. Parking autocars sur place." },
-      { nom: "Amboise", meta: "Depuis Paris · ≈ 220 km · ≈ 2 h 30", texte: "Château royal et Clos Lucé à quelques minutes à pied l'un de l'autre." },
+      { nom: "Chambord", photo: "chambord", meta: "Depuis Paris · ≈ 180 km · ≈ 2 h 15", texte: "Le plus visité. Parking autocars à l'entrée du domaine ; souvent combiné avec Blois ou Cheverny." },
+      { nom: "Chenonceau", photo: "chenonceau", meta: "Depuis Paris · ≈ 230 km · ≈ 2 h 45", texte: "Se combine avec Amboise dans la journée. Parking autocars sur place." },
+      { nom: "Amboise", photo: "amboise", meta: "Depuis Paris · ≈ 220 km · ≈ 2 h 30", texte: "Château royal et Clos Lucé à quelques minutes à pied l'un de l'autre." },
     ],
     autres: ["Blois", "Cheverny", "Villandry", "Azay-le-Rideau", "Chaumont-sur-Loire", "Saumur", "Angers", "Langeais", "Ussé", "Valençay"],
     reperes: [
@@ -175,9 +175,9 @@ export const VOYAGES: Voyage[] = [
     exemplesTitre: "Les plus demandés",
     exemplesIntro: "Trois exemples depuis Paris. Toute ville européenne est possible : choisissez-en une, ou tapez votre destination.",
     exemples: [
-      { nom: "Londres", meta: "Depuis Paris · ≈ 460 km · tunnel ou ferry", texte: "Le séjour scolaire par excellence. Les transporteurs précisent dans leur offre la traversée retenue et l'organisation des conducteurs." },
-      { nom: "Bruxelles", meta: "Depuis Paris · ≈ 310 km · ≈ 3 h 30", texte: "Faisable sur 2 jours, souvent combiné avec Bruges ou Gand." },
-      { nom: "Amsterdam", meta: "Depuis Paris · ≈ 500 km · ≈ 5 h 30", texte: "3 jours en général. Accès autocars réglementé au centre : le transporteur connaît les points de dépose." },
+      { nom: "Londres", photo: "londres", meta: "Depuis Paris · ≈ 460 km · tunnel ou ferry", texte: "Le séjour scolaire par excellence. Les transporteurs précisent dans leur offre la traversée retenue et l'organisation des conducteurs." },
+      { nom: "Bruxelles", photo: "bruxelles", meta: "Depuis Paris · ≈ 310 km · ≈ 3 h 30", texte: "Faisable sur 2 jours, souvent combiné avec Bruges ou Gand." },
+      { nom: "Amsterdam", photo: "amsterdam", meta: "Depuis Paris · ≈ 500 km · ≈ 5 h 30", texte: "3 jours en général. Accès autocars réglementé au centre : le transporteur connaît les points de dépose." },
     ],
     autres: ["Bruges", "Gand", "Berlin", "Munich", "Barcelone", "Madrid", "Rome", "Florence", "Venise", "Prague", "Vienne", "Lisbonne"],
     reperes: [
@@ -200,9 +200,9 @@ export const VOYAGES: Voyage[] = [
     exemplesTitre: "Les plus demandés",
     exemplesIntro: "Trois exemples depuis Paris. Tous les sites sont possibles : choisissez-en un, ou tapez votre destination.",
     exemples: [
-      { nom: "Mont-Saint-Michel", meta: "Depuis Paris · ≈ 360 km · ≈ 4 h", texte: "Les autocars stationnent au parking de La Caserne ; le groupe rejoint le Mont à pied par la passerelle ou en navette. Journée longue depuis Paris : 2 jours possibles." },
-      { nom: "Plages du Débarquement", meta: "Depuis Paris · ≈ 280 km · ≈ 3 h", texte: "Omaha Beach, cimetière américain, Arromanches : plusieurs arrêts dans la journée, le car suit le groupe." },
-      { nom: "Honfleur et Deauville", meta: "Depuis Paris · ≈ 200 km · ≈ 2 h 30", texte: "Deux arrêts dans la journée, souvent demandés par les associations et les aînés." },
+      { nom: "Mont-Saint-Michel", photo: "mont-saint-michel", meta: "Depuis Paris · ≈ 360 km · ≈ 4 h", texte: "Les autocars stationnent au parking de La Caserne ; le groupe rejoint le Mont à pied par la passerelle ou en navette. Journée longue depuis Paris : 2 jours possibles." },
+      { nom: "Plages du Débarquement", photo: "plages-debarquement", meta: "Depuis Paris · ≈ 280 km · ≈ 3 h", texte: "Omaha Beach, cimetière américain, Arromanches : plusieurs arrêts dans la journée, le car suit le groupe." },
+      { nom: "Honfleur et Deauville", photo: "honfleur", meta: "Depuis Paris · ≈ 200 km · ≈ 2 h 30", texte: "Deux arrêts dans la journée, souvent demandés par les associations et les aînés." },
     ],
     autres: ["Saint-Malo", "Giverny", "Rouen", "Bayeux", "Étretat", "Cancale", "Dinan", "Caen Mémorial", "Granville", "Falaise"],
     reperes: [

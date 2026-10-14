@@ -2,7 +2,9 @@ import Link from "next/link";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { RechercheVoyage } from "@/components/RechercheVoyage";
+import Image from "next/image";
 import { IllustrationsSprite, Illu, type IlluId } from "@/components/Illustrations";
+import { photoVille } from "@/lib/photos-villes";
 
 // Accueil « voyage » : on donne envie de partir, puis on montre que DealBus
 // est le moyen simple d'y aller en car. Illustrations SVG intégrées
@@ -33,14 +35,14 @@ const ETAPES = [
   { tag: "Vous décidez", tagCls: "bg-asphalte-3 text-blanc", titre: "Retenez, et partez", texte: "Coordonnées échangées avec le transporteur choisi, règlement direct avec lui. DealBus ne prend rien côté client." },
 ];
 
-type Dest = { illu: IlluId; titre: string; meta: string; texte: string; href: string };
+type Dest = { illu: IlluId; photo: string; titre: string; meta: string; texte: string; href: string };
 const DESTINATIONS: Dest[] = [
-  { illu: "parc", titre: "Disneyland Paris", meta: "Depuis Paris · 45 km · journée", texte: "La sortie la plus demandée par les écoles et les CSE. Dépose au parking cars, reprise le soir.", href: "/voyages/parcs-attractions?vers=Disneyland%20Paris" },
-  { illu: "msm", titre: "Mont-Saint-Michel", meta: "Depuis Paris · 360 km · journée ou 2 jours", texte: "Longue journée : les transporteurs prévoient souvent deux conducteurs, c'est inclus dans leur offre.", href: "/voyages/normandie-bretagne?vers=Mont-Saint-Michel" },
-  { illu: "mer", titre: "Plages du Débarquement", meta: "Depuis Caen · 30 km · journée", texte: "Circuit mémoriel : Omaha Beach, cimetière américain, Arromanches. Le car suit le groupe toute la journée.", href: "/voyages/normandie-bretagne?vers=Plages%20du%20D%C3%A9barquement" },
-  { illu: "vigne", titre: "Puy du Fou", meta: "Depuis Paris · 380 km · 2 jours", texte: "Nuit sur place : hébergement du chauffeur et immobilisation du car compris dans les offres.", href: "/voyages/parcs-attractions?vers=Puy%20du%20Fou" },
-  { illu: "mer", titre: "Deauville · Honfleur", meta: "Depuis Paris · 200 km · journée", texte: "La journée à la mer des associations et des aînés. Arrêt possible à Honfleur sur le retour.", href: "/voyages/journee-mer?vers=Deauville" },
-  { illu: "londres", titre: "Londres", meta: "Depuis Paris · 460 km · 3 jours", texte: "Séjour avec le car sur place. Transporteurs habitués au tunnel et aux formalités de groupe.", href: "/voyages/sejours-europe?vers=Londres" },
+  { illu: "parc", photo: "disneyland-paris", titre: "Disneyland Paris", meta: "Depuis Paris · 45 km · journée", texte: "La sortie la plus demandée par les écoles et les CSE. Dépose au parking cars, reprise le soir.", href: "/voyages/parcs-attractions?vers=Disneyland%20Paris" },
+  { illu: "msm", photo: "mont-saint-michel", titre: "Mont-Saint-Michel", meta: "Depuis Paris · 360 km · journée ou 2 jours", texte: "Longue journée : les transporteurs prévoient souvent deux conducteurs, c'est inclus dans leur offre.", href: "/voyages/normandie-bretagne?vers=Mont-Saint-Michel" },
+  { illu: "mer", photo: "plages-debarquement", titre: "Plages du Débarquement", meta: "Depuis Caen · 30 km · journée", texte: "Circuit mémoriel : Omaha Beach, cimetière américain, Arromanches. Le car suit le groupe toute la journée.", href: "/voyages/normandie-bretagne?vers=Plages%20du%20D%C3%A9barquement" },
+  { illu: "vigne", photo: "puy-du-fou", titre: "Puy du Fou", meta: "Depuis Paris · 380 km · 2 jours", texte: "Nuit sur place : hébergement du chauffeur et immobilisation du car compris dans les offres.", href: "/voyages/parcs-attractions?vers=Puy%20du%20Fou" },
+  { illu: "mer", photo: "deauville", titre: "Deauville · Honfleur", meta: "Depuis Paris · 200 km · journée", texte: "La journée à la mer des associations et des aînés. Arrêt possible à Honfleur sur le retour.", href: "/voyages/journee-mer?vers=Deauville" },
+  { illu: "londres", photo: "londres", titre: "Londres", meta: "Depuis Paris · 460 km · 3 jours", texte: "Séjour avec le car sur place. Transporteurs habitués au tunnel et aux formalités de groupe.", href: "/voyages/sejours-europe?vers=Londres" },
 ];
 
 const CONFIANCE = [
@@ -172,7 +174,11 @@ export default function Home() {
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {DESTINATIONS.map((d) => (
                 <Link key={d.titre} href={d.href} className="bg-asphalte border border-ligne rounded-lg overflow-hidden hover:border-ligne-strong transition group">
-                  <div className="relative h-[150px] overflow-hidden"><Illu id={d.illu} className="transition group-hover:scale-[1.03] duration-500" /></div>
+                  <div className="relative h-[150px] overflow-hidden">
+                    {photoVille(d.photo)
+                      ? <Image src={photoVille(d.photo)!} alt={d.titre} fill sizes="(max-width: 640px) 100vw, 33vw" className="object-cover transition group-hover:scale-[1.03] duration-500" />
+                      : <Illu id={d.illu} className="transition group-hover:scale-[1.03] duration-500" />}
+                  </div>
                   <div className="p-4 pb-5">
                     <h4 className="h-display text-2xl">{d.titre}</h4>
                     <p className="font-mono text-[11px] text-blanc-faint tracking-wide mt-1">{d.meta}</p>
