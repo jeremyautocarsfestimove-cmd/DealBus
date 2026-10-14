@@ -70,7 +70,7 @@ export default function Home() {
       <main className="relative overflow-x-clip">
 
         {/* ---------- 1. HERO ---------- */}
-        <header className="relative min-h-[600px] flex items-end text-white overflow-hidden">
+        <header className="relative min-h-[600px] flex items-end text-white">
           <Illu id="msm" priorite titre="Groupe devant le Mont-Saint-Michel au lever du soleil, autocar sur la digue" />
           <div className="absolute inset-0 bg-gradient-to-b from-encre/10 via-transparent to-encre/70" />
           <div className="relative max-w-6xl mx-auto px-7 pt-24 pb-10 w-full">

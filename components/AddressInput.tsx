@@ -13,6 +13,8 @@ type Suggestion = {
 
 // Photon : clés OSM considérées comme des lieux (monuments, parcs, gares, communes…)
 const CLES_LIEU = new Set(["tourism", "historic", "leisure", "amenity", "natural", "railway", "aeroway", "sport"]);
+// Comparaison sans accents ni casse : « com » doit trouver « Compiègne » avant tout le reste.
+const norm = (t: string) => t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
 const DEPT_DEPUIS_CP = (cp?: string) => {
   if (!cp) return "";
   if (cp.startsWith("20")) return Number(cp) < 20200 ? "2A" : "2B";
@@ -66,12 +68,28 @@ export function AddressInput({
       try {
         const requests: Promise<Suggestion[]>[] = [
           // --- France : BAN (adresses précises) ---
+          // --- France : communes d'abord (BAN, type=municipality : « Com » → Compiègne dès 3 lettres) ---
+          fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(q)}&type=municipality&limit=4`, { signal })
+            .then((r) => r.json())
+            .then((data) =>
+              (data.features ?? []).map(
+                (f: { properties: { label: string; city: string; postcode: string; context: string } }) => ({
+                  label: `${f.properties.label}, ${f.properties.postcode ?? ""}`.replace(/, $/, ""),
+                  city: f.properties.city,
+                  postcode: f.properties.postcode ?? "",
+                  dept: (f.properties.context ?? "").split(",")[0].trim() || f.properties.postcode?.slice(0, 2) || "",
+                  country: "France",
+                  genre: "commune" as Suggestion["genre"],
+                })
+              )
+            )
+            .catch(() => [] as Suggestion[]),
           fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(q)}&limit=4`, { signal })
             .then((r) => r.json())
             .then((data) =>
               (data.features ?? []).map(
                 (f: { properties: { label: string; city: string; postcode: string; context: string; type?: string } }) => ({
-                  label: f.properties.label,
+                  label: f.properties.type === "municipality" ? `${f.properties.label}, ${f.properties.postcode ?? ""}`.replace(/, $/, "") : f.properties.label,
                   city: f.properties.city,
                   postcode: f.properties.postcode ?? "",
                   dept: (f.properties.context ?? "").split(",")[0].trim() || f.properties.postcode?.slice(0, 2) || "",
@@ -119,12 +137,22 @@ export function AddressInput({
         ];
 
         const results = await Promise.all(requests);
-        const ordre = { lieu: 0, commune: 1, adresse: 2 } as const;
+        // Classement : la commune dont le nom commence par ce qu'on tape, puis les
+        // lieux qui commencent pareil, puis le reste ; les adresses en dernier.
+        const nq = norm(q);
+        const score = (x: Suggestion) => {
+          const prefixe = norm(x.label).startsWith(nq) || norm(x.city).startsWith(nq);
+          if (x.genre === "commune") return prefixe ? 0 : 2;
+          if (x.genre === "lieu") return prefixe ? 1 : 3;
+          return 4;
+        };
         const vus = new Set<string>();
         const list = results.flat()
-          .filter((x) => { const k = x.label.toLowerCase(); if (vus.has(k)) return false; vus.add(k); return true; })
-          .sort((a, b) => ordre[a.genre ?? "adresse"] - ordre[b.genre ?? "adresse"])
-          .slice(0, 7);
+          .filter((x) => { const k = norm(x.label); if (vus.has(k)) return false; vus.add(k); return true; })
+          .map((x, i) => ({ x, i, s: score(x) }))
+          .sort((a, b) => a.s - b.s || a.i - b.i)
+          .map(({ x }) => x)
+          .slice(0, 8);
         setSuggestions(list);
         setOpen(list.length > 0);
       } catch {
@@ -143,7 +171,7 @@ export function AddressInput({
         onFocus={() => suggestions.length > 0 && setOpen(true)}
       />
       {open && (
-        <ul className="absolute z-30 left-0 right-0 top-full mt-1 bg-asphalte-2 border border-ligne-strong rounded-sm overflow-hidden shadow-xl">
+        <ul className="absolute z-50 left-0 top-full mt-1 min-w-full w-max max-w-[min(92vw,520px)] bg-asphalte-2 border border-ligne-strong rounded-sm overflow-hidden shadow-xl">
           {suggestions.map((s, i) => (
             <li key={i}>
               <button
@@ -155,7 +183,7 @@ export function AddressInput({
                   setOpen(false);
                 }}
               >
-                <span className="text-blanc flex-1 truncate">{s.label}</span>
+                <span className="text-blanc flex-1 whitespace-nowrap">{s.label}</span>
                 <span className="text-blanc-faint text-[11px] font-mono shrink-0">
                   {s.genre === "lieu" ? "Lieu" : s.genre === "commune" ? "Commune" : s.country === "France" ? s.postcode : s.country}
                 </span>
