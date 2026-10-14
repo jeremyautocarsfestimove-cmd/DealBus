@@ -1,0 +1,102 @@
+{
+  "strasbourg": {
+    "auteur": "Auteur inconnu",
+    "licence": "Licence libre",
+    "source": "https://commons.wikimedia.org/wiki/File:Strasbourg_vue_aérienne_vers_la_cathédrale_septembre_2015.jpg?utm_source=fr.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+  },
+  "colmar": {
+    "auteur": "Auteur inconnu",
+    "licence": "Licence libre",
+    "source": "https://commons.wikimedia.org/wiki/File:La_Petite_Venise_Colmar_Alsace_tunliweb_04.jpg?utm_source=fr.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+  },
+  "reims": {
+    "auteur": "Auteur inconnu",
+    "licence": "Licence libre",
+    "source": "https://commons.wikimedia.org/wiki/File:Exterior_view_of_the_west_facade_of_Notre-Dame_Cathedral_in_Reims.jpg?utm_source=fr.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+  },
+  "parc-asterix": {
+    "auteur": "Auteur inconnu",
+    "licence": "Licence libre",
+    "source": "https://commons.wikimedia.org/wiki/File:Logo_Parc_Astérix_2020.png?utm_source=fr.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+  },
+  "puy-du-fou": {
+    "auteur": "Auteur inconnu",
+    "licence": "Licence libre",
+    "source": "https://commons.wikimedia.org/wiki/File:Le_signe_du_triomphe.jpg?utm_source=fr.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+  },
+  "deauville": {
+    "auteur": "Auteur inconnu",
+    "licence": "Licence libre",
+    "source": "https://commons.wikimedia.org/wiki/File:France-000638_-_Grand_Casino_(14974258481).jpg?utm_source=fr.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+  },
+  "etretat": {
+    "auteur": "Auteur inconnu",
+    "licence": "Licence libre",
+    "source": "https://commons.wikimedia.org/wiki/File:Vue_d'Étretat.jpg?utm_source=fr.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+  },
+  "le-touquet": {
+    "auteur": "Auteur inconnu",
+    "licence": "Licence libre",
+    "source": "https://commons.wikimedia.org/wiki/File:Le_Touquet-Paris-Plage_-_L'hôtel_de_ville_(2).JPG?utm_source=fr.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+  },
+  "epernay": {
+    "auteur": "Auteur inconnu",
+    "licence": "Licence libre",
+    "source": "https://commons.wikimedia.org/wiki/File:Hautvillers,_view_to_Épernay.jpg?utm_source=fr.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+  },
+  "val-de-loire": {
+    "auteur": "Auteur inconnu",
+    "licence": "Licence libre",
+    "source": "https://commons.wikimedia.org/wiki/File:La_Loire_à_Sandillon_02.JPG?utm_source=fr.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+  },
+  "beaune": {
+    "auteur": "Auteur inconnu",
+    "licence": "Licence libre",
+    "source": "https://commons.wikimedia.org/wiki/File:Beaune_-_Hôtel-Dieu_-_Cour_-_02.jpg?utm_source=fr.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+  },
+  "chambord": {
+    "auteur": "Auteur inconnu",
+    "licence": "Licence libre",
+    "source": "https://commons.wikimedia.org/wiki/File:Chambord_Castle_Northwest_facade.jpg?utm_source=fr.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+  },
+  "chenonceau": {
+    "auteur": "Auteur inconnu",
+    "licence": "Licence libre",
+    "source": "https://commons.wikimedia.org/wiki/File:Chenonceau-20050320.jpg?utm_source=fr.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+  },
+  "amboise": {
+    "auteur": "Auteur inconnu",
+    "licence": "Licence libre",
+    "source": "https://commons.wikimedia.org/wiki/File:Château_et_tour_des_Minimes_(Amboise).jpg?utm_source=fr.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+  },
+  "londres": {
+    "auteur": "Auteur inconnu",
+    "licence": "Licence libre",
+    "source": "https://commons.wikimedia.org/wiki/File:London_Skyline_(125508655).jpeg?utm_source=fr.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+  },
+  "bruxelles": {
+    "auteur": "Auteur inconnu",
+    "licence": "Licence libre",
+    "source": "https://commons.wikimedia.org/wiki/File:Agglomeratie_Brussel.png?utm_source=fr.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+  },
+  "amsterdam": {
+    "auteur": "Auteur inconnu",
+    "licence": "Licence libre",
+    "source": "https://commons.wikimedia.org/wiki/File:langfr-500px-Flag_of_Amsterdam.svg.png?utm_source=fr.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+  },
+  "mont-saint-michel": {
+    "auteur": "Auteur inconnu",
+    "licence": "Licence libre",
+    "source": "https://commons.wikimedia.org/wiki/File:Mont_St_Michel_in_the_afternoon.jpg?utm_source=fr.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+  },
+  "plages-debarquement": {
+    "auteur": "Auteur inconnu",
+    "licence": "Licence libre",
+    "source": "https://commons.wikimedia.org/wiki/File:Seconde-guerre-mondiale-debarquement-LCVP-6juin1944.jpg?utm_source=fr.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+  },
+  "honfleur": {
+    "auteur": "Auteur inconnu",
+    "licence": "Licence libre",
+    "source": "https://commons.wikimedia.org/wiki/File:20210825_Honfleur_-25.jpg?utm_source=fr.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+  }
+}
