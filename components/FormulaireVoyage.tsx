@@ -4,7 +4,14 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AddressInput } from "./AddressInput";
 import { ORGANISMES, type Organisme } from "@/lib/assistant-demande";
-import type { Voyage, Formule } from "@/lib/voyages";
+import type { Voyage } from "@/lib/voyages";
+
+type TypeTrajet = "aller_retour" | "aller_simple" | "circuit";
+const TYPES: { id: TypeTrajet; label: string }[] = [
+  { id: "aller_simple", label: "Aller simple" },
+  { id: "aller_retour", label: "Aller-retour" },
+  { id: "circuit", label: "Circuit" },
+];
 
 // Formulaire compact de la page thème : l'essentiel pour lancer la demande.
 // Horaires, précisions et message se renseignent dans le parcours guidé /demande,
@@ -19,8 +26,9 @@ export function FormulaireVoyage({ voyage }: { voyage: Voyage }) {
   const [versLibre, setVersLibre] = useState("");
   const [de, setDe] = useState("");
   const [dept, setDept] = useState("");
-  const [formule, setFormule] = useState<Formule>(voyage.formules.find((f) => f.id === voyage.formuleDefaut) ?? voyage.formules[0]);
+  const [type, setType] = useState<TypeTrajet>(voyage.formules.some((f) => f.id === "sejour") ? "circuit" : "aller_retour");
   const [date, setDate] = useState("");
+  const [dateRetour, setDateRetour] = useState("");
   const [passagers, setPassagers] = useState("");
   const [organisme, setOrganisme] = useState<Organisme>(voyage.organismeDefaut);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -34,16 +42,6 @@ export function FormulaireVoyage({ voyage }: { voyage: Voyage }) {
   }, [versInitial]);
 
   const destination = vers === AUTRE ? versLibre.trim() : vers;
-  const jours = formule.jours ?? 1;
-
-  function dateRetour() {
-    if (!date) return "";
-    if (jours <= 1) return date;
-    const d = new Date(date + "T12:00:00");
-    d.setDate(d.getDate() + jours - 1);
-    const pad = (n: number) => String(n).padStart(2, "0");
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-  }
 
   function go() {
     if (!destination) { setErreur("Indiquez la destination."); return; }
@@ -51,13 +49,12 @@ export function FormulaireVoyage({ voyage }: { voyage: Voyage }) {
     p.set("vers", destination);
     if (de) p.set("de", de);
     if (dept) p.set("dept", dept);
-    p.set("type", formule.id === "aller_simple" ? "aller_simple" : jours > 1 ? "circuit" : "aller_retour");
+    p.set("type", type);
     if (date) p.set("date_aller", date);
-    const dr = dateRetour();
-    if (dr && formule.id !== "aller_simple") p.set("date_retour", dr);
+    if (type !== "aller_simple" && (dateRetour || date)) p.set("date_retour", dateRetour || date);
     if (passagers) p.set("passagers", passagers);
     p.set("organisme", organisme);
-    p.set("message", `${voyage.titreCourt} · ${formule.label}`);
+    p.set("message", voyage.titreCourt);
     router.push(`/demande?${p.toString()}`);
   }
 
@@ -88,24 +85,29 @@ export function FormulaireVoyage({ voyage }: { voyage: Voyage }) {
       </div>
 
       <div className="mb-2.5">
-        <label className={lab}>Formule</label>
+        <label className={lab}>Trajet</label>
         <div className="flex flex-wrap gap-1.5">
-          {voyage.formules.map((f) => (
-            <button key={`${f.id}-${f.jours}`} type="button" className={chip(f === formule)} onClick={() => setFormule(f)}>{f.label}</button>
+          {TYPES.map((t) => (
+            <button key={t.id} type="button" className={chip(t.id === type)} onClick={() => { setType(t.id); if (t.id === "aller_simple") setDateRetour(""); }}>{t.label}</button>
           ))}
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-2.5 mb-2.5">
-        <div><label className={lab}>{jours > 1 ? "Départ le" : "Date"}</label><input type="date" className={champ} value={date} onChange={(e) => setDate(e.target.value)} /></div>
-        <div><label className={lab}>Passagers</label><input type="number" min={1} className={champ} placeholder="52" value={passagers} onChange={(e) => setPassagers(e.target.value)} /></div>
+      <div className={`grid gap-2.5 mb-2.5 ${type === "aller_simple" ? "grid-cols-1" : "grid-cols-2"}`}>
+        <div><label className={lab}>{type === "circuit" ? "Départ le" : type === "aller_simple" ? "Date" : "Aller"}</label><input type="date" className={champ} value={date} onChange={(e) => setDate(e.target.value)} /></div>
+        {type !== "aller_simple" && (
+          <div><label className={lab}>{type === "circuit" ? "Fin du circuit" : "Retour"}</label><input type="date" className={champ} min={date || undefined} value={dateRetour} onChange={(e) => setDateRetour(e.target.value)} /></div>
+        )}
       </div>
 
-      <div className="mb-4">
-        <label className={lab}>Vous êtes</label>
-        <select className={champ} value={organisme} onChange={(e) => setOrganisme(e.target.value as Organisme)}>
-          {ORGANISMES.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}
-        </select>
+      <div className="grid grid-cols-2 gap-2.5 mb-4">
+        <div><label className={lab}>Passagers</label><input type="number" min={1} className={champ} placeholder="52" value={passagers} onChange={(e) => setPassagers(e.target.value)} /></div>
+        <div>
+          <label className={lab}>Vous êtes</label>
+          <select className={champ} value={organisme} onChange={(e) => setOrganisme(e.target.value as Organisme)}>
+            {ORGANISMES.map((o) => <option key={o.id} value={o.id}>{o.label.replace(/^Un(e)? /, "")}</option>)}
+          </select>
+        </div>
       </div>
 
       {erreur && <p className="font-mono text-sm text-[#E8735D] mb-2">{erreur}</p>}
