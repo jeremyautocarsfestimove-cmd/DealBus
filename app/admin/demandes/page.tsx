@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { MODE_TAG, eur } from "../helpers";
 import { PilotageAction } from "../actions";
 import { demandeActive, libelleStatut } from "@/lib/demandes";
+import { RecalculerDistances } from "../recalculer-distances";
 
 export const metadata = { title: "Demandes — Administration" };
 
@@ -38,6 +39,7 @@ export default async function AdminDemandesPage() {
       <p className="text-sm text-blanc-dim mb-6">
         Demandes actives : ouvertes ou confirmées, dont la date n&apos;est pas passée. Les autres sont archivées en bas de page.
       </p>
+      <RecalculerDistances />
       <div className="flex gap-2 mb-6">
         <span className="tag bg-vert-dim text-vert">{actives.length} active{actives.length > 1 ? "s" : ""}</span>
         <span className="tag bg-asphalte-3 text-blanc-dim">{archives.length} archivée{archives.length > 1 ? "s" : ""}</span>
