@@ -4,26 +4,33 @@
 
 type Coords = [number, number]; // [lon, lat]
 
+// Le problème des destinations à l'étranger : la BAN (France uniquement) répond
+// TOUJOURS quelque chose, même pour « Londres, Royaume-Uni » (rue de Londres à
+// Paris…). On interroge donc BAN et Photon en parallèle : si la BAN n'est pas
+// sûre d'elle (score < 0,7) ou si Photon situe l'adresse hors de France, on
+// prend Photon.
 async function geocode(adresse: string): Promise<Coords | null> {
-  try {
-    const r = await fetch(
-      `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(adresse)}&limit=1`,
-      { next: { revalidate: 86400 } }
-    );
-    const data = await r.json();
-    const c = data.features?.[0]?.geometry?.coordinates;
-    if (c) return [c[0], c[1]];
-  } catch { /* repli */ }
-  try {
-    const r = await fetch(
-      `https://photon.komoot.io/api/?q=${encodeURIComponent(adresse)}&limit=1`,
-      { next: { revalidate: 86400 } }
-    );
-    const data = await r.json();
-    const c = data.features?.[0]?.geometry?.coordinates;
-    if (c) return [c[0], c[1]];
-  } catch { /* échec total */ }
-  return null;
+  const [ban, photon] = await Promise.all([
+    fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(adresse)}&limit=1`, { next: { revalidate: 86400 } })
+      .then((r) => r.json())
+      .then((d) => {
+        const f = d.features?.[0];
+        return f?.geometry?.coordinates ? { c: [f.geometry.coordinates[0], f.geometry.coordinates[1]] as Coords, score: Number(f.properties?.score ?? 0) } : null;
+      })
+      .catch(() => null),
+    fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(adresse)}&limit=1&lang=fr`, { next: { revalidate: 86400 } })
+      .then((r) => r.json())
+      .then((d) => {
+        const f = d.features?.[0];
+        return f?.geometry?.coordinates ? { c: [f.geometry.coordinates[0], f.geometry.coordinates[1]] as Coords, fr: f.properties?.countrycode === "FR" } : null;
+      })
+      .catch(() => null),
+  ]);
+
+  if (photon && !photon.fr) return photon.c;            // hors de France : Photon fait foi
+  if (ban && ban.score >= 0.7) return ban.c;            // France, adresse sûre
+  if (photon) return photon.c;                          // France mais BAN hésitante (lieu, monument…)
+  return ban?.c ?? null;
 }
 
 export type Itineraire = {
