@@ -8,6 +8,7 @@ export interface Demande {
   statut: DemandeStatut;
   type_trajet: "aller_retour" | "aller_simple" | "circuit";
   depart_adresse: string;
+  depart_departement?: string | null;
   arrivee_adresse: string;
   date_aller: string;
   heure_aller: string | null;

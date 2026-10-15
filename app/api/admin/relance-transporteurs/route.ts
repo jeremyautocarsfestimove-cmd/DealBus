@@ -41,6 +41,10 @@ export async function POST(req: Request) {
   ids = ids.filter((id) => !exclus.has(id));
   if (!ids.length) return NextResponse.json({ error: elargir ? "Aucun transporteur validé à relancer" : "Aucun transporteur validé sur ce département n'est encore sans offre. Essayez « élargir à tous les transporteurs »." }, { status: 409 });
 
+  // Invitation : les transporteurs relancés voient la demande même hors de leurs zones
+  await admin.from("demande_invitations")
+    .upsert(ids.map((t) => ({ demande_id: d.id, transporteur_id: t })), { onConflict: "demande_id,transporteur_id", ignoreDuplicates: true });
+
   const { data: profils } = await admin.from("profiles").select("id, email").in("id", ids).not("email", "is", null);
   const emails = Array.from(new Set((profils ?? []).map((p: any) => p.email).filter(Boolean))) as string[];
 

@@ -106,6 +106,7 @@ export default async function ProPage() {
 
   /* eslint-disable @typescript-eslint/no-explicit-any */
   const L = (leads ?? []) as Demande[];
+  const mesZones = new Set(((zones ?? []) as { departement: string }[]).map((z) => z.departement));
   const O = (offres ?? []) as any[];
   const B = (mesBids ?? []) as any[];
   const M = (missions ?? []) as any[];
@@ -219,6 +220,9 @@ export default async function ProPage() {
                         </span>
                         {d.depart_adresse} <span className="text-blanc-faint font-sans normal-case font-normal">→</span> {d.arrivee_adresse}
                         {badgeNonLus(d.id)}
+                        {!mesZones.has(d.depart_departement ?? "") && (
+                          <span className="tag bg-ambre-dim text-ambre-fort normal-case font-mono font-semibold text-[10px]" title="DealBus vous a proposé cette demande hors de vos zones">Sur invitation</span>
+                        )}
                       </span>
                       {d.mode === "enchere" ? (
                         <span className="inline-flex items-center gap-2 rounded-full border border-vert/30 bg-vert-dim px-3 py-1.5 font-mono text-[10.5px] uppercase tracking-[0.12em] text-vert">
