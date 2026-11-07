@@ -6,6 +6,9 @@ import { notFound } from "next/navigation";
 import { BackButton } from "@/components/BackButton";
 import { createClient } from "@/lib/supabase/server";
 import { eur, MODE_TAG, TAG_ALERTE, jour } from "../../helpers";
+import { analyser } from "@/lib/assistant-demande";
+import { fourchetteCalibree, libelleFourchette, repereKm, fmtKm } from "@/lib/calibration-prix";
+import { calibrationPrix } from "@/lib/calibration-serveur";
 
 export const metadata = { title: "Détail d'une demande — Administration" };
 
@@ -57,6 +60,17 @@ export default async function DetailDemandePage({ params }: { params: Promise<{ 
   const moy = prix.length ? prix.reduce((s, p) => s + p, 0) / prix.length : null;
   const km = demande.distance_km ? Number(demande.distance_km) : null;
   const ecart = min && max ? Math.round(((max - min) / min) * 100) : null;
+
+  // Repères de marché : fourchette montrée au client + €/km observé sur les trajets comparables
+  const analyse = analyser({
+    type_trajet: demande.type_trajet, km,
+    date_aller: demande.date_aller, heure_aller: demande.heure_aller ? String(demande.heure_aller).slice(0, 5) : "",
+    date_retour: demande.date_retour ?? "", heure_retour: demande.heure_retour ? String(demande.heure_retour).slice(0, 5) : "",
+    passagers: demande.passagers, vehicule_utilise_sur_place: !!demande.vehicule_utilise_sur_place,
+  });
+  const calib = await calibrationPrix().catch(() => null);
+  const fourchette = fourchetteCalibree(analyse, calib);
+  const repere = repereKm(km, analyse.nuits, calib);
 
   const parKm = (p: number | null) =>
     p && km ? `${(p / km).toFixed(2).replace(".", ",")} €/km` : "—";
@@ -127,6 +141,28 @@ export default async function DetailDemandePage({ params }: { params: Promise<{ 
               <p className="font-mono text-[10px] uppercase tracking-wider text-blanc-faint mt-1">Plus haute · {parKm(max)}</p>
             </div>
           </div>
+          {(fourchette || repere) && (
+            <div className="grid md:grid-cols-2 gap-4 mb-4">
+              {fourchette && (
+                <div className="card">
+                  <p className="font-mono text-xl font-semibold">{eur(fourchette.min)} à {eur(fourchette.max)}</p>
+                  <p className="font-mono text-[10px] uppercase tracking-wider text-blanc-faint mt-1">{libelleFourchette(fourchette)}</p>
+                  {med && (
+                    <p className="text-[12.5px] text-blanc-dim mt-2">
+                      Médiane reçue {med < fourchette.min ? "en dessous de" : med > fourchette.max ? "au-dessus de" : "dans"} la fourchette
+                    </p>
+                  )}
+                </div>
+              )}
+              {repere && (
+                <div className="card">
+                  <p className="font-mono text-xl font-semibold">{fmtKm(repere.p25)} à {fmtKm(repere.p75)}</p>
+                  <p className="font-mono text-[10px] uppercase tracking-wider text-blanc-faint mt-1">€/km aller observé · {repere.segment} · {repere.n} offres</p>
+                  <p className="text-[12.5px] text-blanc-dim mt-2">Médiane du marché {fmtKm(repere.p50)} · ici {parKm(med)}</p>
+                </div>
+              )}
+            </div>
+          )}
           {ecart !== null && (
             <div className="card border-ambre/40 mb-10">
               <p className="text-sm">

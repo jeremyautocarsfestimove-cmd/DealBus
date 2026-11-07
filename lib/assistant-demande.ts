@@ -124,7 +124,8 @@ export type Analyse = {
   nuits: number;
   deuxConducteurs: boolean;
   alertes: Alerte[];
-  fourchette: { min: number; max: number } | null;  // TTC
+  fourchette: { min: number; max: number } | null;  // TTC, barème seul
+  estimationTtc: number | null;                       // prix central du barème (base de la calibration)
   horairesIncoherents: boolean;
 };
 
@@ -138,6 +139,11 @@ export function analyser(e: EntreeAssistant): Analyse {
   const retour = toMin(e.heure_retour);
   const nuits = e.type_trajet === "aller_simple" ? 0 : joursEntre(e.date_aller, e.date_retour);
   const memeJour = e.type_trajet !== "aller_simple" && !!e.date_retour && nuits === 0;
+  // Le car ne reste pas sur place : il rentre à vide après la dépose (et revient à vide pour la reprise)
+  const surPlace = e.type_trajet !== "aller_simple" && nuits > 0 && e.vehicule_utilise_sur_place;
+  const rentreAVide = e.type_trajet === "aller_simple" || (nuits > 0 && !surPlace);
+  const trajetsEnCharge = e.type_trajet === "aller_simple" ? 1 : 2;
+  const trajetsAVide = e.type_trajet === "aller_simple" ? 1 : nuits > 0 && !surPlace ? 2 : 0;
 
   // Aller-retour dans la journée : le retour doit partir après l'arrivée
   const horairesIncoherents = memeJour && routeMin !== null && depart !== null && retour !== null
@@ -164,6 +170,9 @@ export function analyser(e: EntreeAssistant): Analyse {
       }
     } else if (routeMin > BAREME.conduiteMaxJourMin) {
       deuxConducteurs = true;
+    } else if (rentreAVide && 2 * routeMin > BAREME.conduiteMaxJourMin) {
+      // le car revient à vide le jour même (dépose puis reprise, ou aller simple) : aller + retour à vide
+      deuxConducteurs = true;
     }
   }
 
@@ -188,7 +197,9 @@ export function analyser(e: EntreeAssistant): Analyse {
     alertes.push({
       niveau: "attention",
       titre: "Second conducteur probable",
-      texte: "Le temps de conduite ou l'amplitude dépasse ce qu'un seul conducteur peut faire dans la journée. Les offres incluront sans doute un second chauffeur ou un départ plus tôt.",
+      texte: rentreAVide && routeMin !== null && routeMin <= BAREME.conduiteMaxJourMin
+        ? "Le car ne reste pas sur place : après la dépose, il rentre à vide, puis revient vous chercher. Sur cette distance, cela dépasse une journée de conduite pour un seul chauffeur. Les offres incluront un second conducteur ou une nuit du chauffeur sur place."
+        : "Le temps de conduite ou l'amplitude dépasse ce qu'un seul conducteur peut faire dans la journée. Les offres incluront sans doute un second chauffeur ou un départ plus tôt.",
     });
   } else if (routeMin !== null && depart !== null && !horairesIncoherents) {
     alertes.push({
@@ -214,11 +225,13 @@ export function analyser(e: EntreeAssistant): Analyse {
 
   // ---------- Fourchette indicative ----------
   let fourchette: Analyse["fourchette"] = null;
+  let estimationTtc: number | null = null;
   if (km && routeMin !== null && gabarit) {
-    const trajets = e.type_trajet === "aller_simple" ? 1 : 2;
+    // Trajets réellement roulés : en charge + à vide (retour du car après dépose, venue pour la reprise)
+    const trajets = trajetsEnCharge + trajetsAVide;
     const kmTotal = km * trajets + BAREME.hautLePiedKm;
     const heures = (trajets * (routeMin + (pauseMin ?? 0))) / 60 + (memeJour ? 2 : 0);
-    let ht = kmTotal * BAREME.coutKm + heures * BAREME.coutHeure;
+    let ht = kmTotal * BAREME.coutKm + heures * BAREME.coutHeure + km * trajets * PEAGE_PAR_KM;
     if (e.vehicule_utilise_sur_place && nuits > 0) {
       ht += nuits * BAREME.nuitConducteur + nuits * BAREME.immobilisationJour;
     }
@@ -226,11 +239,12 @@ export function analyser(e: EntreeAssistant): Analyse {
     ht *= gabarit.nbVehicules;
     ht *= 1 + BAREME.marge;
     const ttc = ht * (1 + BAREME.tva);
+    estimationTtc = Math.round(ttc);
     const arrondi = (n: number) => Math.round(n / 50) * 50;
     fourchette = { min: arrondi(ttc * 0.9), max: arrondi(ttc * 1.12) };
   }
 
-  return { km, routeMin, pauseMin, gabarit, arriveeMin, amplitudeJ1Min, nuits, deuxConducteurs, alertes, fourchette, horairesIncoherents };
+  return { km, routeMin, pauseMin, gabarit, arriveeMin, amplitudeJ1Min, nuits, deuxConducteurs, alertes, fourchette, estimationTtc, horairesIncoherents };
 }
 
 // ---------- Score de complétude ----------

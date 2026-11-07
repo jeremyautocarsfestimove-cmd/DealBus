@@ -11,6 +11,7 @@ import {
   ORGANISMES, MOTIFS, EQUIPEMENTS, BUDGETS,
   analyser, completude, fmtDuree, fmtHeure, eur,
 } from "@/lib/assistant-demande";
+import { fourchetteCalibree, libelleFourchette, type Calibration } from "@/lib/calibration-prix";
 
 const STEPS = ["Le trajet", "Votre groupe", "Vérification", "Envoi"];
 
@@ -152,6 +153,13 @@ function DemandeWizard() {
     vehicule_utilise_sur_place: form.vehicule_utilise_sur_place,
   });
   const { score, criteres } = completude(form);
+
+  // ---------- Fourchette calibrée sur les offres réelles ----------
+  const [calib, setCalib] = useState<Calibration | null>(null);
+  useEffect(() => {
+    fetch("/api/calibration-prix").then((r) => (r.ok ? r.json() : null)).then(setCalib).catch(() => {});
+  }, []);
+  const fourchette = fourchetteCalibree(analyse, calib);
 
   // ---------- Validation par étape ----------
   function erreurEtape(n: number): string | null {
@@ -322,9 +330,9 @@ function DemandeWizard() {
             </div>
           ))}
           <div className="mt-4 pt-4 border-t border-ligne">
-            <p className="h-display text-3xl text-ambre">{analyse.fourchette ? `${eur(analyse.fourchette.min)} à ${eur(analyse.fourchette.max)}` : "—"}</p>
+            <p className="h-display text-3xl text-ambre">{fourchette ? `${eur(fourchette.min)} à ${eur(fourchette.max)}` : "—"}</p>
             <p className="font-mono text-[10.5px] uppercase tracking-wider text-blanc-faint mt-1">
-              {analyse.fourchette ? "Fourchette indicative TTC, hors offres réelles" : "Fourchette indicative dès que trajet, horaires et passagers sont renseignés"}
+              {fourchette ? libelleFourchette(fourchette) : "Fourchette indicative dès que trajet, horaires et passagers sont renseignés"}
             </p>
           </div>
         </>

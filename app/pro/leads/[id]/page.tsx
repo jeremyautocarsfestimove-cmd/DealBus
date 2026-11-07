@@ -13,6 +13,8 @@ import {
   analyser, planifier, fmtDuree, eur, gabaritPour,
   type Tarifs,
 } from "@/lib/assistant-demande";
+import { fourchetteCalibree, repereKm, fmtKm } from "@/lib/calibration-prix";
+import { calibrationPrix } from "@/lib/calibration-serveur";
 
 export default async function LeadPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -72,6 +74,9 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
     passagers: d.passagers, vehicule_utilise_sur_place: !!d.vehicule_utilise_sur_place,
   };
   const analyse = analyser(entree);
+  const calib = await calibrationPrix().catch(() => null);
+  const fourchette = fourchetteCalibree(analyse, calib);
+  const repere = repereKm(analyse.km, analyse.nuits, calib);
   const plan = planifier(entree, hlpAller, hlpRetour, hlpAllerMin, hlpRetourMin);
   const gabarit = gabaritPour(d.passagers);
   const hFr = (h: string | null | undefined) => (h ? String(h).slice(0, 5).replace(":", "h") : "");
@@ -166,9 +171,16 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
             </div>
             <div className="sombre rounded p-5">
               <p className="font-mono text-[10.5px] uppercase tracking-[.14em] text-ambre mb-2">Repère de marché</p>
-              <p className="h-display text-3xl text-ambre">{analyse.fourchette ? `${eur(analyse.fourchette.min)} à ${eur(analyse.fourchette.max)}` : "—"}</p>
+              <p className="h-display text-3xl text-ambre">{fourchette ? `${eur(fourchette.min)} à ${eur(fourchette.max)}` : "—"}</p>
               <p className="font-mono text-[10.5px] uppercase tracking-wider text-blanc-faint mt-1">Fourchette indicative TTC montrée au client</p>
-              <p className="text-[12.5px] text-blanc-dim mt-3 leading-snug">Le client a vu cette fourchette en déposant sa demande. Une offre claire sur ce qui est inclus fait souvent la différence.</p>
+              {repere && analyse.km && (
+                <div className="mt-4 pt-3 border-t border-ligne">
+                  <p className="font-mono text-lg font-semibold">{fmtKm(repere.p25)} à {fmtKm(repere.p75)}</p>
+                  <p className="font-mono text-[10.5px] uppercase tracking-wider text-blanc-faint mt-1">Prix au km aller observé · {repere.segment} · {repere.n} offres</p>
+                  <p className="text-[12.5px] text-blanc-dim mt-1">Médiane {fmtKm(repere.p50)}, soit {eur(Math.round(repere.p50 * analyse.km))} pour ce trajet de {analyse.km} km.</p>
+                </div>
+              )}
+              <p className="text-[12.5px] text-blanc-dim mt-3 leading-snug">Fourchette indicative montrée au client, calée sur les offres réelles reçues sur DealBus. Une offre claire sur ce qui est inclus fait souvent la différence.</p>
             </div>
           </div>
         </div>
@@ -194,7 +206,7 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
               </div>
             ) : (
               <DevisForm demandeId={id} plan={plan} tarifs={tarifs} nbVehicules={gabarit?.nbVehicules ?? 1}
-                fourchette={analyse.fourchette} nuitsSurPlace={plan.nuits > 0} />
+                fourchette={fourchette ? { min: fourchette.min, max: fourchette.max } : null} nuitsSurPlace={plan.nuits > 0} />
             )
           ) : (
             <EnchereForm demandeId={id} enchereFin={d.enchere_fin} bestPrix={bestBid?.prix_ttc ?? null} />
