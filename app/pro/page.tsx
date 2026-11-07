@@ -8,12 +8,9 @@ import { fourchetteDepuisDevis } from "@/lib/calibration-prix";
 import { InscriptionTransporteur } from "./InscriptionTransporteur";
 import { DemanderSuppression } from "./pro-actions";
 
-type Filtre = "toutes" | "journee" | "sejour" | "simple" | "zone" | "invitation";
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export default async function ProPage({ searchParams }: { searchParams: Promise<{ f?: string }> }) {
+export default async function ProPage() {
   const ctx = await contexteTransporteur();
-  const { f = "toutes" } = await searchParams;
 
   if (!ctx) {
     return (
@@ -77,15 +74,11 @@ export default async function ProPage({ searchParams }: { searchParams: Promise<
     const km = d.distance_km ? Number(d.distance_km) : null;
     const a = analyser({ type_trajet: d.type_trajet, km, date_aller: d.date_aller, heure_aller: d.heure_aller ? String(d.heure_aller).slice(0, 5) : "", date_retour: d.date_retour ?? "", heure_retour: d.heure_retour ? String(d.heure_retour).slice(0, 5) : "", passagers: d.passagers, vehicule_utilise_sur_place: !!d.vehicule_utilise_sur_place });
     const rep = km ? fourchetteDepuisDevis(points, km, d.type_trajet, gabaritPour(d.passagers)?.nbVehicules ?? 1) : null;
-    const nature: Exclude<Filtre, "toutes" | "zone" | "invitation"> = d.type_trajet === "aller_simple" ? "simple" : a.nuits > 0 ? "sejour" : "journee";
+    const nature: "simple" | "sejour" | "journee" = d.type_trajet === "aller_simple" ? "simple" : a.nuits > 0 ? "sejour" : "journee";
     return { d, km, a, rep, nature, invitation: !mesZones.has(d.depart_departement ?? ""), nb: nbOffres.get(d.id) ?? 0 };
   });
 
-  const compte = (x: Filtre) => enrichies.filter((e) => x === "toutes" || (x === "zone" ? !e.invitation : x === "invitation" ? e.invitation : e.nature === x)).length;
-  const liste = enrichies.filter((e) => f === "toutes" || (f === "zone" ? !e.invitation : f === "invitation" ? e.invitation : e.nature === f));
-  const filtres: { id: Filtre; label: string }[] = [
-    { id: "toutes", label: "Toutes" }, { id: "journee", label: "Journée" }, { id: "sejour", label: "Séjour" }, { id: "simple", label: "Aller simple" }, { id: "zone", label: "Dans mes zones" }, { id: "invitation", label: "Sur invitation" },
-  ];
+  const liste = enrichies;
 
   const M = (missions ?? []) as any[];
   const MF = M.filter((m) => m.statut !== "annulee");
@@ -115,14 +108,6 @@ export default async function ProPage({ searchParams }: { searchParams: Promise<
         <div className="pro-kpi"><p>Offres en attente de réponse</p><b>{compteurs!.offres}</b><small>{offresConsultees ? `${offresConsultees} consultée${offresConsultees > 1 ? "s" : ""} par le client` : "aucune consultée pour l'instant"}</small></div>
         <div className="pro-kpi"><p>Missions à venir</p><b>{compteurs!.missions}</b><small>{prochaine ? `prochaine le ${jourCourt(prochaine)}` : "aucune planifiée"}</small></div>
         <div className="pro-kpi"><p>CA signé via DealBus</p><b>{eur(ca)}</b><small>commissions dues : {eur(dues)}</small></div>
-      </div>
-
-      <div className="flex gap-2 flex-wrap mb-4">
-        {filtres.map((x) => (
-          <Link key={x.id} href={x.id === "toutes" ? "/pro" : `/pro?f=${x.id}`} className="pro-chip" aria-current={f === x.id ? "true" : undefined}>
-            {x.label} · {compte(x.id)}
-          </Link>
-        ))}
       </div>
 
       <div className="card p-0 overflow-hidden">
@@ -164,7 +149,7 @@ export default async function ProPage({ searchParams }: { searchParams: Promise<
             </div>
           );
         })}
-        {liste.length === 0 && <p className="px-5 py-10 text-center text-blanc-dim">Aucune demande dans cette catégorie.</p>}
+        {liste.length === 0 && <p className="px-5 py-10 text-center text-blanc-dim">Aucune demande ouverte pour l&apos;instant.</p>}
       </div>
     </>
   );
