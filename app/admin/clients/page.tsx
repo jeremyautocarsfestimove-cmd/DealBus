@@ -86,8 +86,8 @@ export default async function ClientsPage({ searchParams }: { searchParams: Prom
                 </td>
                 <td className="font-mono text-[12px] whitespace-nowrap">{c.telephone ?? "—"}</td>
                 <td><span className={`pill ${STATUT_CLIENT[c.statut].classe}`} title={STATUT_CLIENT[c.statut].aide}>{STATUT_CLIENT[c.statut].label}</span></td>
-                <td className="text-blanc-dim">{ORGANISMES.find((o) => o.id === c.organisme)?.label ?? "—"}</td>
-                <td className="text-right font-mono">{c.nbDemandes}{c.nbActives > 0 && <span className="text-ambre-fort"> ({c.nbActives} act.)</span>}</td>
+                <td className="text-blanc-dim whitespace-nowrap">{ORGANISMES.find((o) => o.id === c.organisme)?.label ?? "—"}</td>
+                <td className="text-right font-mono whitespace-nowrap">{c.nbDemandes}{c.nbActives > 0 && <span className="text-ambre-fort"> · {c.nbActives} active{c.nbActives > 1 ? "s" : ""}</span>}</td>
                 <td className="text-right font-mono">{c.nbOffres || "—"}</td>
                 <td className="text-right font-mono">{c.nbMissions || "—"}</td>
                 <td className="text-right font-mono">{c.commissions ? eur(Math.round(c.commissions)) : "—"}</td>
