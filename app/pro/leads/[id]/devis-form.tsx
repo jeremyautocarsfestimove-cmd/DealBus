@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { TYPES_VEHICULES } from "../../pro-actions";
 import { INCLUS, coutDeRevient, eur, commissionTaux, type PlanMission, type Tarifs } from "@/lib/assistant-demande";
 import { FEATURES } from "@/lib/features";
+import { ENGAGEMENT_OFFRE, CGU_VERSION } from "@/lib/cgu";
 
 type Vehicule = { id: string; type: string; marque_modele: string | null; places: number; annee: number | null };
 
@@ -76,10 +77,17 @@ export function DevisForm({
     setError(null);
     const { data: { user } } = await supabase.auth.getUser();
 
+    const prix = Number(form.prix_ttc);
+    const taux = commissionTaux(prix);
+    const commission = Math.round(prix * taux) / 100;
     const { data: creee, error: err } = await supabase.from("offres").insert({
       demande_id: demandeId,
       transporteur_id: user!.id,
-      prix_ttc: Number(form.prix_ttc),
+      prix_ttc: prix,
+      engagement_texte: ENGAGEMENT_OFFRE(taux, commission),
+      engagement_cgu_version: CGU_VERSION,
+      engagement_taux: taux,
+      engagement_commission: commission,
       vehicule_type: form.vehicule_type,
       vehicule_places: Number(form.vehicule_places),
       vehicule_annee: form.vehicule_annee ? Number(form.vehicule_annee) : null,
@@ -257,7 +265,10 @@ export function DevisForm({
             ? <>Commission DealBus si le client vous choisit : <strong className="text-[#111]">{commissionTaux(prixSaisi)} % = {eur(Math.round(prixSaisi * commissionTaux(prixSaisi)) / 100)}</strong> TTC, facturée le lendemain du transport. Le client vous règle en direct.</>
             : <>Commission DealBus uniquement si le client vous choisit (9 %, 7 % ou 5 % selon le prix), facturée le lendemain du transport. Le client vous règle en direct.</>}
         </div>
-        <p className="text-[12px] text-blanc-faint">Une seule offre par demande : une fois envoyée, elle ne pourra plus être modifiée ni retirée.</p>
+        <p className="text-[12px] text-blanc-faint">
+          {prixSaisi > 0 ? ENGAGEMENT_OFFRE(commissionTaux(prixSaisi), Math.round(prixSaisi * commissionTaux(prixSaisi)) / 100) : "En envoyant votre offre, vous acceptez de régler la commission DealBus si le client vous choisit, conformément aux articles 12 et 14 des CGU."}
+          {" "}Une seule offre par demande : une fois envoyée, elle ne pourra plus être modifiée ni retirée.
+        </p>
         {error && <p className="font-mono text-sm text-[#E8735D]">{error}</p>}
         <button className="btn-primary w-full disabled:opacity-50" disabled={saving} onClick={submit}>
           {saving ? "Envoi…" : "Envoyer mon offre"}

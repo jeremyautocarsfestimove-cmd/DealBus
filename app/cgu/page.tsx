@@ -21,7 +21,7 @@ export default function CguPage() {
         <p className="eyebrow mb-4">Cadre d&apos;utilisation</p>
         <h1 className="h-display text-4xl mb-3">Conditions Générales d&apos;Utilisation</h1>
         <p className="font-mono text-xs text-blanc-faint mb-12">
-          Dernière mise à jour : 17 août 2026 · Version 1.0
+          Dernière mise à jour : 7 novembre 2026 · Version 1.1 (version 1.0 du 17 août 2026 : facturation mensuelle après réalisation)
         </p>
 
         <Article n={1} titre="Éditeur et hébergement">
@@ -251,7 +251,9 @@ export default function CguPage() {
             Plateforme et que le transport a été effectué. Son montant s&apos;entend toutes taxes
             comprises, la TVA au taux de 20 % étant récupérable par le Transporteur assujetti. La
             facture de commission est émise et adressée au Transporteur le lendemain de la fin du
-            transport, sous forme électronique ; elle est payable à réception. Lorsqu&apos;un Client annule son transport, le Transporteur en
+            transport, sous forme électronique ; elle est payable à réception et au plus tard quinze (15) jours après
+            son émission. L&apos;envoi d&apos;une Offre vaut acceptation expresse, par le Transporteur, de la commission
+            qui en résulterait ; cette acceptation est enregistrée avec l&apos;Offre. Lorsqu&apos;un Client annule son transport, le Transporteur en
             informe DealBus sans délai par la Plateforme, avec un justificatif d&apos;annulation. Le défaut de paiement des commissions dues entraîne, après relance
             restée sans effet, la suspension de l&apos;accès aux Demandes puis la clôture du
             compte, sans préjudice du recouvrement des sommes dues.

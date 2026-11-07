@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { CGU_VERSION } from "@/lib/cgu";
 import { BackButton } from "@/components/BackButton";
 
 const DEPARTEMENTS_HINT = "Ex. 76, 27, 14";
@@ -14,6 +15,7 @@ export function InscriptionTransporteur() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [accepted, setAccepted] = useState(false);
+  const [cguOk, setCguOk] = useState(false);
 
   const [form, setForm] = useState({
     // Étape 1
@@ -104,6 +106,9 @@ export function InscriptionTransporteur() {
       departement_siege: form.departement_siege || form.code_postal.slice(0, 2),
     });
     if (tErr) { setError(tErr.message); setSaving(false); return; }
+
+    // Preuve d'acceptation des CGU (version, date, IP)
+    await fetch("/api/cgu/accepter", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ contexte: "inscription" }) }).catch(() => {});
 
     // Alerter l'administration (jamais bloquant)
     fetch("/api/notify-event", {
@@ -277,17 +282,19 @@ export function InscriptionTransporteur() {
 
           {error && <p className="font-mono text-sm text-[#E8735D]">{error}</p>}
 
+          <label className="flex gap-3 items-start cursor-pointer border border-ligne-strong rounded-sm px-3.5 py-3 mb-4">
+            <input type="checkbox" className="mt-0.5 w-4 h-4 accent-ambre" checked={cguOk} onChange={(e) => setCguOk(e.target.checked)} />
+            <span className="text-[13px] text-blanc-dim">
+              <strong className="text-blanc">J&apos;ai lu et j&apos;accepte les{" "}
+              <a href="/cgu" target="_blank" className="underline underline-offset-2">Conditions Générales d&apos;Utilisation</a> (version {CGU_VERSION})</strong>, notamment la commission due uniquement en cas de succès (9 %, 7 % ou 5 % du prix TTC, facturée après le transport) et le droit de suite de 12 mois.
+            </span>
+          </label>
           <div className="flex gap-3">
             <BackButton onClick={() => setStep(2)} />
-            <button className="btn-primary flex-1 disabled:opacity-50" disabled={saving} onClick={submit}>
+            <button className="btn-primary flex-1 disabled:opacity-50" disabled={saving || !cguOk} onClick={submit}>
               {saving ? "Création…" : "Créer mon compte →"}
             </button>
           </div>
-          <p className="font-mono text-[11px] text-blanc-faint text-center mt-4">
-            En créant votre compte, vous acceptez les{" "}
-            <a href="/cgu" target="_blank" className="underline underline-offset-2 hover:text-blanc-dim">Conditions Générales d&apos;Utilisation</a>,
-            dont le barème de commission et le droit de suite.
-          </p>
           <div className="hidden">
           </div>
           <p className="font-mono text-[11px] text-blanc-faint">

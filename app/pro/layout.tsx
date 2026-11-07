@@ -2,6 +2,8 @@ import Link from "next/link";
 import { Nav } from "@/components/Nav";
 import { contexteTransporteur, initiales } from "@/lib/pro";
 import { ProTabs } from "./ProTabs";
+import { AccepterCgu } from "./AccepterCgu";
+import { CGU_VERSION } from "@/lib/cgu";
 import "./pro.css";
 
 export const metadata = { title: "Espace transporteur — DealBus" };
@@ -17,6 +19,15 @@ export default async function ProLayout({ children }: { children: React.ReactNod
       <>
         <Nav />
         {children}
+      </>
+    );
+  }
+
+  if (ctx.transporteur!.cgu_version !== CGU_VERSION) {
+    return (
+      <>
+        <Nav />
+        <div className="pro"><main className="max-w-[1240px] mx-auto px-5 lg:px-7 py-10"><AccepterCgu premiereFois={!ctx.transporteur!.cgu_version} raisonSociale={ctx.transporteur!.raison_sociale} /></main></div>
       </>
     );
   }

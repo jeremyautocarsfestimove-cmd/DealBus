@@ -144,7 +144,8 @@ export default async function FicheTransporteurPage({
               SIREN {t.siren}<br />
               Titre d&apos;exercice {t.licence_transport}<br />
               Siège dépt. {t.departement_siege}<br />
-              RC Pro {t.rc_pro_url ? <a href={t.rc_pro_url} target="_blank" className="font-semibold hover:underline">Voir le justificatif →</a> : "non fourni"}
+              RC Pro {t.rc_pro_url ? <a href={t.rc_pro_url} target="_blank" className="font-semibold hover:underline">Voir le justificatif →</a> : "non fourni"}<br />
+              CGU {t.cgu_version ? <>version {t.cgu_version} acceptées le {new Date(t.cgu_acceptees_le).toLocaleDateString("fr-FR")} à {new Date(t.cgu_acceptees_le).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</> : <span className="text-[#C2410C]">pas encore acceptées (version courante)</span>}
             </p>
           </div>
         </div>

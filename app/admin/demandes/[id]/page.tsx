@@ -230,6 +230,9 @@ export default async function DetailDemandePage({ params }: { params: Promise<{ 
                       {o.vehicule_type} · {o.vehicule_places} pl.
                       {o.vehicule_annee ? ` · ${o.vehicule_annee}` : ""}
                       {o.conditions && <p className="text-[12px] text-blanc-faint mt-1 max-w-xs">{o.conditions}</p>}
+                      {o.engagement_commission != null && (
+                        <p className="text-[11.5px] text-[#1A7F52] mt-1" title={o.engagement_texte ?? ""}>Engagement commission {Number(o.engagement_taux)} % = {eur(Number(o.engagement_commission))} · CGU {o.engagement_cgu_version} · {new Date(o.created_at).toLocaleString("fr-FR")}</p>
+                      )}
                     </td>
                     <td className="px-5 py-3"><span className={`tag ${s.classe}`}>{s.label}</span></td>
                   </tr>
