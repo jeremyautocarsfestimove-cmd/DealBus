@@ -22,8 +22,9 @@ export default async function ProLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <div className="pro">
+    <>
       <Nav />
+    <div className="pro">
       <div className="pro-bar">
         <div className="max-w-[1240px] mx-auto px-5 lg:px-7 h-[52px] flex items-center justify-between gap-4">
           <ProTabs compteurs={ctx.compteurs!} />
@@ -35,5 +36,6 @@ export default async function ProLayout({ children }: { children: React.ReactNod
       </div>
       <main className="max-w-[1240px] mx-auto px-5 lg:px-7 py-7 lg:py-8">{children}</main>
     </div>
+    </>
   );
 }

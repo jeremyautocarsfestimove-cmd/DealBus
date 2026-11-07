@@ -27,7 +27,7 @@
 .pro .font-mono { font-variant-numeric: tabular-nums; }
 .pro .uppercase { text-transform: none !important; }
 .pro [class*="tracking-"] { letter-spacing: normal !important; }
-.pro .h-display { font-weight: 650; letter-spacing: -0.02em !important; line-height: 1.15; }
+.pro .h-display { font-weight: 650; letter-spacing: -0.02em !important; line-height: 1.15; text-transform: none !important; }
 .pro h1.h-display, .pro .text-4xl.h-display { font-size: 22px; }
 .pro h2.h-display { font-size: 16px; }
 .pro h3.h-display { font-size: 14px; }
@@ -80,7 +80,7 @@
 .pro .hover\:bg-asphalte-2:hover { background: #FAFAF8; }
 
 /* Barre d'onglets de l'espace pro */
-.pro-bar { background: #fff; border-bottom: 1px solid #ECEBE8; position: sticky; top: 0; z-index: 40; }
+.pro-bar { background: #fff; border-bottom: 1px solid #ECEBE8; }
 .pro-tabs a { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 8px; color: #55534E; font-weight: 500; font-size: 13px; white-space: nowrap; }
 .pro-tabs a:hover { background: #F7F7F5; color: #111; }
 .pro-tabs a[aria-current="page"] { background: #F2F1EE; color: #111; font-weight: 600; }

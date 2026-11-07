@@ -164,7 +164,7 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
         </div>
 
         {/* ---------- Colonne droite : l'offre ---------- */}
-        <div className="lg:sticky lg:top-[70px] space-y-4">
+        <div className="lg:sticky lg:top-[84px] space-y-4">
           {d.mode === "devis" ? (
             monOffre ? (
               <div className="card">
