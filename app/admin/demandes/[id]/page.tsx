@@ -7,8 +7,8 @@ import { BackButton } from "@/components/BackButton";
 import { createClient } from "@/lib/supabase/server";
 import { eur, MODE_TAG, TAG_ALERTE, jour } from "../../helpers";
 import { analyser } from "@/lib/assistant-demande";
-import { fourchetteCalibree, libelleFourchette, repereKm, fmtKm } from "@/lib/calibration-prix";
-import { calibrationPrix } from "@/lib/calibration-serveur";
+import { libelleFourchette, fmtKm } from "@/lib/calibration-prix";
+import { estimerFourchette, repereKm } from "@/lib/calibration-serveur";
 
 export const metadata = { title: "Détail d'une demande — Administration" };
 
@@ -68,9 +68,9 @@ export default async function DetailDemandePage({ params }: { params: Promise<{ 
     date_retour: demande.date_retour ?? "", heure_retour: demande.heure_retour ? String(demande.heure_retour).slice(0, 5) : "",
     passagers: demande.passagers, vehicule_utilise_sur_place: !!demande.vehicule_utilise_sur_place,
   });
-  const calib = await calibrationPrix().catch(() => null);
-  const fourchette = fourchetteCalibree(analyse, calib);
-  const repere = repereKm(km, analyse.nuits, calib);
+  // Calculé sans les devis de cette demande, pour juger honnêtement l'estimation
+  const fourchette = await estimerFourchette(analyse, demande.type_trajet, id);
+  const repere = await repereKm(km, analyse.nuits, id);
 
   const parKm = (p: number | null) =>
     p && km ? `${(p / km).toFixed(2).replace(".", ",")} €/km` : "—";
@@ -146,7 +146,7 @@ export default async function DetailDemandePage({ params }: { params: Promise<{ 
               {fourchette && (
                 <div className="card">
                   <p className="font-mono text-xl font-semibold">{eur(fourchette.min)} à {eur(fourchette.max)}</p>
-                  <p className="font-mono text-[10px] uppercase tracking-wider text-blanc-faint mt-1">{libelleFourchette(fourchette)}</p>
+                  <p className="font-mono text-[10px] uppercase tracking-wider text-blanc-faint mt-1">Estimation hors devis de cette demande · {libelleFourchette(fourchette)}</p>
                   {med && (
                     <p className="text-[12.5px] text-blanc-dim mt-2">
                       Médiane reçue {med < fourchette.min ? "en dessous de" : med > fourchette.max ? "au-dessus de" : "dans"} la fourchette

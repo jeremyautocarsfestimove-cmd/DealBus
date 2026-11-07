@@ -11,7 +11,7 @@ import {
   ORGANISMES, MOTIFS, EQUIPEMENTS, BUDGETS,
   analyser, completude, fmtDuree, fmtHeure, eur,
 } from "@/lib/assistant-demande";
-import { fourchetteCalibree, libelleFourchette, type Calibration } from "@/lib/calibration-prix";
+import { fourchetteBareme, libelleFourchette, type Fourchette } from "@/lib/calibration-prix";
 
 const STEPS = ["Le trajet", "Votre groupe", "Vérification", "Envoi"];
 
@@ -154,12 +154,18 @@ function DemandeWizard() {
   });
   const { score, criteres } = completude(form);
 
-  // ---------- Fourchette calibrée sur les offres réelles ----------
-  const [calib, setCalib] = useState<Calibration | null>(null);
+  // ---------- Fourchette : prix au km des devis réels, pondéré par la distance ----------
+  const [fourchetteDevis, setFourchetteDevis] = useState<Fourchette | null>(null);
   useEffect(() => {
-    fetch("/api/calibration-prix").then((r) => (r.ok ? r.json() : null)).then(setCalib).catch(() => {});
-  }, []);
-  const fourchette = fourchetteCalibree(analyse, calib);
+    if (!km) { setFourchetteDevis(null); return; }
+    let actif = true;
+    fetch(`/api/calibration-prix?km=${km}&type=${form.type_trajet}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((f) => { if (actif) setFourchetteDevis(f); })
+      .catch(() => { if (actif) setFourchetteDevis(null); });
+    return () => { actif = false; };
+  }, [km, form.type_trajet]);
+  const fourchette = fourchetteDevis ?? fourchetteBareme(analyse);
 
   // ---------- Validation par étape ----------
   function erreurEtape(n: number): string | null {
