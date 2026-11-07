@@ -1,5 +1,4 @@
 import { notFound, redirect } from "next/navigation";
-import { Nav } from "@/components/Nav";
 import { BackButton } from "@/components/BackButton";
 import { createClient } from "@/lib/supabase/server";
 import { AnnulerMission, DeclarerTerminee } from "../../pro-actions";
@@ -30,10 +29,9 @@ export default async function MissionPage({ params }: { params: Promise<{ id: st
 
   return (
     <>
-      <Nav />
-      <main className="max-w-3xl mx-auto px-7 py-14">
+      <div className="max-w-3xl">
         <div className="mb-8">
-          <BackButton href="/pro" />
+          <BackButton href="/pro/missions" />
         </div>
 
         <p className="eyebrow mb-4">Mission {mission.demande?.numero ? `#${mission.demande.numero}` : "DealBus"}</p>
@@ -89,7 +87,7 @@ export default async function MissionPage({ params }: { params: Promise<{ id: st
             )}
           </div>
         )}
-      </main>
+      </div>
     </>
   );
 }

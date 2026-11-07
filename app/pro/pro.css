@@ -1,0 +1,108 @@
+/* =====================================================================
+   Espace transporteur · thème « Clair premium »
+   Scopé sous .pro : le reste du site n'est pas touché. Même logique que
+   l'admin : capitales et police machine à écrire neutralisées, cartes
+   blanches arrondies, typographie normale, ambre en accent.
+   ===================================================================== */
+
+.pro {
+  --c-surface: 247 247 245;
+  --c-surface-2: 255 255 255;
+  --c-surface-3: 244 243 240;
+  --c-encre: 17 17 17;
+  --c-ambre: 245 165 36;
+  --c-ambre-fort: 178 106 0;
+  --c-vert: 26 127 82;
+  --c-bleunuit: 232 238 255;
+  --c-bleunuit-fort: 52 81 178;
+  background: #F7F7F5;
+  color: #111;
+  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 13.5px;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+.pro .font-mono, .pro .font-condensed { font-family: var(--font-inter), -apple-system, sans-serif !important; }
+.pro .font-mono { font-variant-numeric: tabular-nums; }
+.pro .uppercase { text-transform: none !important; }
+.pro [class*="tracking-"] { letter-spacing: normal !important; }
+.pro .h-display { font-weight: 650; letter-spacing: -0.02em !important; line-height: 1.15; }
+.pro h1.h-display, .pro .text-4xl.h-display { font-size: 22px; }
+.pro h2.h-display { font-size: 16px; }
+.pro h3.h-display { font-size: 14px; }
+.pro .h-display.text-3xl { font-size: 20px; }
+.pro .eyebrow { background: #FFF4E0; color: #B26A00; border-radius: 6px; font-size: 11.5px; font-weight: 600; }
+.pro .label { color: #6F6D67; font-size: 12px; font-weight: 500; }
+
+.pro .card {
+  background: #fff; border: 0; border-radius: 12px; padding: 18px 20px;
+  box-shadow: 0 1px 2px rgba(17, 17, 17, 0.04), 0 0 0 1px #ECEBE8;
+}
+.pro .card:hover { border-color: transparent; }
+.pro a.card:hover { box-shadow: 0 2px 6px rgba(17, 17, 17, 0.06), 0 0 0 1px #DCDAD5; }
+.pro .card .card, .pro .card .border.border-ligne { background: #FAFAF8; box-shadow: 0 0 0 1px #EFEEEA; border-radius: 10px; }
+.pro .sombre { background: #111; color: #F5F2EA; border-radius: 12px; }
+.pro .sombre .text-blanc-faint { color: #8B8E96; }
+.pro .sombre .text-blanc-dim { color: #C9CED8; }
+.pro .sombre .text-ambre { color: #F5A524; }
+
+.pro .tag, .pro .tag-devis, .pro .tag-enchere { font-size: 11px; font-weight: 600; border-radius: 6px; padding: 2px 7px; letter-spacing: 0 !important; text-transform: none !important; }
+.pro .tag-devis { background: #E8EEFF; color: #3451B2; }
+.pro .tag-enchere { background: #E6F6EE; color: #1A7F52; }
+
+.pro .btn { border-radius: 9px; font-weight: 600; font-size: 13px; }
+.pro .btn-primary { background: #F5A524; color: #111; }
+.pro .btn-primary:hover { transform: none; background: #E2941A; }
+.pro .btn-ghost { background: #fff; border: 1px solid #E2E1DD; color: #222; }
+.pro .btn-ghost:hover { border-color: #C9C7C2; background: #FAFAF8; }
+.pro .input { background: #fff; border: 1px solid #E2E1DD; border-radius: 9px; color: #111; }
+.pro .input:focus { border-color: #F5A524; box-shadow: 0 0 0 3px rgba(245, 165, 36, 0.15); }
+.pro select.input option { color: #111; }
+
+.pro .text-blanc-faint { color: #9A9893; }
+.pro .text-blanc-dim { color: #6F6D67; }
+.pro .text-blanc { color: #111; }
+.pro .text-vert { color: #1A7F52; }
+.pro .text-ambre, .pro .text-ambre-fort { color: #B26A00; }
+.pro .text-\[\#E8735D\] { color: #C2410C; }
+.pro .bg-asphalte, .pro .bg-asphalte-2 { background: #fff; }
+.pro .bg-asphalte-3 { background: #F4F3F0; }
+.pro .bg-ambre-dim { background: #FFF4E0; }
+.pro .bg-ambre { background: #F5A524; }
+.pro .bg-vert-dim { background: #E6F6EE; }
+.pro .bg-bleunuit { background: #E8EEFF; }
+.pro .text-bleunuit-fort, .pro .text-\[\#9DB3DE\] { color: #3451B2; }
+.pro .bg-\[\#3a2020\] { background: #FDE8E4; }
+.pro .border-ligne { border-color: #EFEEEA; }
+.pro .border-ligne-strong { border-color: #E2E1DD; }
+.pro .divide-ligne > * + * { border-color: #F0EFEC; }
+.pro .hover\:bg-asphalte-2:hover { background: #FAFAF8; }
+
+/* Barre d'onglets de l'espace pro */
+.pro-bar { background: #fff; border-bottom: 1px solid #ECEBE8; position: sticky; top: 0; z-index: 40; }
+.pro-tabs a { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 8px; color: #55534E; font-weight: 500; font-size: 13px; white-space: nowrap; }
+.pro-tabs a:hover { background: #F7F7F5; color: #111; }
+.pro-tabs a[aria-current="page"] { background: #F2F1EE; color: #111; font-weight: 600; }
+.pro-tabs em { font-style: normal; background: #F5A524; color: #111; font-size: 10.5px; font-weight: 700; border-radius: 9px; padding: 1px 6px; }
+.pro-tabs em.muted { background: #F1F0ED; color: #77756F; }
+
+/* Liste des demandes */
+.pro-lead { display: grid; grid-template-columns: minmax(0, 1fr) 190px 150px; gap: 18px; align-items: center; padding: 16px 20px; border-bottom: 1px solid #F0EFEC; }
+.pro-lead:last-child { border-bottom: 0; }
+.pro-lead:hover { background: #FCFCFB; }
+@media (max-width: 860px) { .pro-lead { grid-template-columns: 1fr; gap: 10px; } }
+.pro-route { font-size: 15px; font-weight: 650; letter-spacing: -0.2px; }
+.pro-route i { font-style: normal; color: #C9C7C2; margin: 0 7px; }
+.pro-meta { color: #77756F; font-size: 12.5px; margin-top: 4px; display: flex; gap: 14px; flex-wrap: wrap; }
+.pro-meta b { color: #111; font-weight: 600; }
+.pro-chip { border-radius: 999px; border: 1px solid #E7E6E2; background: #fff; padding: 6px 12px; font-size: 12.5px; font-weight: 500; color: #55534E; }
+.pro-chip[aria-current="true"] { background: #111; color: #fff; border-color: #111; }
+.pro-kpi { background: #fff; border-radius: 12px; padding: 16px 18px; box-shadow: 0 1px 2px rgba(17, 17, 17, 0.04), 0 0 0 1px #ECEBE8; }
+.pro-kpi p { color: #77756F; font-size: 12px; font-weight: 500; }
+.pro-kpi b { display: block; font-size: 26px; letter-spacing: -0.8px; margin-top: 6px; font-variant-numeric: tabular-nums; }
+.pro-kpi small { display: block; color: #8A8882; font-size: 11.5px; margin-top: 4px; }
+.pro-steps { display: flex; gap: 4px; margin-top: 8px; }
+.pro-steps span { flex: 1; height: 5px; border-radius: 3px; background: #EFEEEA; }
+.pro-steps span.on { background: #1A7F52; }
+.pro-steps span.cur { background: #F5A524; }

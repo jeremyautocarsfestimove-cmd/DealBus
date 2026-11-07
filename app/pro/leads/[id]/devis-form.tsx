@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { TYPES_VEHICULES } from "../../pro-actions";
-import { INCLUS, coutDeRevient, eur, type PlanMission, type Tarifs } from "@/lib/assistant-demande";
+import { INCLUS, coutDeRevient, eur, commissionTaux, type PlanMission, type Tarifs } from "@/lib/assistant-demande";
 import { FEATURES } from "@/lib/features";
 
 type Vehicule = { id: string; type: string; marque_modele: string | null; places: number; annee: number | null };
@@ -170,6 +170,19 @@ export function DevisForm({
       {/* ---------- L'offre ---------- */}
       <div className="card space-y-4">
         <h3 className="h-display text-xl">Votre offre</h3>
+        {fourchette && (
+          <div>
+            <p className="text-[12.5px] text-blanc-dim">Repère observé sur DealBus pour des trajets de distance proche</p>
+            <div className="relative h-2 rounded-full mt-7 mb-1.5 mx-1" style={{ background: "linear-gradient(90deg,#E6F6EE,#FFF4E0,#FDE8E4)" }}>
+              <span className="absolute -top-6 text-[11px] font-semibold text-[#55534E] -translate-x-1/2 whitespace-nowrap" style={{ left: "12%" }}>{eur(fourchette.min)}</span>
+              <span className="absolute -top-6 text-[11px] font-semibold text-[#55534E] -translate-x-1/2 whitespace-nowrap" style={{ left: "88%" }}>{eur(fourchette.max)}</span>
+              <i className="absolute -top-[5px] w-[3px] h-[18px] bg-[#111] rounded-sm" style={{ left: "12%" }} />
+              <i className="absolute -top-[5px] w-[3px] h-[18px] bg-[#111] rounded-sm" style={{ left: "88%" }} />
+              {prixSaisi > 0 && (() => { const pos = Math.max(2, Math.min(98, 12 + ((prixSaisi - fourchette.min) / Math.max(fourchette.max - fourchette.min, 1)) * 76)); return <i className="absolute -top-[7px] w-[9px] h-[22px] rounded-full bg-[#F5A524] border-2 border-white shadow -translate-x-1/2" style={{ left: `${pos}%` }} />; })()}
+            </div>
+            <div className="flex justify-between text-[11px] text-blanc-faint mx-1"><span>quart le moins cher</span><span>quart le plus cher</span></div>
+          </div>
+        )}
         {flotte.length > 0 && (
           <div>
             <label className="label">Choisir un véhicule de ma flotte</label>
@@ -183,8 +196,13 @@ export function DevisForm({
         )}
         <div>
           <label className="label">Votre prix (TTC, tout compris)</label>
-          <input className="input font-mono text-lg" type="number" placeholder={FEATURES.calculateur ? String(Math.round(calc.prixTTC)) : "Ex. 2590"}
+          <input className="input font-mono text-2xl font-semibold" type="number" placeholder={FEATURES.calculateur ? String(Math.round(calc.prixTTC)) : "Ex. 2590"}
             value={form.prix_ttc} onChange={(e) => set("prix_ttc", e.target.value)} />
+          {prixSaisi > 0 && fourchette && !FEATURES.calculateur && (
+            <p className={`text-[12px] mt-1.5 font-medium ${prixSaisi < fourchette.min ? "text-[#1A7F52]" : prixSaisi > fourchette.max ? "text-[#C2410C]" : "text-[#B26A00]"}`}>
+              {prixSaisi < fourchette.min ? "Sous la fourchette observée" : prixSaisi > fourchette.max ? "Au-dessus de la fourchette montrée au client" : "Dans la fourchette observée"}
+            </p>
+          )}
           {FEATURES.calculateur && margeReelle !== null && (
             <p className={`font-mono text-[11px] mt-1.5 ${margeReelle < 5 ? "text-[#E8735D]" : margeReelle < 12 ? "text-ambre" : "text-vert"}`}>
               {margeReelle < 0 ? `Sous votre coût de revient (${margeReelle} %)` : `Marge nette après commission : ${margeReelle} %`}
@@ -234,13 +252,15 @@ export function DevisForm({
             ))}
           </div>
         </div>
-        <p className="text-[12.5px] text-blanc-dim bg-ambre-dim border border-ambre/40 rounded-sm px-3.5 py-3 flex gap-2.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-ambre shrink-0 mt-1.5" />
-          <span>Cette offre est <strong>définitive</strong> : une fois envoyée, elle ne pourra plus être modifiée ni retirée.</span>
-        </p>
+        <div className="text-[12.5px] text-[#55534E] bg-[#FAFAF8] rounded-lg px-3.5 py-3">
+          {prixSaisi > 0
+            ? <>Commission DealBus si le client vous choisit : <strong className="text-[#111]">{commissionTaux(prixSaisi)} % = {eur(Math.round(prixSaisi * commissionTaux(prixSaisi)) / 100)}</strong> TTC, facturée le lendemain du transport. Le client vous règle en direct.</>
+            : <>Commission DealBus uniquement si le client vous choisit (9 %, 7 % ou 5 % selon le prix), facturée le lendemain du transport. Le client vous règle en direct.</>}
+        </div>
+        <p className="text-[12px] text-blanc-faint">Une seule offre par demande : une fois envoyée, elle ne pourra plus être modifiée ni retirée.</p>
         {error && <p className="font-mono text-sm text-[#E8735D]">{error}</p>}
         <button className="btn-primary w-full disabled:opacity-50" disabled={saving} onClick={submit}>
-          {saving ? "Envoi…" : "Envoyer mon offre (tir unique) →"}
+          {saving ? "Envoi…" : "Envoyer mon offre"}
         </button>
       </div>
     </div>

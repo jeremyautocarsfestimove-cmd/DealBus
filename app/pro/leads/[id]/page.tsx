@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
-import { Nav } from "@/components/Nav";
-import { BackButton } from "@/components/BackButton";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import type { Demande } from "@/lib/types";
 import { DevisForm } from "./devis-form";
@@ -13,7 +12,8 @@ import {
   analyser, planifier, fmtDuree, eur, gabaritPour,
   type Tarifs,
 } from "@/lib/assistant-demande";
-import { fmtKm, libelleFourchette, kmTransport } from "@/lib/calibration-prix";
+import { fmtKm, kmTransport } from "@/lib/calibration-prix";
+import { ville, jourCourt, joursAvant } from "@/lib/pro";
 import { estimerFourchette, repereKm } from "@/lib/calibration-serveur";
 
 export default async function LeadPage({ params }: { params: Promise<{ id: string }> }) {
@@ -81,128 +81,97 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
   const gabarit = gabaritPour(d.passagers);
   const hFr = (h: string | null | undefined) => (h ? String(h).slice(0, 5).replace(":", "h") : "");
 
+  const typeLib = d.type_trajet === "aller_simple" ? "aller simple" : d.type_trajet === "circuit" ? "circuit" : "aller-retour";
+  const surPlace = d.type_trajet !== "aller_simple" && d.sur_place_repondu ? (d.vehicule_utilise_sur_place ? "car sur place" : "dépose puis reprise") : null;
+  const jours = joursAvant(String(d.date_aller));
+  const Ligne = ({ t, children }: { t: string; children: React.ReactNode }) => (
+    <div className="grid sm:grid-cols-[110px_1fr] gap-x-4 py-2.5 border-t border-ligne first:border-0"><dt className="text-[12px] text-[#8A8882] pt-0.5">{t}</dt><dd className="text-[13px]">{children}</dd></div>
+  );
+
   return (
     <>
-      <Nav />
-      <main className="max-w-5xl mx-auto px-7 py-14">
-        <div className="w-full mb-8"><BackButton href="/pro" /></div>
-
-        <div className="flex flex-wrap items-center gap-2 mb-3">
-          <span className={d.mode === "enchere" ? "tag-enchere" : "tag-devis"}>{d.mode === "enchere" ? "Enchère" : "Devis"}</span>
-          {d.organisme && <span className="tag bg-ambre-dim text-ambre-fort">{ORGANISMES.find((o) => o.id === d.organisme)?.label}</span>}
-          {typeof d.completude === "number" && d.completude > 0 && (
-            <span className={`tag ${d.completude >= 70 ? "bg-vert-dim text-vert" : "bg-asphalte-3 text-blanc-dim"}`}>Demande complète {d.completude} %</span>
-          )}
-          <span className="font-mono text-[11px] text-blanc-faint ml-auto">Demande #{d.numero} · client anonyme</span>
+      <div className="flex items-start justify-between gap-4 flex-wrap mb-6">
+        <div className="min-w-0">
+          <p className="text-[12.5px] text-[#77756F] mb-2"><Link href="/pro" className="hover:underline">← Demandes</Link> · Demande #{d.numero} · {maMission ? "mission confirmée avec vous" : "client anonyme jusqu'à l'acceptation"}</p>
+          <h1 className="h-display text-4xl truncate" title={`${d.depart_adresse} → ${d.arrivee_adresse}`}>{ville(d.depart_adresse)} → {ville(d.arrivee_adresse)}</h1>
+          <p className="text-blanc-dim mt-1.5">
+            {jourCourt(String(d.date_aller))}{d.heure_aller ? ` ${hFr(d.heure_aller)}` : ""}{d.date_retour && d.date_retour !== d.date_aller ? ` → ${jourCourt(String(d.date_retour))}${d.heure_retour ? ` ${hFr(d.heure_retour)}` : ""}` : ""}
+            {" "}· {d.passagers} passagers · {typeLib}{surPlace ? `, ${surPlace}` : ""}{d.organisme ? ` · ${ORGANISMES.find((o) => o.id === d.organisme)?.label}` : ""}
+          </p>
         </div>
-        <h1 className="h-display text-4xl mb-2">{d.depart_adresse} → {d.arrivee_adresse}</h1>
-        <p className="font-mono text-xs text-blanc-faint mb-8">
-          {new Date(d.date_aller).toLocaleDateString("fr-FR")}{d.heure_aller ? ` à ${hFr(d.heure_aller)}` : ""}
-          {d.date_retour ? ` → ${new Date(d.date_retour).toLocaleDateString("fr-FR")}${d.heure_retour ? ` à ${hFr(d.heure_retour)}` : ""}` : ""}
-          {" "}· {d.passagers} passagers · {d.type_trajet.replace("_", "-")}
-          {d.type_trajet !== "aller_simple" && d.sur_place_repondu ? (d.vehicule_utilise_sur_place ? " · car sur place" : " · dépose puis reprise") : ""}
-        </p>
-
-        {/* ---------- Chiffres clés ---------- */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-          <div className="card py-4"><p className="h-display text-3xl">{km ? `${km} km` : "—"}</p><p className="font-mono text-[10px] uppercase tracking-wider text-blanc-faint mt-1">Aller, prise en charge → destination{analyse.routeMin ? ` · ${fmtDuree(analyse.routeMin)} de route` : ""}</p></div>
-          <div className="card py-4"><p className="h-display text-3xl text-ambre">{plan.hautLePiedKm !== null ? `${plan.hautLePiedKm} km` : "—"}</p><p className="font-mono text-[10px] uppercase tracking-wider text-blanc-faint mt-1">{moi?.depot_adresse ? `Haut-le-pied dépôt ↔ prise en charge${hlpAller !== null && hlpRetour !== null ? ` (${hlpAller} + ${hlpRetour} km)` : ""}` : "Haut-le-pied (dépôt non renseigné)"}</p></div>
-          <div className="card py-4"><p className="h-display text-3xl">{plan.kmTotal !== null ? `${plan.kmTotal} km` : "—"}</p><p className="font-mono text-[10px] uppercase tracking-wider text-blanc-faint mt-1">Kilométrage total estimé</p></div>
-          <div className="card py-4"><p className={`h-display text-3xl ${plan.deuxConducteurs ? "text-[#E8735D]" : "text-vert"}`}>{plan.deuxConducteurs ? "2 conducteurs" : "1 conducteur"}</p><p className="font-mono text-[10px] uppercase tracking-wider text-blanc-faint mt-1">{plan.deuxConducteurs ? "Probables, selon vos horaires" : "Suffisant sur chaque journée"}</p></div>
+        <div className="flex items-center gap-2 flex-wrap">
+          {d.mode === "enchere" && <span className="tag-enchere">Enchère</span>}
+          <span className={`tag ${jours <= 7 ? "bg-[#FDE8E4] text-[#C2410C]" : "bg-[#F1F0ED] text-[#55534E]"}`}>{jours <= 0 ? "Départ aujourd'hui" : jours === 1 ? "Départ demain" : `Départ dans ${jours} jours`}</span>
         </div>
+      </div>
 
-        <div className="grid lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] gap-5 mb-8">
-          <div className="card text-sm">
-            <p className="font-mono text-[11px] uppercase tracking-wider text-blanc-faint mb-4">Ce que DealBus a calculé</p>
-            {analyse.horairesIncoherents && (
-              <p className="mb-4 text-[12.5px] bg-[#E8735D]/10 border border-[#E8735D]/40 rounded-sm px-3.5 py-2.5 text-blanc-dim">
-                <strong className="text-[#E8735D]">Horaires du client incohérents</strong> : le retour est prévu avant l&apos;arrivée à destination. Le plan ci-dessous suppose 2 h sur place ; demandez confirmation au client par la messagerie avant de chiffrer.
-              </p>
-            )}
-            <dl className="divide-y divide-ligne">
-              {plan.journees.map((j) => (
-                <div key={j.titre} className="grid sm:grid-cols-[130px_1fr] gap-x-4 py-2.5">
-                  <dt className="font-mono text-[11px] uppercase tracking-wider text-blanc-faint pt-0.5">{j.titre}</dt>
-                  <dd>{j.detail}<span className="block font-mono text-[11px] text-blanc-faint mt-0.5">amplitude {fmtDuree(j.amplitudeMin)} · conduite {fmtDuree(j.conduiteMin)}</span></dd>
-                </div>
+      <div className="grid lg:grid-cols-[minmax(0,1fr)_380px] gap-4 items-start">
+        {/* ---------- Colonne gauche : le besoin ---------- */}
+        <div className="space-y-4 min-w-0">
+          <div className="card p-0 overflow-hidden">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 p-4">
+              {[
+                ["Aller", `${jourCourt(String(d.date_aller))}${d.heure_aller ? ` · ${hFr(d.heure_aller)}` : ""}`],
+                ["Retour", d.type_trajet === "aller_simple" ? "aucun" : `${jourCourt(String(d.date_retour ?? d.date_aller))}${d.heure_retour ? ` · ${hFr(d.heure_retour)}` : ""}`],
+                ["Distance aller", km ? `${km} km${analyse.routeMin ? ` · ${fmtDuree(analyse.routeMin)}` : ""}` : "—"],
+                ["Gabarit conseillé", gabarit?.label ?? "—"],
+                ["Haut-le-pied", plan.hautLePiedKm !== null ? `${plan.hautLePiedKm} km${hlpAller !== null && hlpRetour !== null ? ` (${hlpAller} + ${hlpRetour})` : " (forfait)"}` : "—"],
+                ["Kilométrage total", plan.kmTotal !== null ? `${plan.kmTotal} km` : "—"],
+                ["Péages estimés", plan.peages ? `≈ ${eur(plan.peages)}` : "—"],
+                ["Conducteurs", plan.deuxConducteurs ? "2 probables" : "1 suffit"],
+              ].map(([l, v], i) => (
+                <div key={l} className="bg-[#FAFAF8] rounded-lg px-3 py-2.5"><p className="text-[11.5px] text-[#8A8882]">{l}</p><p className={`text-[13.5px] font-semibold mt-0.5 ${i === 7 && plan.deuxConducteurs ? "text-[#C2410C]" : ""}`}>{v}</p></div>
               ))}
-              {analyse.nuits > 0 && (
-                <div className="grid sm:grid-cols-[130px_1fr] gap-x-4 py-2.5">
-                  <dt className="font-mono text-[11px] uppercase tracking-wider text-blanc-faint pt-0.5">Nuit{analyse.nuits > 1 ? "s" : ""}</dt>
-                  <dd>{analyse.nuits} sur place{d.vehicule_utilise_sur_place ? ", car et conducteur restent" : ", le car ne reste pas : deux trajets séparés"}.</dd>
+            </div>
+            <div className="px-5 py-4 border-t border-ligne">
+              <h2 className="text-[14px] font-semibold mb-2">Ce que DealBus a calculé</h2>
+              {analyse.horairesIncoherents && (
+                <p className="mb-3 text-[12.5px] bg-[#FDE8E4] rounded-lg px-3.5 py-2.5 text-[#7A2E1C]"><strong>Horaires du client incohérents</strong> : le retour est prévu avant l&apos;arrivée. Le plan suppose 2 h sur place ; demandez confirmation au client avant de chiffrer.</p>
+              )}
+              <dl>
+                {plan.journees.map((j) => <Ligne key={j.titre} t={j.titre}>{j.detail}<span className="block text-[12px] text-[#8A8882] mt-0.5">amplitude {fmtDuree(j.amplitudeMin)} · conduite {fmtDuree(j.conduiteMin)}</span></Ligne>)}
+                {analyse.nuits > 0 && <Ligne t={`Nuit${analyse.nuits > 1 ? "s" : ""}`}>{analyse.nuits} sur place{d.vehicule_utilise_sur_place ? ", car et conducteur restent" : ", le car ne reste pas : deux trajets séparés"}.</Ligne>}
+                <Ligne t="Gabarit">{d.passagers} passagers : {gabarit?.label ?? "—"}{d.equipements?.includes("soute") ? ", bagages en soute" : ""}</Ligne>
+              </dl>
+              {plan.deuxConducteurs && (
+                <div className="mt-3 flex gap-2.5 bg-[#FFF8EA] border border-[#F7E1B5] rounded-lg px-3.5 py-2.5 text-[12.5px] text-[#7A5413]">
+                  <span>⚠</span><span>Plus de {BAREME.conduiteMaxJourMin / 60} h de conduite ou {BAREME.amplitudeMaxJourMin / 60} h d&apos;amplitude sur une journée : prévoir un second conducteur ou un découcher. Vous pouvez proposer un autre horaire au client depuis la messagerie.</span>
                 </div>
               )}
-              <div className="grid sm:grid-cols-[130px_1fr] gap-x-4 py-2.5">
-                <dt className="font-mono text-[11px] uppercase tracking-wider text-blanc-faint pt-0.5">Réglementation</dt>
-                <dd>
-                  <span className={`tag ${plan.deuxConducteurs ? "bg-ambre-dim text-ambre-fort" : "bg-vert-dim text-vert"}`}>{plan.deuxConducteurs ? "À vérifier" : "Conforme"}</span>
-                  <span className="ml-2 text-blanc-dim">{plan.deuxConducteurs
-                    ? `Plus de ${BAREME.conduiteMaxJourMin / 60} h de conduite ou ${BAREME.amplitudeMaxJourMin / 60} h d'amplitude sur une journée : prévoir un second conducteur ou un découcher.`
-                    : "Temps de conduite et d'amplitude tenables avec un seul conducteur, pauses comprises."}</span>
-                </dd>
-              </div>
-              <div className="grid sm:grid-cols-[130px_1fr] gap-x-4 py-2.5">
-                <dt className="font-mono text-[11px] uppercase tracking-wider text-blanc-faint pt-0.5">Péages estimés</dt>
-                <dd>{plan.peages ? `environ ${eur(plan.peages)} sur l'ensemble` : "—"}</dd>
-              </div>
-              <div className="grid sm:grid-cols-[130px_1fr] gap-x-4 py-2.5">
-                <dt className="font-mono text-[11px] uppercase tracking-wider text-blanc-faint pt-0.5">Gabarit</dt>
-                <dd>{d.passagers} passagers : {gabarit?.label ?? "—"}{d.equipements?.includes("soute") ? ", bagages en soute" : ""}</dd>
-              </div>
-            </dl>
-            {!moi?.depot_adresse && (
-              <p className="mt-4 text-[12.5px] text-blanc-dim bg-ambre-dim border border-ambre/40 rounded-sm px-3.5 py-2.5">
-                Renseignez l&apos;adresse de votre dépôt dans <strong>Mon profil → Paramètres de devis</strong> pour un haut-le-pied calculé sur votre situation réelle (ici : forfait {BAREME.hautLePiedKm} km).
-              </p>
-            )}
-          </div>
-
-          <div className="space-y-5">
-            <div className="card text-sm">
-              <p className="font-mono text-[11px] uppercase tracking-wider text-blanc-faint mb-4">Ce que le client a précisé</p>
-              <dl className="grid grid-cols-[110px_1fr] gap-x-3 gap-y-2.5">
-                <dt className="font-mono text-[11px] uppercase tracking-wider text-blanc-faint pt-0.5">Groupe</dt>
-                <dd>{ORGANISMES.find((o) => o.id === d.organisme)?.label ?? "Non précisé"}{d.motif ? ` · ${d.motif}` : ""}</dd>
-                {d.heure_arrivee && (<><dt className="font-mono text-[11px] uppercase tracking-wider text-blanc-faint pt-0.5">Arrivée souhaitée</dt><dd>{hFr(d.heure_arrivee)}</dd></>)}
-                <dt className="font-mono text-[11px] uppercase tracking-wider text-blanc-faint pt-0.5">Équipements</dt>
-                <dd>{d.equipements?.length ? d.equipements.map((e) => EQUIPEMENTS.find((x) => x.id === e)?.label ?? e).join(" · ") : "Aucun équipement particulier"}</dd>
-                {d.precisions && (<><dt className="font-mono text-[11px] uppercase tracking-wider text-blanc-faint pt-0.5">Précisions</dt><dd className="whitespace-pre-line text-blanc-dim">« {d.precisions} »</dd></>)}
+              {!moi?.depot_adresse && (
+                <p className="mt-3 text-[12.5px] text-[#55534E] bg-[#FAFAF8] rounded-lg px-3.5 py-2.5">Renseignez l&apos;adresse de votre dépôt dans <Link href="/pro/profil" className="font-semibold underline">Mon entreprise</Link> pour un haut-le-pied calculé sur votre situation réelle (ici : forfait {BAREME.hautLePiedKm} km).</p>
+              )}
+            </div>
+            <div className="px-5 py-4 border-t border-ligne">
+              <h2 className="text-[14px] font-semibold mb-2">Ce que le client a précisé</h2>
+              <dl>
+                <Ligne t="Groupe">{ORGANISMES.find((o) => o.id === d.organisme)?.label ?? "Non précisé"}{d.motif ? ` · ${d.motif}` : ""}</Ligne>
+                {d.heure_arrivee && <Ligne t="Arrivée souhaitée">{hFr(d.heure_arrivee)}</Ligne>}
+                <Ligne t="Équipements">{d.equipements?.length ? d.equipements.map((e) => EQUIPEMENTS.find((x) => x.id === e)?.label ?? e).join(" · ") : "Aucun équipement particulier"}</Ligne>
+                {d.precisions && <Ligne t="Précisions"><span className="whitespace-pre-line text-[#3A3936]">« {d.precisions} »</span></Ligne>}
+                <Ligne t="Adresses"><span className="text-[#55534E]">{d.depart_adresse} → {d.arrivee_adresse}</span></Ligne>
               </dl>
             </div>
-            <div className="sombre rounded p-5">
-              <p className="font-mono text-[10.5px] uppercase tracking-[.14em] text-ambre mb-2">Repère de marché</p>
-              <p className="h-display text-3xl text-ambre">{fourchette ? `${eur(fourchette.min)} à ${eur(fourchette.max)}` : "—"}</p>
-              <p className="font-mono text-[10.5px] uppercase tracking-wider text-blanc-faint mt-1">Montrée au client · {fourchette ? libelleFourchette(fourchette) : "fourchette indicative TTC"}</p>
-              {repere && kmT && (
-                <div className="mt-4 pt-3 border-t border-ligne">
-                  <p className="font-mono text-lg font-semibold">{fmtKm(repere.p25)} à {fmtKm(repere.p75)}</p>
-                  <p className="font-mono text-[10.5px] uppercase tracking-wider text-blanc-faint mt-1">Prix au km observé, par car · devis de distance proche · {repere.n} devis</p>
-                  <p className="text-[12.5px] text-blanc-dim mt-1">Médiane {fmtKm(repere.p50)} × {kmT} km de transport ({d.type_trajet === "aller_simple" ? "aller" : "aller + retour"}) {(analyse.gabarit?.nbVehicules ?? 1) > 1 ? ` × ${analyse.gabarit?.nbVehicules} cars` : ""} = {eur(Math.round(repere.p50 * kmT * (analyse.gabarit?.nbVehicules ?? 1)))}</p>
-                </div>
-              )}
-              <p className="text-[12.5px] text-blanc-dim mt-3 leading-snug">Une offre claire sur ce qui est inclus fait souvent la différence.</p>
-            </div>
+          </div>
+
+          <div className="card p-0 overflow-hidden"><ItineraireMap depart={d.depart_adresse} arrivee={d.arrivee_adresse} allerRetour={d.type_trajet === "aller_retour"} montrerTemps /></div>
+
+          <div className="card">
+            <h2 className="text-[14px] font-semibold">Questions au client <span className="text-[12px] text-[#9A9893] font-normal">· dans la plateforme, copie par email{maMission ? "" : ", coordonnées masquées"}</span></h2>
+            <p className="text-[12.5px] text-blanc-dim mt-1 mb-4">Horaires, parking, hôtel du groupe, matériel… Le prix, lui, passe par votre offre.</p>
+            <Messagerie demandeId={id} transporteurId={user!.id} role="transporteur" interlocuteur={`Client de la demande #${d.numero}`} anonyme={!maMission} />
           </div>
         </div>
 
-        <ItineraireMap depart={d.depart_adresse} arrivee={d.arrivee_adresse} allerRetour={d.type_trajet === "aller_retour"} montrerTemps />
-
-        <div className="mt-8 mb-8">
-          <h2 className="h-display text-2xl mb-1">Une question au client ?</h2>
-          <p className="text-sm text-blanc-dim mb-4">Horaires, parking, hôtel du groupe, matériel… Le client reçoit aussi votre message par email. Le prix, lui, passe par votre offre.</p>
-          <Messagerie demandeId={id} transporteurId={user!.id} role="transporteur"
-            interlocuteur={`Client de la demande #${d.numero}`} anonyme={!maMission} />
-        </div>
-
-        <div className="mt-8">
+        {/* ---------- Colonne droite : l'offre ---------- */}
+        <div className="lg:sticky lg:top-[70px] space-y-4">
           {d.mode === "devis" ? (
             monOffre ? (
               <div className="card">
-                <p className="flex items-center gap-2.5 text-sm text-blanc-dim">
-                  <span className="w-1.5 h-1.5 rounded-full bg-vert" />
-                  Offre envoyée : <strong className="font-mono">{Number(monOffre.prix_ttc).toLocaleString("fr-FR")} €</strong>
-                  — en attente de la décision du client.
-                </p>
+                <h2 className="text-[15px] font-semibold">Votre offre est envoyée</h2>
+                <p className="text-[28px] font-semibold tracking-tight mt-2">{Number(monOffre.prix_ttc).toLocaleString("fr-FR")} €</p>
+                <p className="text-[12.5px] text-blanc-dim mt-1">En attente de la décision du client. Vous serez prévenu par email.</p>
+                {fourchette && <p className="text-[12px] text-[#9A9893] mt-3 pt-3 border-t border-ligne">Repère observé : {eur(fourchette.min)} à {eur(fourchette.max)}</p>}
               </div>
             ) : (
               <DevisForm demandeId={id} plan={plan} tarifs={tarifs} nbVehicules={gabarit?.nbVehicules ?? 1}
@@ -211,8 +180,15 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
           ) : (
             <EnchereForm demandeId={id} enchereFin={d.enchere_fin} bestPrix={bestBid?.prix_ttc ?? null} />
           )}
+          {repere && kmT && (
+            <div className="card">
+              <p className="text-[12px] text-[#77756F] font-medium">Prix au km observé, par car</p>
+              <p className="text-[18px] font-semibold mt-1">{fmtKm(repere.p25)} à {fmtKm(repere.p75)}</p>
+              <p className="text-[12px] text-[#77756F] mt-1">Médiane {fmtKm(repere.p50)} × {kmT} km ({d.type_trajet === "aller_simple" ? "aller" : "aller + retour"}){(analyse.gabarit?.nbVehicules ?? 1) > 1 ? ` × ${analyse.gabarit?.nbVehicules} cars` : ""} = {eur(Math.round(repere.p50 * kmT * (analyse.gabarit?.nbVehicules ?? 1)))} · {repere.n} devis de distance proche</p>
+            </div>
+          )}
         </div>
-      </main>
+      </div>
     </>
   );
 }
