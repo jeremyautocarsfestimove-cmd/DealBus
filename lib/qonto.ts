@@ -33,7 +33,7 @@ async function q<T>(chemin: string, init: RequestInit = {}): Promise<T> {
 
 // N° de TVA intracommunautaire français déduit du SIREN
 export function tvaDepuisSiren(siren: string): string | null {
-  const s = siren.replace(/\D/g, "");
+  const s = siren.replace(/\D/g, "").slice(0, 9); // accepte aussi un SIRET (14 chiffres)
   if (s.length !== 9) return null;
   const cle = (12 + 3 * (Number(s) % 97)) % 97;
   return `FR${String(cle).padStart(2, "0")}${s}`;
@@ -47,9 +47,26 @@ export function decouperAdresse(adresse: string | null): { street_address: strin
   return { street_address: m[1].replace(/,\s*$/, "").trim() || m[3], zip_code: m[2], city: m[3].replace(/,.*$/, "").trim().slice(0, 50) };
 }
 
+// Adresse du siège depuis l'annuaire public des entreprises (API Recherche d'entreprises, data.gouv)
+export async function adresseDepuisSiren(siren: string): Promise<{ street_address: string; zip_code: string; city: string } | null> {
+  try {
+    const s = siren.replace(/\D/g, "").slice(0, 9); // SIREN, même si un SIRET est saisi
+    const res = await fetch(`https://recherche-entreprises.api.gouv.fr/search?q=${s}&page=1&per_page=1`, { cache: "no-store" });
+    if (!res.ok) return null;
+    const j = await res.json();
+    const r = (j.results ?? []).find((x: { siren?: string }) => x.siren === s);
+    const g = r?.siege;
+    if (!g?.code_postal || !g?.libelle_commune) return null;
+    const rue = [g.numero_voie, g.indice_repetition, g.type_voie, g.libelle_voie].filter(Boolean).join(" ").trim();
+    return { street_address: (rue || g.complement_adresse || g.libelle_commune).slice(0, 250), zip_code: g.code_postal, city: String(g.libelle_commune).slice(0, 50) };
+  } catch {
+    return null;
+  }
+}
+
 export async function creerClient(t: { raison_sociale: string; siren: string; email: string | null; depot_adresse: string | null }): Promise<string> {
-  const adresse = decouperAdresse(t.depot_adresse);
-  if (!adresse) throw new Error(`Adresse du dépôt de ${t.raison_sociale} absente ou illisible : renseignez « numéro rue, code postal ville » dans sa fiche.`);
+  const adresse = decouperAdresse(t.depot_adresse) ?? (await adresseDepuisSiren(t.siren));
+  if (!adresse) throw new Error(`Adresse de ${t.raison_sociale} introuvable (ni adresse de dépôt lisible, ni siège trouvé par le SIREN ${t.siren}).`);
   const r = await q<{ client: { id: string } }>("/clients", {
     method: "POST",
     body: JSON.stringify({
