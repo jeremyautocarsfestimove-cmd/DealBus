@@ -159,12 +159,12 @@ function DemandeWizard() {
   useEffect(() => {
     if (!km) { setFourchetteDevis(null); return; }
     let actif = true;
-    fetch(`/api/calibration-prix?km=${km}&type=${form.type_trajet}`)
+    fetch(`/api/calibration-prix?km=${km}&type=${form.type_trajet}&nuits=${analyse.nuits}`)
       .then((r) => (r.ok ? r.json() : null))
       .then((f) => { if (actif) setFourchetteDevis(f); })
       .catch(() => { if (actif) setFourchetteDevis(null); });
     return () => { actif = false; };
-  }, [km, form.type_trajet]);
+  }, [km, form.type_trajet, analyse.nuits]);
   const fourchette = fourchetteDevis ?? fourchetteBareme(analyse);
 
   // ---------- Validation par étape ----------

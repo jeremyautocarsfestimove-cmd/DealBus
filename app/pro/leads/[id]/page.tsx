@@ -75,7 +75,7 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
   };
   const analyse = analyser(entree);
   const fourchette = await estimerFourchette(analyse, d.type_trajet);
-  const repere = await repereKm(analyse.km, analyse.nuits);
+  const repere = await repereKm(analyse.km, d.type_trajet, analyse.nuits);
   const plan = planifier(entree, hlpAller, hlpRetour, hlpAllerMin, hlpRetourMin);
   const gabarit = gabaritPour(d.passagers);
   const hFr = (h: string | null | undefined) => (h ? String(h).slice(0, 5).replace(":", "h") : "");

@@ -5,7 +5,7 @@ import { unstable_cache } from "next/cache";
 import { createAdminClient } from "./supabase/admin";
 import { analyser, type Analyse } from "./assistant-demande";
 import {
-  CALIB, trajetsEnCharge, fourchetteDepuisDevis, fourchetteBareme, repereKmDepuisDevis,
+  CALIB, groupeDe, fourchetteDepuisDevis, fourchetteBareme, repereKmDepuisDevis,
   type PointMarche, type Fourchette,
 } from "./calibration-prix";
 
@@ -37,22 +37,15 @@ async function charger(): Promise<PointMarche[]> {
     const km = d?.distance_km ? Number(d.distance_km) : 0;
     const prix = Number(o.prix_ttc);
     if (!d || !km || !prix) continue;
-    const kmCharge = km * trajetsEnCharge(d.type_trajet);
-    const prixKm = prix / kmCharge;
+    const prixKm = prix / km;
     if (prixKm < CALIB.prixKmMin || prixKm > CALIB.prixKmMax) continue;
-    points.push({
-      demandeId: o.demande_id,
-      km,
-      kmCharge,
-      prixKm,
-      prixKmAller: prix / km,
-      nuits: d.type_trajet === "aller_simple" ? 0 : nuitsEntre(d.date_aller, d.date_retour),
-    });
+    const nuits = d.type_trajet === "aller_simple" ? 0 : nuitsEntre(d.date_aller, d.date_retour);
+    points.push({ demandeId: o.demande_id, km, prixKm, groupe: groupeDe(d.type_trajet, nuits) });
   }
   return points;
 }
 
-export const pointsMarche = unstable_cache(charger, ["points-marche-v1"], { revalidate: 3600 });
+export const pointsMarche = unstable_cache(charger, ["points-marche-v2"], { revalidate: 3600 });
 
 // Fourchette pour une demande : devis réels si assez de comparables, sinon barème.
 // exclureDemandeId : ne pas compter les devis de la demande elle-même (vue admin).
@@ -62,11 +55,11 @@ export async function estimerFourchette(
   if (!a.km) return fourchetteBareme(a);
   const tous = await pointsMarche().catch(() => [] as PointMarche[]);
   const points = exclureDemandeId ? tous.filter((p) => p.demandeId !== exclureDemandeId) : tous;
-  return fourchetteDepuisDevis(points, a.km, typeTrajet) ?? fourchetteBareme(a);
+  return fourchetteDepuisDevis(points, a.km, typeTrajet, a.nuits) ?? fourchetteBareme(a);
 }
 
-export async function repereKm(km: number | null, nuits: number, exclureDemandeId?: string) {
+export async function repereKm(km: number | null, typeTrajet: string, nuits: number, exclureDemandeId?: string) {
   const tous = await pointsMarche().catch(() => [] as PointMarche[]);
   const points = exclureDemandeId ? tous.filter((p) => p.demandeId !== exclureDemandeId) : tous;
-  return repereKmDepuisDevis(points, km, nuits);
+  return repereKmDepuisDevis(points, km, typeTrajet, nuits);
 }

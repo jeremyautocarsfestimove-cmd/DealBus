@@ -70,7 +70,7 @@ export default async function DetailDemandePage({ params }: { params: Promise<{ 
   });
   // Calculé sans les devis de cette demande, pour juger honnêtement l'estimation
   const fourchette = await estimerFourchette(analyse, demande.type_trajet, id);
-  const repere = await repereKm(km, analyse.nuits, id);
+  const repere = await repereKm(km, demande.type_trajet, analyse.nuits, id);
 
   const parKm = (p: number | null) =>
     p && km ? `${(p / km).toFixed(2).replace(".", ",")} €/km` : "—";

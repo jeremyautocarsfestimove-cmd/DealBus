@@ -1,12 +1,14 @@
 // Fourchette de prix estimée à partir des devis réels des transporteurs.
 //
-// Principe : chaque devis reçu donne un prix au km (prix TTC / km en charge).
+// Principe : chaque devis reçu donne un prix au km aller (prix TTC / km aller).
+// On ne compare que des devis du même type de trajet (aller simple, aller-retour
+// dans la journée, aller-retour avec nuits) : le car rentre à vide sur un aller
+// simple ou une dépose, donc les prix au km ne se comparent qu'entre trajets du même type.
 // Pour une nouvelle demande, on fait la moyenne de ces prix au km en donnant
 // plus de poids aux devis dont la distance est proche de celle du client
 // (un trajet de 50 km et un trajet de 600 km n'ont pas le même prix au km).
 // Fourchette = km du client × prix au km (quart bas → quart haut des devis pondérés).
 //
-// Km en charge = km aller × 1 (aller simple) ou × 2 (aller-retour, circuit).
 // C'est une estimation au km : hors déplacements sur place, nuits, options.
 //
 // Fichier partagé client / serveur : aucune dépendance serveur ici.
@@ -19,10 +21,8 @@ export type Stats = { p25: number; p50: number; p75: number; n: number };
 export type PointMarche = {
   demandeId: string;
   km: number;          // km aller
-  kmCharge: number;    // km aller × trajets en charge
-  prixKm: number;      // € TTC / km en charge
-  prixKmAller: number; // € TTC / km aller (repère métier, comme le tableau admin)
-  nuits: number;
+  prixKm: number;      // € TTC / km aller (comme le tableau admin)
+  groupe: string;      // aller simple / aller-retour journée / aller-retour avec nuits
 };
 
 export type Fourchette = {
@@ -36,11 +36,20 @@ export const CALIB = {
   largeur: 0.35,     // largeur de la pondération (en log de distance) : ±35 % ≈ poids fort
   nMin: 5,           // nombre effectif minimum de devis comparables
   ecartMin: 0.08,    // fourchette d'au moins ±8 % autour de la médiane
-  prixKmMin: 0.8,    // devis aberrants écartés (€ TTC / km en charge)
-  prixKmMax: 40,
+  prixKmMin: 1.5,    // devis aberrants écartés (€ TTC / km aller)
+  prixKmMax: 80,
 };
 
-export const trajetsEnCharge = (type: string) => (type === "aller_simple" ? 1 : 2);
+export function groupeDe(type: string, nuits: number): string {
+  if (type === "aller_simple") return "simple";
+  return nuits > 0 ? "ar_sejour" : "ar_journee";
+}
+
+export const LIBELLES_GROUPE: Record<string, string> = {
+  simple: "aller simple",
+  ar_journee: "aller-retour dans la journée",
+  ar_sejour: "aller-retour avec nuit(s)",
+};
 
 const arrondi = (n: number) => Math.round(n / 50) * 50;
 
@@ -74,13 +83,13 @@ export function prixKmPondere(points: PointMarche[], km: number): Stats | null {
   };
 }
 
-export function fourchetteDepuisDevis(points: PointMarche[], km: number, typeTrajet: string): Fourchette | null {
-  const st = prixKmPondere(points, km);
+export function fourchetteDepuisDevis(points: PointMarche[], km: number, typeTrajet: string, nuits: number): Fourchette | null {
+  const groupe = groupeDe(typeTrajet, nuits);
+  const st = prixKmPondere(points.filter((p) => p.groupe === groupe), km);
   if (!st) return null;
-  const kmCharge = km * trajetsEnCharge(typeTrajet);
   const lo = Math.min(st.p25, st.p50 * (1 - CALIB.ecartMin));
   const hi = Math.max(st.p75, st.p50 * (1 + CALIB.ecartMin));
-  return { min: arrondi(kmCharge * lo), max: arrondi(kmCharge * hi), source: "devis", n: st.n };
+  return { min: arrondi(km * lo), max: arrondi(km * hi), source: "devis", n: st.n };
 }
 
 export function fourchetteBareme(a: Analyse): Fourchette | null {
@@ -89,24 +98,12 @@ export function fourchetteBareme(a: Analyse): Fourchette | null {
 
 export function libelleFourchette(f: Fourchette): string {
   return f.source === "devis"
-    ? `Estimation TTC au km, d'après ${f.n} devis de transporteurs sur des distances proches. Hors déplacements sur place, nuits et options`
+    ? `Estimation TTC au km, d'après ${f.n} devis de transporteurs sur des trajets du même type et de distance proche. Hors déplacements sur place, nuits et options`
     : "Estimation TTC indicative sur barème, hors déplacements sur place et options";
 }
 
-// ---------- Repère €/km aller (pro et admin) ----------
-export function cleSegment(km: number, nuits: number): string {
-  const d = km < 100 ? "court" : km <= 300 ? "moyen" : "long";
-  return `${d}_${nuits > 0 ? "sejour" : "journee"}`;
-}
-
-export const LIBELLES_SEGMENT: Record<string, string> = {
-  court_journee: "moins de 100 km, journée",
-  moyen_journee: "100 à 300 km, journée",
-  long_journee: "plus de 300 km, journée",
-  court_sejour: "moins de 100 km, avec nuit(s)",
-  moyen_sejour: "100 à 300 km, avec nuit(s)",
-  long_sejour: "plus de 300 km, avec nuit(s)",
-};
+// ---------- Repère €/km aller (pro et admin) : même type de trajet, même tranche de distance ----------
+const tranche = (km: number) => (km < 100 ? "moins de 100 km" : km <= 300 ? "100 à 300 km" : "plus de 300 km");
 
 function stats(v: number[]): Stats {
   const t = [...v].sort((a, b) => a - b);
@@ -117,12 +114,12 @@ function stats(v: number[]): Stats {
   return { p25: q(0.25), p50: q(0.5), p75: q(0.75), n: t.length };
 }
 
-export function repereKmDepuisDevis(points: PointMarche[], km: number | null, nuits: number): (Stats & { segment: string }) | null {
+export function repereKmDepuisDevis(points: PointMarche[], km: number | null, typeTrajet: string, nuits: number): (Stats & { segment: string }) | null {
   if (!km) return null;
-  const cle = cleSegment(km, nuits);
-  const v = points.filter((p) => cleSegment(p.km, p.nuits) === cle).map((p) => p.prixKmAller);
+  const groupe = groupeDe(typeTrajet, nuits);
+  const v = points.filter((p) => p.groupe === groupe && tranche(p.km) === tranche(km)).map((p) => p.prixKm);
   if (v.length < CALIB.nMin) return null;
-  return { ...stats(v), segment: LIBELLES_SEGMENT[cle] ?? cle };
+  return { ...stats(v), segment: `${LIBELLES_GROUPE[groupe]}, ${tranche(km)}` };
 }
 
 export const fmtKm = (v: number) => `${v.toFixed(2).replace(".", ",")} €/km`;
