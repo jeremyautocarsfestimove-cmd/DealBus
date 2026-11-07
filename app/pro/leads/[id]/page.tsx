@@ -13,7 +13,7 @@ import {
   analyser, planifier, fmtDuree, eur, gabaritPour,
   type Tarifs,
 } from "@/lib/assistant-demande";
-import { fmtKm, libelleFourchette } from "@/lib/calibration-prix";
+import { fmtKm, libelleFourchette, kmTransport } from "@/lib/calibration-prix";
 import { estimerFourchette, repereKm } from "@/lib/calibration-serveur";
 
 export default async function LeadPage({ params }: { params: Promise<{ id: string }> }) {
@@ -75,7 +75,8 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
   };
   const analyse = analyser(entree);
   const fourchette = await estimerFourchette(analyse, d.type_trajet);
-  const repere = await repereKm(analyse.km, d.type_trajet, analyse.nuits);
+  const repere = await repereKm(analyse.km, d.type_trajet);
+  const kmT = analyse.km ? kmTransport(analyse.km, d.type_trajet) : null;
   const plan = planifier(entree, hlpAller, hlpRetour, hlpAllerMin, hlpRetourMin);
   const gabarit = gabaritPour(d.passagers);
   const hFr = (h: string | null | undefined) => (h ? String(h).slice(0, 5).replace(":", "h") : "");
@@ -172,11 +173,11 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
               <p className="font-mono text-[10.5px] uppercase tracking-[.14em] text-ambre mb-2">Repère de marché</p>
               <p className="h-display text-3xl text-ambre">{fourchette ? `${eur(fourchette.min)} à ${eur(fourchette.max)}` : "—"}</p>
               <p className="font-mono text-[10.5px] uppercase tracking-wider text-blanc-faint mt-1">Montrée au client · {fourchette ? libelleFourchette(fourchette) : "fourchette indicative TTC"}</p>
-              {repere && analyse.km && (
+              {repere && kmT && (
                 <div className="mt-4 pt-3 border-t border-ligne">
                   <p className="font-mono text-lg font-semibold">{fmtKm(repere.p25)} à {fmtKm(repere.p75)}</p>
-                  <p className="font-mono text-[10.5px] uppercase tracking-wider text-blanc-faint mt-1">Prix au km aller observé · {repere.segment} · {repere.n} offres</p>
-                  <p className="text-[12.5px] text-blanc-dim mt-1">Médiane {fmtKm(repere.p50)}, soit {eur(Math.round(repere.p50 * analyse.km))} pour ce trajet de {analyse.km} km.</p>
+                  <p className="font-mono text-[10.5px] uppercase tracking-wider text-blanc-faint mt-1">Prix au km observé, par car · devis de distance proche · {repere.n} devis</p>
+                  <p className="text-[12.5px] text-blanc-dim mt-1">Médiane {fmtKm(repere.p50)} × {kmT} km de transport ({d.type_trajet === "aller_simple" ? "aller" : "aller + retour"}) {(analyse.gabarit?.nbVehicules ?? 1) > 1 ? ` × ${analyse.gabarit?.nbVehicules} cars` : ""} = {eur(Math.round(repere.p50 * kmT * (analyse.gabarit?.nbVehicules ?? 1)))}</p>
                 </div>
               )}
               <p className="text-[12.5px] text-blanc-dim mt-3 leading-snug">Une offre claire sur ce qui est inclus fait souvent la différence.</p>

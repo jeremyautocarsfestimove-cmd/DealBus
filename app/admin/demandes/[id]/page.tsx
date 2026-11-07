@@ -7,7 +7,7 @@ import { BackButton } from "@/components/BackButton";
 import { createClient } from "@/lib/supabase/server";
 import { eur, MODE_TAG, TAG_ALERTE, jour } from "../../helpers";
 import { analyser } from "@/lib/assistant-demande";
-import { libelleFourchette, fmtKm } from "@/lib/calibration-prix";
+import { libelleFourchette, fmtKm, kmTransport } from "@/lib/calibration-prix";
 import { estimerFourchette, repereKm } from "@/lib/calibration-serveur";
 
 export const metadata = { title: "Détail d'une demande — Administration" };
@@ -70,7 +70,7 @@ export default async function DetailDemandePage({ params }: { params: Promise<{ 
   });
   // Calculé sans les devis de cette demande, pour juger honnêtement l'estimation
   const fourchette = await estimerFourchette(analyse, demande.type_trajet, id);
-  const repere = await repereKm(km, demande.type_trajet, analyse.nuits, id);
+  const repere = await repereKm(km, demande.type_trajet, id);
 
   const parKm = (p: number | null) =>
     p && km ? `${(p / km).toFixed(2).replace(".", ",")} €/km` : "—";
@@ -157,8 +157,8 @@ export default async function DetailDemandePage({ params }: { params: Promise<{ 
               {repere && (
                 <div className="card">
                   <p className="font-mono text-xl font-semibold">{fmtKm(repere.p25)} à {fmtKm(repere.p75)}</p>
-                  <p className="font-mono text-[10px] uppercase tracking-wider text-blanc-faint mt-1">€/km aller observé · {repere.segment} · {repere.n} offres</p>
-                  <p className="text-[12.5px] text-blanc-dim mt-2">Médiane du marché {fmtKm(repere.p50)} · ici {parKm(med)}</p>
+                  <p className="font-mono text-[10px] uppercase tracking-wider text-blanc-faint mt-1">Prix au km observé, par car · devis de distance proche, hors cette demande · {repere.n} devis</p>
+                  <p className="text-[12.5px] text-blanc-dim mt-2">Médiane du marché {fmtKm(repere.p50)} · ici {med && km ? fmtKm(med / kmTransport(km, demande.type_trajet) / (analyse.gabarit?.nbVehicules ?? 1)) : "—"} ({demande.type_trajet === "aller_simple" ? "aller" : "aller + retour"} : {km ? kmTransport(km, demande.type_trajet) : "—"} km)</p>
                 </div>
               )}
             </div>

@@ -154,17 +154,17 @@ function DemandeWizard() {
   });
   const { score, criteres } = completude(form);
 
-  // ---------- Fourchette : prix au km des devis réels, pondéré par la distance ----------
+  // ---------- Fourchette : km du trajet × prix au km observé sur les devis ----------
   const [fourchetteDevis, setFourchetteDevis] = useState<Fourchette | null>(null);
   useEffect(() => {
     if (!km) { setFourchetteDevis(null); return; }
     let actif = true;
-    fetch(`/api/calibration-prix?km=${km}&type=${form.type_trajet}&nuits=${analyse.nuits}`)
+    fetch(`/api/calibration-prix?km=${km}&type=${form.type_trajet}&passagers=${Number(form.passagers) || 1}`)
       .then((r) => (r.ok ? r.json() : null))
       .then((f) => { if (actif) setFourchetteDevis(f); })
       .catch(() => { if (actif) setFourchetteDevis(null); });
     return () => { actif = false; };
-  }, [km, form.type_trajet, analyse.nuits]);
+  }, [km, form.type_trajet, form.passagers]);
   const fourchette = fourchetteDevis ?? fourchetteBareme(analyse);
 
   // ---------- Validation par étape ----------
@@ -338,7 +338,7 @@ function DemandeWizard() {
           <div className="mt-4 pt-4 border-t border-ligne">
             <p className="h-display text-3xl text-ambre">{fourchette ? `${eur(fourchette.min)} à ${eur(fourchette.max)}` : "—"}</p>
             <p className="font-mono text-[10.5px] uppercase tracking-wider text-blanc-faint mt-1">
-              {fourchette ? libelleFourchette(fourchette) : "Fourchette indicative dès que trajet, horaires et passagers sont renseignés"}
+              {fourchette ? libelleFourchette(fourchette) : "Fourchette indicative dès que le trajet est renseigné"}
             </p>
           </div>
         </>
