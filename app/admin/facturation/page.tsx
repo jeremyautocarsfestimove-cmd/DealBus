@@ -5,6 +5,7 @@ import { missionsAFacturer, prochainesFactures, ht, TVA, arrondi2 } from "@/lib/
 import { qontoConfigure } from "@/lib/qonto";
 import { eur, jour } from "../helpers";
 import { ActionFacturation } from "./facturation-actions";
+import { TesterQonto } from "./tester-qonto";
 
 export const metadata = { title: "Facturation — Administration" };
 
@@ -63,6 +64,8 @@ export default async function FacturationPage() {
           </div>
         ))}
       </div>
+
+      {qontoConfigure() && <TesterQonto />}
 
       {/* À émettre */}
       <section className="crm-panel mb-6">

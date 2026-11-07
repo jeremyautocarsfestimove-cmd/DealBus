@@ -136,3 +136,17 @@ export async function lireFacture(id: string): Promise<{ status: string; number:
 export async function marquerPayee(id: string, date: string) {
   await q(`/client_invoices/${id}/mark_as_paid`, { method: "POST", body: JSON.stringify({ paid_at: date }) });
 }
+
+// Diagnostic : la clé fonctionne-t-elle, l'IBAN appartient-il bien au compte ?
+export async function lireOrganisation(): Promise<{ nom: string; ibans: string[] }> {
+  const r = await q<{ organization: { legal_name?: string; name?: string; slug?: string; bank_accounts?: { iban: string }[] } }>("/organization");
+  const o = r.organization;
+  return { nom: o.legal_name ?? o.name ?? o.slug ?? "?", ibans: (o.bank_accounts ?? []).map((b) => b.iban.replace(/\s/g, "")) };
+}
+
+export async function lireReglagesEinvoicing(): Promise<string | null> {
+  try {
+    const r = await q<{ sending_status?: string; einvoicing_settings?: { sending_status?: string } }>("/einvoicing/settings");
+    return r.sending_status ?? r.einvoicing_settings?.sending_status ?? null;
+  } catch { return null; }
+}

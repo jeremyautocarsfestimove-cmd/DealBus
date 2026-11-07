@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { exigerAdmin } from "@/lib/admin-crm";
 import { missionsAFacturer, emettreFacture, emettreFacturesDues } from "@/lib/facturation";
-import { qontoConfigure, envoyerFacture, lireFacture, marquerPayee } from "@/lib/qonto";
+import { qontoConfigure, envoyerFacture, lireFacture, marquerPayee, lireOrganisation, lireReglagesEinvoicing, decouperAdresse, adresseDepuisSiren, tvaDepuisSiren } from "@/lib/qonto";
 
 export const maxDuration = 60;
 
@@ -20,6 +20,46 @@ export async function POST(req: Request) {
   const today = new Date().toISOString().slice(0, 10);
 
   try {
+    if (body.action === "tester") {
+      const points: { libelle: string; ok: boolean; detail: string }[] = [];
+      // 1. Clé API
+      let org: { nom: string; ibans: string[] } | null = null;
+      try {
+        org = await lireOrganisation();
+        points.push({ libelle: "Clé API Qonto", ok: true, detail: `connectée à l'organisation « ${org.nom} »` });
+      } catch (e) {
+        points.push({ libelle: "Clé API Qonto", ok: false, detail: (e as Error).message });
+      }
+      // 2. IBAN
+      if (org) {
+        const iban = (process.env.QONTO_IBAN ?? "").replace(/\s/g, "");
+        const ok = org.ibans.includes(iban);
+        points.push({ libelle: "IBAN de paiement", ok, detail: ok ? `compte ${iban.slice(0, 4)} … ${iban.slice(-4)} trouvé dans Qonto` : "l'IBAN saisi dans Vercel ne correspond à aucun compte de cette organisation Qonto" });
+        const statut = await lireReglagesEinvoicing();
+        points.push({ libelle: "Facture électronique (réseau PA)", ok: true, detail: statut ? `statut d'envoi : ${statut}${statut === "enabled" || statut === "active" ? "" : " (l'envoi se fait par email jusqu'en 2027, ce n'est pas bloquant)"}` : "statut non lu (pas bloquant : envoi par email jusqu'en 2027)" });
+      }
+      // 3. Transporteurs ayant une mission à facturer
+      const { data: ms } = await admin.from("missions").select("transporteur_id").is("facture_id", null).in("statut", ["a_venir", "terminee_declaree"]);
+      const ids = [...new Set(((ms ?? []) as any[]).map((m) => m.transporteur_id))];
+      if (ids.length) {
+        const { data: ts } = await admin.from("transporteurs").select("raison_sociale, siren, depot_adresse, profile:profiles(email)").in("id", ids);
+        for (const t of (ts ?? []) as any[]) {
+          const manque: string[] = [];
+          if (!t.profile?.email) manque.push("pas d'email");
+          const tva = tvaDepuisSiren(t.siren ?? "");
+          if (!tva) manque.push(`SIREN invalide (${t.siren})`);
+          const adr = decouperAdresse(t.depot_adresse) ?? (await adresseDepuisSiren(t.siren ?? ""));
+          if (!adr) manque.push("adresse introuvable (ni dépôt, ni siège via SIREN)");
+          points.push({
+            libelle: `Transporteur ${t.raison_sociale.trim()}`,
+            ok: manque.length === 0,
+            detail: manque.length ? manque.join(", ") : `${adr!.street_address}, ${adr!.zip_code} ${adr!.city} · TVA ${tva}${t.depot_adresse ? "" : " (adresse du siège, via SIREN)"}`,
+          });
+        }
+      }
+      return NextResponse.json({ points });
+    }
+
     if (body.action === "emettre") {
       if (!body.mission_id) return NextResponse.json(await emettreFacturesDues());
       const m = (await missionsAFacturer()).find((x) => x.id === body.mission_id);
