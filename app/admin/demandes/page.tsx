@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { MODE_TAG, eur, jour } from "../helpers";
+import { MODE_TAG, eur } from "../helpers";
 import { PilotageAction } from "../actions";
 import { demandeActive, libelleStatut } from "@/lib/demandes";
 import { RecalculerDistances } from "../recalculer-distances";
-import { depuis } from "@/lib/admin-crm";
+import { depuis, ville } from "@/lib/admin-crm";
 
 export const metadata = { title: "Demandes — Administration" };
 
@@ -64,7 +64,7 @@ export default async function AdminDemandesPage({ searchParams }: { searchParams
           <thead>
             <tr>
               <th>#</th><th>Trajet</th><th>Client</th><th>Départ</th><th className="text-right">Pax</th>
-              <th>Statut</th><th className="text-right">Offres</th><th className="text-right">Fourchette reçue</th><th>Créée</th><th></th>
+              <th>Statut</th><th className="text-right">Nb</th><th className="text-right">Offres reçues</th><th>Créée</th><th></th>
             </tr>
           </thead>
           <tbody>
@@ -77,19 +77,19 @@ export default async function AdminDemandesPage({ searchParams }: { searchParams
                     #{d.numero}
                     {d.mode === "enchere" && <span className={`pill ml-1.5 ${MODE_TAG.enchere}`}>Ench.</span>}
                   </td>
-                  <td className="max-w-[320px]">
-                    <Link href={`/admin/demandes/${d.id}`} className="font-semibold hover:text-ambre-fort block truncate">{d.depart_adresse} → {d.arrivee_adresse}</Link>
+                  <td>
+                    <Link href={`/admin/demandes/${d.id}`} title={`${d.depart_adresse} → ${d.arrivee_adresse}`} className="font-semibold hover:text-ambre-fort">{ville(d.depart_adresse)} → {ville(d.arrivee_adresse)}</Link>
                     <p className="font-mono text-[11px] text-blanc-faint">
                       {d.type_trajet === "aller_simple" ? "aller simple" : d.type_trajet === "circuit" ? "circuit" : "aller-retour"}
                       {d.distance_km ? ` · ${Number(d.distance_km)} km` : ""}
                     </p>
                   </td>
-                  <td>
-                    <Link href={`/admin/clients/${d.client_id}`} className="hover:text-ambre-fort">{d.client?.nom ?? "Sans nom"}</Link>
-                    <p className="font-mono text-[11px] text-blanc-faint truncate max-w-[180px]">{d.client?.email ?? ""}</p>
+                  <td className="max-w-[220px]">
+                    <Link href={`/admin/clients/${d.client_id}`} className="hover:text-ambre-fort block truncate">{d.client?.nom ?? "Sans nom"}</Link>
+                    <p className="font-mono text-[11px] text-blanc-faint truncate max-w-[200px]" title={d.client?.email ?? ""}>{d.client?.email ?? ""}</p>
                   </td>
                   <td className="font-mono text-[12px] whitespace-nowrap">
-                    {jour(d.date_aller)}{d.heure_aller ? ` ${String(d.heure_aller).slice(0, 5).replace(":", "h")}` : ""}
+                    {new Date(d.date_aller).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "2-digit" })}{d.heure_aller ? ` · ${String(d.heure_aller).slice(0, 5).replace(":", "h")}` : ""}
                   </td>
                   <td className="text-right font-mono">{d.passagers}</td>
                   <td>

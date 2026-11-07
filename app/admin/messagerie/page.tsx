@@ -37,10 +37,9 @@ export default async function AdminMessageriePage() {
 
   return (
     <main>
-      <p className="eyebrow mb-4">Administration</p>
       <div className="flex items-end justify-between gap-4 flex-wrap mb-10">
         <div>
-          <h1 className="h-display text-4xl mb-2">Messagerie.</h1>
+          <h1 className="crm-titre mb-2">Messagerie</h1>
           <p className="text-sm text-blanc-dim">Toutes les conversations client ↔ transporteur. Lecture réservée à la modération et aux litiges.</p>
         </div>
         <div className="flex gap-2 flex-wrap">

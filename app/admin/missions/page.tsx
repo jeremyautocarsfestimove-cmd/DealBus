@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { eur } from "../helpers";
-import { PilotageAction } from "../actions";
 
 export const metadata = { title: "Missions & commissions — Administration" };
 
@@ -25,11 +24,11 @@ export default async function AdminMissionsPage() {
 
   return (
     <main>
-      <p className="eyebrow mb-4">Administration</p>
-      <h1 className="h-display text-4xl mb-2">Missions &amp; commissions.</h1>
+      <h1 className="crm-titre mb-2">Missions &amp; commissions</h1>
       <p className="text-sm text-blanc-dim mb-8">
         Les dossiers d&apos;annulation et de litige se traitent sur{" "}
-        <Link href="/admin/litiges" className="text-ambre-fort hover:underline">leur page dédiée</Link>.
+        <Link href="/admin/litiges" className="text-ambre-fort hover:underline">leur page dédiée</Link>.{" "}La facturation mensuelle se fait sur la page{" "}
+        <Link href="/admin/facturation" className="text-ambre-fort hover:underline">Facturation</Link>.
       </p>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
@@ -66,10 +65,8 @@ export default async function AdminMissionsPage() {
             <div className="flex gap-2 flex-wrap justify-end">
               {["annulee", "litige"].includes(m.statut) ? (
                 <Link href="/admin/litiges" className="btn-ghost text-xs px-4 py-2">Traiter le dossier →</Link>
-              ) : m.facturation === "a_facturer" ? (
-                <PilotageAction entity="mission" id={m.id} action="facturer" label="Marquer facturée" primary />
-              ) : m.facturation === "facturee" ? (
-                <PilotageAction entity="mission" id={m.id} action="payer" label="Marquer payée" primary />
+              ) : m.facturation !== "payee" ? (
+                <Link href="/admin/facturation" className="btn-ghost text-xs px-4 py-2">Facturation →</Link>
               ) : null}
             </div>
           </div>

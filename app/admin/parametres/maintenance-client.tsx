@@ -31,7 +31,7 @@ export function MaintenanceClient({ initial, majLe }: { initial: Maintenance; ma
     <div className="card">
       <div className="flex flex-wrap items-start justify-between gap-4 mb-5">
         <div>
-          <h2 className="h-display text-2xl mb-1">Site en travaux</h2>
+          <h2 className="font-condensed font-bold uppercase text-xl leading-none mb-1">Site en travaux</h2>
           <p className="text-sm text-blanc-dim max-w-xl">
             Quand le mode est actif, tout le site public renvoie une page « en travaux » (code 503, non indexée).
             Vous et les autres admins connectés continuez à voir le site normalement. La connexion reste ouverte

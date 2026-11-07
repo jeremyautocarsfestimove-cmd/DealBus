@@ -25,10 +25,9 @@ export default async function AdminLitigesPage() {
 
   return (
     <main>
-      <p className="eyebrow mb-4">Administration</p>
       <div className="flex items-end justify-between gap-4 flex-wrap mb-10">
         <div>
-          <h1 className="h-display text-4xl mb-2">Annulations &amp; litiges.</h1>
+          <h1 className="crm-titre mb-2">Annulations &amp; litiges</h1>
           <p className="text-sm text-blanc-dim">
             Toutes les annulations transporteur et les dossiers nécessitant un arbitrage.
           </p>
@@ -43,7 +42,7 @@ export default async function AdminLitigesPage() {
 
       {(enAttente.length > 0 || (demandesAnnul ?? []).length > 0) && (
         <div className="mb-10">
-          <h2 className="h-display text-2xl mb-1">Demandes d&apos;annulation à valider</h2>
+          <h2 className="font-condensed font-bold uppercase text-xl leading-none mb-1">Demandes d&apos;annulation à valider</h2>
           <p className="text-sm text-blanc-dim mb-4">Rien n&apos;est annulé tant que vous n&apos;avez pas tranché. Les deux parties sont prévenues par email de votre décision.</p>
           <div className="space-y-3">
             {enAttente.map((m) => (
@@ -100,7 +99,7 @@ export default async function AdminLitigesPage() {
         </div>
       )}
 
-      <h2 className="h-display text-2xl mb-4">Annulations et litiges</h2>
+      <h2 className="font-condensed font-bold uppercase text-xl leading-none mb-4">Annulations et litiges</h2>
       <div className="space-y-3">
         {autres.map((m) => {
           const traite = m.statut === "annulee" && m.client_confirmation === "bien_annule";

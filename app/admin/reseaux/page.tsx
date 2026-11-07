@@ -8,8 +8,7 @@ export default async function AdminReseauxPage() {
 
   return (
     <main>
-        <p className="eyebrow mb-4">Administration</p>
-        <h1 className="h-display text-4xl mb-10">Réseaux sociaux.</h1>
+        <h1 className="crm-titre mb-6">Réseaux sociaux</h1>
         <ReseauxForm initial={initial} />
     </main>
   );

@@ -78,3 +78,8 @@ select option { color: #12151B; background-color: #FFFFFF; }
 .crm-onglet { @apply font-mono text-[11px] uppercase tracking-wider px-3 py-1.5 rounded-sm border border-ligne text-blanc-dim hover:text-blanc hover:border-ligne-strong transition; }
 .crm-onglet-on { @apply bg-blanc text-asphalte border-blanc hover:text-asphalte; }
 .crm-deal { @apply block bg-asphalte border border-ligne rounded px-3 py-2.5 text-[12.5px] hover:border-ligne-strong transition; }
+/* Pages admin : les anciennes cartes prennent le gabarit des panneaux CRM */
+.admin-crm .card { @apply px-5 py-4 rounded; }
+.admin-crm .card .card { @apply bg-asphalte; }
+.admin-crm .tag { @apply text-[10px] px-1.5 py-0.5; }
+.admin-crm .btn-primary, .admin-crm .btn-ghost { @apply text-[13px]; }

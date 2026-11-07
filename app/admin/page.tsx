@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { exigerAdmin, depuis } from "@/lib/admin-crm";
+import { exigerAdmin, depuis, ville } from "@/lib/admin-crm";
 import { demandeActive } from "@/lib/demandes";
 import { eur, aTraiter, TAG_ALERTE, SECTEURS, jour } from "./helpers";
 import { TransporteurActions, EnvoyerEmailTransporteur } from "./actions";
@@ -10,11 +10,6 @@ export const metadata = { title: "Cockpit — Administration" };
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type Tache = { priorite: 1 | 2 | 3; titre: string; detail: string; lien: string; action: string };
 
-const ville = (adresse: string) => {
-  const parts = adresse.split(",").map((s) => s.trim()).filter(Boolean);
-  const avecCp = parts.find((p) => /\d{5}/.test(p));
-  return (avecCp ? avecCp.replace(/\d{5}/, "").trim() : parts[0]) || parts[0] || adresse;
-};
 const heures = (iso: string) => (Date.now() - new Date(iso).getTime()) / 3600000;
 const joursAvant = (date: string) => Math.ceil((new Date(`${date}T00:00:00`).getTime() - Date.now()) / 86400000);
 

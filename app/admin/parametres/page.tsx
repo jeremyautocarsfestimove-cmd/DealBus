@@ -17,8 +17,7 @@ export default async function ParametresPage() {
 
   return (
     <>
-      <p className="eyebrow mb-3">Réglages</p>
-      <h1 className="h-display text-4xl mb-8">Paramètres du site</h1>
+      <h1 className="crm-titre mb-6">Paramètres du site</h1>
       <MaintenanceClient initial={maintenance} majLe={data?.maj_le ?? null} />
     </>
   );

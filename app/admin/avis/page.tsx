@@ -14,8 +14,7 @@ export default async function AdminAvisPage() {
 
   return (
     <main>
-      <p className="eyebrow mb-4">Administration</p>
-      <h1 className="h-display text-4xl mb-2">Avis.</h1>
+      <h1 className="crm-titre mb-2">Avis</h1>
       <p className="text-sm text-blanc-dim mb-10">
         Supprimer un avis recalcule automatiquement la note du transporteur.
       </p>

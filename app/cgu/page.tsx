@@ -247,8 +247,12 @@ export default function CguPage() {
             cent (3 %). Le taux applicable est affiché au Transporteur avant tout engagement.
           </p>
           <p>
-            La facture de commission est émise après la réalisation de la Mission et payable à
-            réception. Le défaut de paiement des commissions dues entraîne, après relance
+            La commission est due lorsque le Client a accepté l&apos;Offre du Transporteur sur la
+            Plateforme et que le transport a été effectué. Son montant s&apos;entend toutes taxes
+            comprises, la TVA au taux de 20 % étant récupérable par le Transporteur assujetti. La
+            facture de commission est émise et adressée au Transporteur le lendemain de la fin du
+            transport, sous forme électronique ; elle est payable à réception. Lorsqu&apos;un Client annule son transport, le Transporteur en
+            informe DealBus sans délai par la Plateforme, avec un justificatif d&apos;annulation. Le défaut de paiement des commissions dues entraîne, après relance
             restée sans effet, la suspension de l&apos;accès aux Demandes puis la clôture du
             compte, sans préjudice du recouvrement des sommes dues.
           </p>

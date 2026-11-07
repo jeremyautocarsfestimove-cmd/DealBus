@@ -19,7 +19,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <>
         <Nav />
         <main className="max-w-2xl mx-auto px-7 py-24 text-center">
-          <h1 className="h-display text-4xl mb-4">Accès réservé.</h1>
+          <h1 className="crm-titre mb-4">Accès réservé</h1>
           <p className="text-blanc-dim">Cette page est réservée à l&apos;administration DealBus.</p>
         </main>
       </>
@@ -57,7 +57,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           }}
           compteurs={{ clients: nbClients ?? 0, demandes: nbOuvertes ?? 0 }}
         />
-        <div className="min-w-0">{children}</div>
+        <div className="min-w-0 admin-crm">{children}</div>
       </div>
     </>
   );

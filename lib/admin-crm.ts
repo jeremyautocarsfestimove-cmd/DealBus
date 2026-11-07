@@ -87,3 +87,16 @@ export function depuis(iso: string): string {
   const m = Math.floor(j / 30);
   return m < 12 ? `il y a ${m} mois` : `il y a ${Math.floor(m / 12)} an${m >= 24 ? "s" : ""}`;
 }
+
+// Ville lisible depuis une adresse complète (« 12 rue X, 75015 Paris » → « Paris »)
+export function ville(adresse: string): string {
+  const parts = adresse.split(",").map((x) => x.trim()).filter(Boolean);
+  const avecCp = parts.find((x) => /\d{5}/.test(x));
+  if (avecCp) {
+    const v = avecCp.replace(/.*\d{5}\s*/, "").trim();
+    if (v) return v;
+    const i = parts.indexOf(avecCp);
+    if (parts[i + 1]) return parts[i + 1];
+  }
+  return parts[0] ?? adresse;
+}

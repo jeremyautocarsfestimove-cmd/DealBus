@@ -27,7 +27,7 @@ export default async function FicheTransporteurPage({
     return (
       <>
         <main className="max-w-2xl mx-auto px-7 py-24 text-center">
-          <h1 className="h-display text-4xl mb-4">Accès réservé.</h1>
+          <h1 className="crm-titre mb-4">Accès réservé</h1>
           <p className="text-blanc-dim">Cette page est réservée à l&apos;administration DealBus.</p>
         </main>
       </>
@@ -44,7 +44,7 @@ export default async function FicheTransporteurPage({
     return (
       <>
         <main className="max-w-2xl mx-auto px-7 py-24 text-center">
-          <h1 className="h-display text-4xl mb-4">Transporteur introuvable.</h1>
+          <h1 className="crm-titre mb-4">Transporteur introuvable</h1>
           <Link href="/admin/transporteurs" className="btn-ghost mt-6 inline-block">← Liste des transporteurs</Link>
         </main>
       </>
@@ -105,8 +105,8 @@ export default async function FicheTransporteurPage({
 
         <div className="flex items-start justify-between gap-6 flex-wrap mb-8">
           <div>
-            <p className="eyebrow mb-3">Fiche transporteur</p>
-            <h1 className="h-display text-4xl mb-2">{t.raison_sociale}</h1>
+            <p className="font-mono text-[11px] uppercase tracking-wider text-blanc-faint mb-2">Fiche transporteur</p>
+            <h1 className="crm-titre mb-2">{t.raison_sociale}</h1>
             <div className="flex items-center gap-2 flex-wrap">
               <span className="tag bg-bleunuit text-bleunuit-fort">{SECTEURS[t.secteur] ?? t.secteur}</span>
               <span className={`tag ${t.statut === "valide" ? "bg-vert-dim text-vert" : t.statut === "en_attente" ? "bg-ambre-dim text-ambre-fort" : "bg-[#FCEBE4] text-[#C2410C]"}`}>

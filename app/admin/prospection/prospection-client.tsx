@@ -249,8 +249,7 @@ export function ProspectionClient() {
     <main>
       <div className="flex items-center justify-between flex-wrap gap-4 mb-8">
         <div>
-          <p className="eyebrow mb-3">Administration</p>
-          <h1 className="h-display text-4xl">Prospection transporteurs.</h1>
+          <h1 className="crm-titre">Prospection transporteurs</h1>
         </div>
       </div>
 
@@ -260,7 +259,7 @@ export function ProspectionClient() {
           <button key={k} onClick={() => setFiltre(filtre === k ? "tous" : k)}
             className={`card text-left transition-opacity ${filtre !== "tous" && filtre !== k ? "opacity-40" : ""}`}>
             <p className="font-mono text-[10.5px] uppercase tracking-wider text-blanc-faint mb-1">{v.label}</p>
-            <p className="h-display text-3xl">{stats[k] ?? 0}</p>
+            <p className="crm-kpi-num">{stats[k] ?? 0}</p>
           </button>
         ))}
       </div>
@@ -419,7 +418,7 @@ export function ProspectionClient() {
           <div className="relative card max-w-md w-full border-ligne-strong shadow-2xl"
             onClick={(e) => e.stopPropagation()}>
             <p className="eyebrow mb-4">Confirmation</p>
-            <h2 className="h-display text-2xl mb-3">{dialogue.titre}</h2>
+            <h2 className="font-condensed font-bold uppercase text-xl leading-none mb-3">{dialogue.titre}</h2>
             {dialogue.lignes.map((l) => (
               <p key={l} className="text-[14px] text-blanc-dim leading-relaxed mb-2">{l}</p>
             ))}

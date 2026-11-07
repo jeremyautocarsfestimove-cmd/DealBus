@@ -18,8 +18,7 @@ export default async function AdminTransporteursPage() {
 
   return (
     <main>
-      <p className="eyebrow mb-4">Administration</p>
-      <h1 className="h-display text-4xl mb-10">Transporteurs.</h1>
+      <h1 className="crm-titre mb-6">Transporteurs</h1>
 
       {enAttente.length > 0 && (
         <>

@@ -79,8 +79,8 @@ export default async function DetailDemandePage({ params }: { params: Promise<{ 
     <main>
       <BackButton href="/admin/demandes" className="mb-8" />
 
-      <p className="eyebrow mb-4">Demande #{demande.numero}</p>
-      <h1 className="h-display text-4xl mb-3">
+      <p className="font-mono text-[11px] uppercase tracking-wider text-blanc-faint mb-2">Demande #{demande.numero}</p>
+      <h1 className="crm-titre mb-3">
         {demande.depart_adresse} → {demande.arrivee_adresse}
       </h1>
       <div className="flex flex-wrap items-center gap-2.5 mb-10">
@@ -119,7 +119,7 @@ export default async function DetailDemandePage({ params }: { params: Promise<{ 
       {/* ---------- Repères tarifaires ---------- */}
       {prix.length > 0 && (
         <>
-          <h2 className="h-display text-2xl mb-1">Repères tarifaires</h2>
+          <h2 className="font-condensed font-bold uppercase text-xl leading-none mb-1">Repères tarifaires</h2>
           <p className="text-sm text-blanc-dim mb-5">
             Le prix au kilomètre n&apos;apparaît que si la distance a été calculée à la création de la demande.
           </p>
@@ -179,7 +179,7 @@ export default async function DetailDemandePage({ params }: { params: Promise<{ 
       )}
 
       {/* ---------- Les offres ---------- */}
-      <h2 className="h-display text-2xl mb-5">
+      <h2 className="font-condensed font-bold uppercase text-xl leading-none mb-5">
         {offres.length} offre{offres.length > 1 ? "s" : ""} reçue{offres.length > 1 ? "s" : ""}
       </h2>
 

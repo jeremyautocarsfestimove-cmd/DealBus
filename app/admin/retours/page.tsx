@@ -15,8 +15,7 @@ export default async function AdminRetoursPage() {
 
   return (
     <main>
-      <p className="eyebrow mb-4">Administration</p>
-      <h1 className="h-display text-4xl mb-2">Retours à vide.</h1>
+      <h1 className="crm-titre mb-2">Retours à vide</h1>
       <p className="text-sm text-blanc-dim mb-10">Annonces publiées par les transporteurs sur la page publique.</p>
 
       <div className="space-y-3">

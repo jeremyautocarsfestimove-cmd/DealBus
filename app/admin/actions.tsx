@@ -96,7 +96,7 @@ export function EnvoyerEmailTransporteur({
           <div className="absolute inset-0 bg-asphalte/80 backdrop-blur-sm" />
           <div className="relative card max-w-xl w-full border-ligne-strong shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <p className="eyebrow mb-4">Email au transporteur</p>
-            <h2 className="h-display text-2xl mb-5">{raisonSociale ?? "Contacter ce transporteur"}</h2>
+            <h2 className="font-condensed font-bold uppercase text-xl leading-none mb-5">{raisonSociale ?? "Contacter ce transporteur"}</h2>
             <label className="label">Objet</label>
             <input className="input w-full mb-4" value={sujet} onChange={(e) => setSujet(e.target.value)} />
             <label className="label">Message</label>

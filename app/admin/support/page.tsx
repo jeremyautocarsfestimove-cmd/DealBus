@@ -32,10 +32,9 @@ export default async function AdminSupportPage({ searchParams }: { searchParams:
 
   return (
     <main>
-      <p className="eyebrow mb-4">Administration</p>
       <div className="flex items-end justify-between gap-4 flex-wrap mb-8">
         <div>
-          <h1 className="h-display text-4xl mb-2">Support.</h1>
+          <h1 className="crm-titre mb-2">Support</h1>
           <p className="text-sm text-blanc-dim">Messages reçus par la bulle « Aide » et conversations ouvertes par DealBus. Chaque réponse part aussi par email.</p>
         </div>
         <span className={`tag ${conversations.some((x) => x.nonLus) ? "bg-[#FCEBE4] text-[#C2410C]" : "bg-vert-dim text-vert"}`}>

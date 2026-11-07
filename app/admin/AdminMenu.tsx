@@ -22,6 +22,7 @@ const MENU: Categorie[] = [
       { href: "/admin/clients", label: "Clients", compteur: "clients" },
       { href: "/admin/demandes", label: "Demandes", compteur: "demandes" },
       { href: "/admin/missions", label: "Missions & commissions" },
+      { href: "/admin/facturation", label: "Facturation" },
       { href: "/admin/litiges", label: "Annulations & litiges", alerte: "litiges" },
       { href: "/admin/messagerie", label: "Messagerie" },
       { href: "/admin/support", label: "Support", alerte: "support" },
