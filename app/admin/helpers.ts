@@ -4,7 +4,7 @@ export const SECTEURS: Record<string, string> = {
 };
 
 export const MODE_TAG: Record<string, string> = {
-  devis: "bg-bleunuit text-bleunuit-fort", enchere: "bg-vert-dim text-vert",
+  devis: "bg-[#E8EEFF] text-[#3451B2]", enchere: "bg-[#E6F6EE] text-[#1A7F52]",
 };
 
 export const TAG_ALERTE = "bg-[#FCEBE4] text-[#C2410C]";

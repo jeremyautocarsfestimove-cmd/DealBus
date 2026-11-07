@@ -24,8 +24,8 @@ export default async function AdminRetoursPage() {
             <div>
               <p className="font-semibold">
                 {r.depart_adresse} → {r.arrivee_adresse}
-                <span className="ml-2.5 tag bg-ambre-dim text-ambre-fort">{eur(r.prix_fixe)}</span>
-                <span className={`ml-2 tag ${["publie", "demande_recue"].includes(r.statut) ? "bg-vert-dim text-vert" : "bg-asphalte-3 text-blanc-faint"}`}>{r.statut}</span>
+                <span className="ml-2.5 tag bg-[#FFF4E0] text-[#B26A00]">{eur(r.prix_fixe)}</span>
+                <span className={`ml-2 tag ${["publie", "demande_recue"].includes(r.statut) ? "bg-[#E6F6EE] text-[#1A7F52]" : "bg-[#F1F0ED] text-[#8A8882]"}`}>{r.statut}</span>
               </p>
               <p className="font-mono text-xs text-blanc-faint mt-1.5">
                 {r.transporteur?.raison_sociale} · {new Date(r.date_dispo).toLocaleDateString("fr-FR")} ·

@@ -30,7 +30,7 @@ export default async function AdminTransporteursPage() {
                   <div>
                     <p className="font-semibold">
                       <Link href={`/admin/transporteurs/${t.id}`} className="hover:underline">{t.raison_sociale}</Link>
-                      <span className="ml-2.5 tag bg-bleunuit text-bleunuit-fort">{SECTEURS[t.secteur] ?? t.secteur}</span>
+                      <span className="ml-2.5 tag bg-[#E8EEFF] text-[#3451B2]">{SECTEURS[t.secteur] ?? t.secteur}</span>
                     </p>
                     <p className="font-mono text-xs text-blanc-faint mt-1.5">
                       SIREN {t.siren} · Titre {t.licence_transport} · Siège {t.departement_siege} ·
@@ -60,7 +60,7 @@ export default async function AdminTransporteursPage() {
             <div>
               <p className="font-semibold">
                 <Link href={`/admin/transporteurs/${t.id}`} className="hover:underline">{t.raison_sociale}</Link>
-                <span className={`ml-2.5 tag ${t.statut === "valide" ? "bg-vert-dim text-vert" : TAG_ALERTE}`}>
+                <span className={`ml-2.5 tag ${t.statut === "valide" ? "bg-[#E6F6EE] text-[#1A7F52]" : TAG_ALERTE}`}>
                   {t.statut === "valide" ? "Actif" : "Suspendu"}
                 </span>
                 {t.suppression_demandee_at && (

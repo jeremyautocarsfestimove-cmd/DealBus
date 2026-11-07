@@ -16,10 +16,10 @@ export async function exigerAdmin(): Promise<boolean> {
 export type StatutClient = "prospect" | "en_cours" | "client" | "inactif";
 
 export const STATUT_CLIENT: Record<StatutClient, { label: string; classe: string; aide: string }> = {
-  en_cours: { label: "En cours", classe: "bg-ambre-dim text-ambre-fort", aide: "Au moins une demande active" },
-  client: { label: "Client", classe: "bg-vert-dim text-vert", aide: "Au moins une mission confirmée" },
-  prospect: { label: "Inscrit", classe: "bg-bleunuit text-bleunuit-fort", aide: "Compte créé, aucune demande" },
-  inactif: { label: "Inactif", classe: "bg-asphalte-3 text-blanc-faint", aide: "Demandes passées, sans mission" },
+  en_cours: { label: "En cours", classe: "bg-[#FFF4E0] text-[#B26A00]", aide: "Au moins une demande active" },
+  client: { label: "Client", classe: "bg-[#E6F6EE] text-[#1A7F52]", aide: "Au moins une mission confirmée" },
+  prospect: { label: "Inscrit", classe: "bg-[#E8EEFF] text-[#3451B2]", aide: "Compte créé, aucune demande" },
+  inactif: { label: "Inactif", classe: "bg-[#F1F0ED] text-[#8A8882]", aide: "Demandes passées, sans mission" },
 };
 
 export type LigneClient = {

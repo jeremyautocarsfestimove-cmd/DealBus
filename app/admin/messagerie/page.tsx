@@ -43,9 +43,9 @@ export default async function AdminMessageriePage() {
           <p className="text-sm text-blanc-dim">Toutes les conversations client ↔ transporteur. Lecture réservée à la modération et aux litiges.</p>
         </div>
         <div className="flex gap-2 flex-wrap">
-          <span className="tag bg-asphalte-3 text-blanc-dim">{liste.length} conversation{liste.length > 1 ? "s" : ""}</span>
-          <span className={`tag ${nbSuspects ? TAG_ALERTE : "bg-vert-dim text-vert"}`}>{nbSuspects} à vérifier</span>
-          <span className={`tag ${nbSansReponse ? "bg-ambre-dim text-ambre-fort" : "bg-vert-dim text-vert"}`}>{nbSansReponse} client{nbSansReponse > 1 ? "s" : ""} sans réponse &gt; 24 h</span>
+          <span className="tag bg-[#F1F0ED] text-[#55534E]">{liste.length} conversation{liste.length > 1 ? "s" : ""}</span>
+          <span className={`tag ${nbSuspects ? TAG_ALERTE : "bg-[#E6F6EE] text-[#1A7F52]"}`}>{nbSuspects} à vérifier</span>
+          <span className={`tag ${nbSansReponse ? "bg-[#FFF4E0] text-[#B26A00]" : "bg-[#E6F6EE] text-[#1A7F52]"}`}>{nbSansReponse} client{nbSansReponse > 1 ? "s" : ""} sans réponse &gt; 24 h</span>
         </div>
       </div>
 
@@ -64,8 +64,8 @@ export default async function AdminMessageriePage() {
               </div>
               <div className="flex gap-2 flex-wrap">
                 {c.suspects > 0 && <span className={`tag ${TAG_ALERTE}`}>{c.suspects} à vérifier</span>}
-                {c.sansReponse && <span className="tag bg-ambre-dim text-ambre-fort">Sans réponse</span>}
-                {c.demande?.statut === "confirmee" && <span className="tag bg-vert-dim text-vert">Mission conclue</span>}
+                {c.sansReponse && <span className="tag bg-[#FFF4E0] text-[#B26A00]">Sans réponse</span>}
+                {c.demande?.statut === "confirmee" && <span className="tag bg-[#E6F6EE] text-[#1A7F52]">Mission conclue</span>}
                 <span className="font-mono text-[11px] text-blanc-faint self-center group-open:rotate-180 transition">▾</span>
               </div>
             </summary>

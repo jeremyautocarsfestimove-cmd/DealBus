@@ -33,10 +33,10 @@ export default async function AdminLitigesPage() {
           </p>
         </div>
         <div className="flex gap-2 flex-wrap">
-          <span className={`tag ${restants ? TAG_ALERTE : "bg-vert-dim text-vert"}`}>
+          <span className={`tag ${restants ? TAG_ALERTE : "bg-[#E6F6EE] text-[#1A7F52]"}`}>
             {restants} à traiter
           </span>
-          <span className="tag bg-asphalte-3 text-blanc-dim">{dossiers.length} total</span>
+          <span className="tag bg-[#F1F0ED] text-[#55534E]">{dossiers.length} total</span>
         </div>
       </div>
 
@@ -50,7 +50,7 @@ export default async function AdminLitigesPage() {
                 <div className="flex items-start justify-between gap-5 flex-wrap">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2.5 flex-wrap mb-2">
-                      <span className="tag bg-ambre-dim text-ambre-fort">Mission · demandée par {m.annulation_demandee_role === "client" ? "le client" : "le transporteur"}</span>
+                      <span className="tag bg-[#FFF4E0] text-[#B26A00]">Mission · demandée par {m.annulation_demandee_role === "client" ? "le client" : "le transporteur"}</span>
                       <span className="font-mono text-[11px] text-blanc-faint">{m.annulation_demandee_at ? new Date(m.annulation_demandee_at).toLocaleString("fr-FR") : ""}</span>
                     </div>
                     <p className="font-semibold text-lg">#{m.demande?.numero} — {m.demande?.depart_adresse} → {m.demande?.arrivee_adresse}</p>
@@ -76,7 +76,7 @@ export default async function AdminLitigesPage() {
                 <div className="flex items-start justify-between gap-5 flex-wrap">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2.5 flex-wrap mb-2">
-                      <span className="tag bg-ambre-dim text-ambre-fort">Demande · offres reçues · client</span>
+                      <span className="tag bg-[#FFF4E0] text-[#B26A00]">Demande · offres reçues · client</span>
                       <span className="font-mono text-[11px] text-blanc-faint">{new Date(d.annulation_demandee_at).toLocaleString("fr-FR")}</span>
                     </div>
                     <p className="font-semibold text-lg">#{d.numero} — {d.depart_adresse} → {d.arrivee_adresse}</p>
@@ -109,7 +109,7 @@ export default async function AdminLitigesPage() {
               <div className="flex items-start justify-between gap-5 flex-wrap">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2.5 flex-wrap mb-2">
-                    <span className={`tag ${m.statut === "litige" ? "bg-ambre-dim text-ambre-fort" : traite ? "bg-vert-dim text-vert" : TAG_ALERTE}`}>
+                    <span className={`tag ${m.statut === "litige" ? "bg-[#FFF4E0] text-[#B26A00]" : traite ? "bg-[#E6F6EE] text-[#1A7F52]" : TAG_ALERTE}`}>
                       {m.statut === "litige" ? "Litige" : traite ? "Annulation traitée" : "Annulation à traiter"}
                     </span>
                     <span className="font-mono text-[11px] text-blanc-faint">Mission {String(m.id).slice(0, 8)}</span>
@@ -164,7 +164,7 @@ export default async function AdminLitigesPage() {
                         confirm="Confirmer que le trajet a finalement eu lieu ?" />
                     </>
                   )}
-                  {traite && <span className="tag bg-vert-dim text-vert">Dossier clôturé ✓</span>}
+                  {traite && <span className="tag bg-[#E6F6EE] text-[#1A7F52]">Dossier clôturé ✓</span>}
                 </div>
               </div>
             </div>

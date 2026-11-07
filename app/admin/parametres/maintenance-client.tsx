@@ -38,7 +38,7 @@ export function MaintenanceClient({ initial, majLe }: { initial: Maintenance; ma
             pour que l&apos;équipe puisse entrer. Les API (cron, webhooks) ne sont pas coupées.
           </p>
         </div>
-        <span className={`tag ${initial.actif ? "bg-[#FCEBE4] text-[#C2410C]" : "bg-vert/15 text-vert"}`}>
+        <span className={`tag ${initial.actif ? "bg-[#FDE8E4] text-[#C2410C]" : "bg-vert/15 text-vert"}`}>
           {initial.actif ? "● En travaux" : "● En ligne"}
         </span>
       </div>

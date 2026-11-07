@@ -108,8 +108,8 @@ export default async function FicheTransporteurPage({
             <p className="font-mono text-[11px] uppercase tracking-wider text-blanc-faint mb-2">Fiche transporteur</p>
             <h1 className="crm-titre mb-2">{t.raison_sociale}</h1>
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="tag bg-bleunuit text-bleunuit-fort">{SECTEURS[t.secteur] ?? t.secteur}</span>
-              <span className={`tag ${t.statut === "valide" ? "bg-vert-dim text-vert" : t.statut === "en_attente" ? "bg-ambre-dim text-ambre-fort" : "bg-[#FCEBE4] text-[#C2410C]"}`}>
+              <span className="tag bg-[#E8EEFF] text-[#3451B2]">{SECTEURS[t.secteur] ?? t.secteur}</span>
+              <span className={`tag ${t.statut === "valide" ? "bg-[#E6F6EE] text-[#1A7F52]" : t.statut === "en_attente" ? "bg-[#FFF4E0] text-[#B26A00]" : "bg-[#FDE8E4] text-[#C2410C]"}`}>
                 {t.statut === "valide" ? "Actif" : t.statut === "en_attente" ? "En attente" : "Suspendu"}
               </span>
               <span className="font-mono text-xs text-blanc-faint">Transporteur #{t.numero_anonyme}</span>
@@ -144,7 +144,7 @@ export default async function FicheTransporteurPage({
               SIREN {t.siren}<br />
               Titre d&apos;exercice {t.licence_transport}<br />
               Siège dépt. {t.departement_siege}<br />
-              RC Pro {t.rc_pro_url ? <a href={t.rc_pro_url} target="_blank" className="text-ambre-fort hover:underline">Voir le justificatif →</a> : "non fourni"}
+              RC Pro {t.rc_pro_url ? <a href={t.rc_pro_url} target="_blank" className="font-semibold hover:underline">Voir le justificatif →</a> : "non fourni"}
             </p>
           </div>
         </div>
@@ -153,7 +153,7 @@ export default async function FicheTransporteurPage({
           <p className="font-semibold text-sm mb-3">Zones de chalandise</p>
           <div className="flex gap-2 flex-wrap">
             {zones.map((z) => (
-              <span key={z.departement} className="tag bg-asphalte-3 text-blanc-dim font-mono">{z.departement}</span>
+              <span key={z.departement} className="tag bg-[#F1F0ED] text-[#55534E] font-mono">{z.departement}</span>
             ))}
             {zones.length === 0 && <span className="text-sm text-blanc-faint">Aucune zone déclarée.</span>}
           </div>

@@ -78,14 +78,14 @@ export default async function AdminDemandesPage({ searchParams }: { searchParams
                     {d.mode === "enchere" && <span className={`pill ml-1.5 ${MODE_TAG.enchere}`}>Ench.</span>}
                   </td>
                   <td>
-                    <Link href={`/admin/demandes/${d.id}`} title={`${d.depart_adresse} → ${d.arrivee_adresse}`} className="font-semibold hover:text-ambre-fort">{ville(d.depart_adresse)} → {ville(d.arrivee_adresse)}</Link>
+                    <Link href={`/admin/demandes/${d.id}`} title={`${d.depart_adresse} → ${d.arrivee_adresse}`} className="font-semibold hover:underline">{ville(d.depart_adresse)} → {ville(d.arrivee_adresse)}</Link>
                     <p className="font-mono text-[11px] text-blanc-faint">
                       {d.type_trajet === "aller_simple" ? "aller simple" : d.type_trajet === "circuit" ? "circuit" : "aller-retour"}
                       {d.distance_km ? ` · ${Number(d.distance_km)} km` : ""}
                     </p>
                   </td>
                   <td className="max-w-[220px]">
-                    <Link href={`/admin/clients/${d.client_id}`} className="hover:text-ambre-fort block truncate">{d.client?.nom ?? "Sans nom"}</Link>
+                    <Link href={`/admin/clients/${d.client_id}`} className="hover:underline block truncate">{d.client?.nom ?? "Sans nom"}</Link>
                     <p className="font-mono text-[11px] text-blanc-faint truncate max-w-[200px]" title={d.client?.email ?? ""}>{d.client?.email ?? ""}</p>
                   </td>
                   <td className="font-mono text-[12px] whitespace-nowrap">
@@ -93,7 +93,7 @@ export default async function AdminDemandesPage({ searchParams }: { searchParams
                   </td>
                   <td className="text-right font-mono">{d.passagers}</td>
                   <td>
-                    <span className={`pill ${d.statut === "annulee" ? "bg-[#FCEBE4] text-[#C2410C]" : d.statut === "confirmee" ? "bg-vert-dim text-vert" : active ? "bg-ambre-dim text-ambre-fort" : "bg-asphalte-3 text-blanc-faint"}`}>
+                    <span className={`pill ${d.statut === "annulee" ? "bg-[#FDE8E4] text-[#C2410C]" : d.statut === "confirmee" ? "bg-[#E6F6EE] text-[#1A7F52]" : active ? "bg-[#FFF4E0] text-[#B26A00]" : "bg-[#F1F0ED] text-[#8A8882]"}`}>
                       {libelleStatut(d)}
                     </span>
                   </td>

@@ -13,10 +13,10 @@ import { estimerFourchette, repereKm } from "@/lib/calibration-serveur";
 export const metadata = { title: "Détail d'une demande — Administration" };
 
 const STATUT_OFFRE: Record<string, { label: string; classe: string }> = {
-  retenue: { label: "Retenue", classe: "bg-vert-dim text-vert" },
-  non_retenue: { label: "Non retenue", classe: "bg-asphalte-3 text-blanc-faint" },
-  consultee: { label: "Consultée", classe: "bg-bleunuit text-bleunuit-fort" },
-  envoyee: { label: "Envoyée", classe: "bg-asphalte-3 text-blanc-dim" },
+  retenue: { label: "Retenue", classe: "bg-[#E6F6EE] text-[#1A7F52]" },
+  non_retenue: { label: "Non retenue", classe: "bg-[#F1F0ED] text-[#8A8882]" },
+  consultee: { label: "Consultée", classe: "bg-[#E8EEFF] text-[#3451B2]" },
+  envoyee: { label: "Envoyée", classe: "bg-[#F1F0ED] text-[#55534E]" },
 };
 
 const mediane = (v: number[]) => {
@@ -85,9 +85,9 @@ export default async function DetailDemandePage({ params }: { params: Promise<{ 
       </h1>
       <div className="flex flex-wrap items-center gap-2.5 mb-10">
         <span className={`tag ${MODE_TAG[demande.mode]}`}>{demande.mode === "enchere" ? "Enchère" : "Devis"}</span>
-        <span className={`tag ${demande.statut === "annulee" ? TAG_ALERTE : "bg-asphalte-3 text-blanc-dim"}`}>{demande.statut}</span>
+        <span className={`tag ${demande.statut === "annulee" ? TAG_ALERTE : "bg-[#F1F0ED] text-[#55534E]"}`}>{demande.statut}</span>
         <span className="font-mono text-xs text-blanc-faint">
-          <Link href={`/admin/clients/${demande.client_id}`} className="text-ambre-fort hover:underline">{demande.client?.nom ?? "Client sans nom"}</Link>
+          <Link href={`/admin/clients/${demande.client_id}`} className="font-semibold hover:underline">{demande.client?.nom ?? "Client sans nom"}</Link>
           {demande.client?.telephone ? ` · ${demande.client.telephone}` : ""}
         </span>
         <EcrireMessage userId={demande.client_id} demandeId={id} label="Écrire au client"
@@ -203,7 +203,7 @@ export default async function DetailDemandePage({ params }: { params: Promise<{ 
             <tbody>
               {offres.map((o) => {
                 const t = parId.get(o.transporteur_id);
-                const s = STATUT_OFFRE[o.statut] ?? { label: o.statut, classe: "bg-asphalte-3 text-blanc-dim" };
+                const s = STATUT_OFFRE[o.statut] ?? { label: o.statut, classe: "bg-[#F1F0ED] text-[#55534E]" };
                 const delta = min ? Math.round(((Number(o.prix_ttc) - min) / min) * 100) : 0;
                 return (
                   <tr key={o.id} className="border-b border-ligne/50 last:border-0 align-top">

@@ -1,0 +1,116 @@
+/* =====================================================================
+   Espace admin DealBus · thème « Clair premium »
+   Tout est scopé sous .adm : le site public n'est pas touché.
+   Les jetons de couleur du site sont redéfinis, et les styles « affiche »
+   (capitales condensées, police machine à écrire) sont neutralisés ici.
+   ===================================================================== */
+
+.adm {
+  --c-surface: 247 247 245;
+  --c-surface-2: 255 255 255;
+  --c-surface-3: 244 243 240;
+  --c-encre: 17 17 17;
+  --c-ambre: 245 165 36;
+  --c-ambre-fort: 178 106 0;
+  --c-vert: 26 127 82;
+  --c-bleunuit: 232 238 255;
+  --c-bleunuit-fort: 52 81 178;
+  background: #F7F7F5;
+  color: #111;
+  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 13.5px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Typographie : plus de capitales, plus de machine à écrire */
+.adm .font-mono,
+.adm .font-condensed { font-family: var(--font-inter), -apple-system, sans-serif !important; }
+.adm .font-mono { font-variant-numeric: tabular-nums; }
+.adm .uppercase { text-transform: none !important; }
+.adm [class*="tracking-"] { letter-spacing: normal !important; }
+.adm .h-display { font-weight: 650; letter-spacing: -0.02em !important; line-height: 1.15; }
+.adm h1.h-display, .adm .text-4xl.h-display { font-size: 22px; }
+.adm h2.h-display { font-size: 16px; }
+.adm .eyebrow { background: #FFF4E0; color: #B26A00; border-radius: 6px; font-size: 11.5px; font-weight: 600; }
+.adm .label { color: #6F6D67; font-size: 12px; font-weight: 500; }
+
+/* Titres de page */
+.adm .crm-titre { font-size: 22px; font-weight: 650; letter-spacing: -0.02em !important; line-height: 1.2; }
+.adm .crm-sous { color: #77756F; font-size: 13px; margin-top: 3px; }
+
+/* Cartes et panneaux */
+.adm .card,
+.adm .crm-panel,
+.adm .crm-kpi {
+  background: #fff;
+  border: 0;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(17, 17, 17, 0.04), 0 0 0 1px #ECEBE8;
+}
+.adm .card { padding: 18px 20px; }
+.adm .card .card { box-shadow: 0 0 0 1px #EFEEEA; background: #FAFAF8; }
+.adm .crm-panel { overflow: hidden; }
+.adm .crm-panel-h { padding: 14px 18px; border-bottom: 1px solid #F0EFEC; }
+.adm .crm-panel-t { font-size: 14px; font-weight: 600; letter-spacing: -0.01em !important; }
+.adm .crm-kpi { padding: 16px 18px; }
+.adm .crm-kpi-num { font-size: 26px; font-weight: 650; letter-spacing: -0.03em !important; line-height: 1.15; }
+.adm .crm-kpi-lbl { color: #77756F; font-size: 12px; font-weight: 500; margin-top: 4px; }
+
+/* Tableaux */
+.adm .crm-table { font-size: 13px; }
+.adm .crm-table th { font-size: 11.5px; color: #8A8882; font-weight: 500; padding: 10px 16px; border-bottom: 1px solid #F0EFEC; background: transparent; }
+.adm .crm-table td { padding: 11px 16px; border-bottom: 1px solid #F4F3F0; }
+.adm .crm-table tbody tr:hover td { background: #FAFAF8; }
+
+/* Badges */
+.adm .pill,
+.adm .tag { font-size: 11px; font-weight: 600; border-radius: 6px; padding: 2px 7px; letter-spacing: 0 !important; }
+
+/* Boutons et champs */
+.adm .btn { border-radius: 8px; font-weight: 600; font-size: 12.5px; }
+.adm .btn-primary { background: #111; color: #fff; }
+.adm .btn-primary:hover { transform: none; background: #2A2A2A; }
+.adm .btn-ghost { background: #fff; border: 1px solid #E2E1DD; color: #222; }
+.adm .btn-ghost:hover { border-color: #C9C7C2; background: #FAFAF8; }
+.adm .input { background: #fff; border: 1px solid #E2E1DD; border-radius: 8px; color: #111; }
+.adm .input:focus { border-color: #F5A524; box-shadow: 0 0 0 3px rgba(245, 165, 36, 0.15); }
+
+/* Onglets / filtres */
+.adm .crm-onglet { border-radius: 8px; background: #fff; border: 1px solid #E7E6E2; color: #55534E; font-size: 12.5px; font-weight: 500; padding: 6px 11px; }
+.adm .crm-onglet:hover { border-color: #C9C7C2; color: #111; }
+.adm .crm-onglet-on, .adm .crm-onglet-on:hover { background: #111; color: #fff; border-color: #111; }
+
+/* Cartes du pipeline */
+.adm .crm-deal { background: #FAFAF8; border: 1px solid #EFEEEA; border-radius: 9px; padding: 10px 11px; }
+.adm .crm-deal:hover { border-color: #DCDAD5; background: #fff; }
+
+/* Bordures plus douces */
+.adm .border-ligne { border-color: #EFEEEA; }
+.adm .border-ligne-strong { border-color: #E2E1DD; }
+
+/* Barre latérale */
+.adm-sb { background: #FBFBFA; border-right: 1px solid #ECEBE8; }
+.adm-nav a { display: flex; align-items: center; gap: 9px; padding: 6px 9px; border-radius: 7px; color: #3A3936; font-weight: 500; font-size: 13px; }
+.adm-nav a:hover { background: #F2F1EE; color: #111; }
+.adm-nav a[aria-current="page"] { background: #fff; color: #111; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 0 0 1px #ECEBE8; }
+.adm-nav a svg { width: 16px; height: 16px; flex: none; stroke: #9A9893; }
+.adm-nav a[aria-current="page"] svg { stroke: #E2941A; }
+.adm-grp { font-size: 11px; color: #9A9893; padding: 14px 9px 5px; font-weight: 500; }
+.adm-cnt { margin-left: auto; font-size: 11px; color: #9A9893; font-variant-numeric: tabular-nums; }
+.adm-alert { margin-left: auto; font-size: 11px; font-weight: 600; background: #FDE8E4; color: #C2410C; border-radius: 10px; padding: 0 7px; }
+
+/* Teintes du texte héritées du site : adoucies pour le fond clair */
+.adm .text-blanc-faint { color: #9A9893; }
+.adm .text-blanc-dim { color: #6F6D67; }
+.adm .text-vert { color: #1A7F52; }
+.adm .text-ambre, .adm .text-ambre-fort { color: #B26A00; }
+.adm .bg-asphalte-2 { background: #fff; }
+.adm .bg-asphalte-3 { background: #F4F3F0; }
+.adm .bg-ambre-dim { background: #FFF4E0; }
+.adm .bg-vert-dim { background: #E6F6EE; }
+.adm .bg-bleunuit { background: #E8EEFF; }
+.adm .text-bleunuit-fort { color: #3451B2; }
+.adm .border-ambre\/40, .adm .border-ambre\/30 { border-color: #F5A524; }
+.adm .sombre { background: #111; color: #F5F2EA; border-radius: 12px; }
+.adm .sombre .text-blanc-faint { color: #8B8E96; }
+.adm .sombre .text-blanc-dim { color: #C9CED8; }

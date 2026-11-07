@@ -27,8 +27,8 @@ export default async function AdminMissionsPage() {
       <h1 className="crm-titre mb-2">Missions &amp; commissions</h1>
       <p className="text-sm text-blanc-dim mb-8">
         Les dossiers d&apos;annulation et de litige se traitent sur{" "}
-        <Link href="/admin/litiges" className="text-ambre-fort hover:underline">leur page dédiée</Link>.{" "}La facturation mensuelle se fait sur la page{" "}
-        <Link href="/admin/facturation" className="text-ambre-fort hover:underline">Facturation</Link>.
+        <Link href="/admin/litiges" className="font-semibold hover:underline">leur page dédiée</Link>.{" "}La facturation mensuelle se fait sur la page{" "}
+        <Link href="/admin/facturation" className="font-semibold hover:underline">Facturation</Link>.
       </p>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
@@ -54,7 +54,7 @@ export default async function AdminMissionsPage() {
                 {m.demande
                   ? `#${m.demande.numero} — ${m.demande.depart_adresse} → ${m.demande.arrivee_adresse}`
                   : `${m.retour?.depart_adresse ?? "?"} → ${m.retour?.arrivee_adresse ?? "?"}`}
-                <span className="ml-2.5 tag bg-asphalte-3 text-blanc-dim">{m.source}</span>
+                <span className="ml-2.5 tag bg-[#F1F0ED] text-[#55534E]">{m.source}</span>
               </p>
               <p className="font-mono text-xs text-blanc-faint mt-1.5">
                 {m.transporteur?.raison_sociale} · mission {eur(m.prix_final)} ·

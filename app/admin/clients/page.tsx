@@ -81,7 +81,7 @@ export default async function ClientsPage({ searchParams }: { searchParams: Prom
             {liste.map((c) => (
               <tr key={c.id}>
                 <td>
-                  <Link href={`/admin/clients/${c.id}`} className="font-semibold hover:text-ambre-fort">{c.nom || "Sans nom"}</Link>
+                  <Link href={`/admin/clients/${c.id}`} className="font-semibold hover:underline">{c.nom || "Sans nom"}</Link>
                   <p className="font-mono text-[11px] text-blanc-faint">{c.email ?? "—"}</p>
                 </td>
                 <td className="font-mono text-[12px] whitespace-nowrap">{c.telephone ?? "—"}</td>

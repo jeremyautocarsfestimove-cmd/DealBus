@@ -10,11 +10,11 @@ type Prospect = {
 };
 
 const STATUTS: Record<string, { label: string; classe: string }> = {
-  a_contacter: { label: "À contacter", classe: "bg-bleunuit text-bleunuit-fort" },
-  envoye: { label: "Envoyé", classe: "bg-vert-dim text-vert" },
+  a_contacter: { label: "À contacter", classe: "bg-[#E8EEFF] text-[#3451B2]" },
+  envoye: { label: "Envoyé", classe: "bg-[#E6F6EE] text-[#1A7F52]" },
   stop: { label: "STOP", classe: "bg-rouge-dim text-rouge" },
-  erreur: { label: "Erreur", classe: "bg-ambre-dim text-ambre-fort" },
-  inscrit: { label: "Inscrit ✓", classe: "bg-vert-dim text-vert" },
+  erreur: { label: "Erreur", classe: "bg-[#FFF4E0] text-[#B26A00]" },
+  inscrit: { label: "Inscrit ✓", classe: "bg-[#E6F6EE] text-[#1A7F52]" },
 };
 
 export function ProspectionClient() {

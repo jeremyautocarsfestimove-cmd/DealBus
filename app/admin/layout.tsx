@@ -4,6 +4,7 @@ import { AdminMenu } from "./AdminMenu";
 import { aTraiter } from "./helpers";
 import Link from "next/link";
 import { lireMaintenance } from "@/lib/maintenance";
+import "./admin.css";
 
 export const metadata = { title: "Administration — DealBus" };
 
@@ -11,7 +12,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   const { data: me } = user
-    ? await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle()
+    ? await supabase.from("profiles").select("role, nom").eq("id", user.id).maybeSingle()
     : { data: null };
 
   if (me?.role !== "admin") {
@@ -19,7 +20,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <>
         <Nav />
         <main className="max-w-2xl mx-auto px-7 py-24 text-center">
-          <h1 className="crm-titre mb-4">Accès réservé</h1>
+          <h1 className="h-display text-4xl mb-4">Accès réservé.</h1>
           <p className="text-blanc-dim">Cette page est réservée à l&apos;administration DealBus.</p>
         </main>
       </>
@@ -36,29 +37,30 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     supabase.from("demandes").select("id", { count: "exact", head: true }).eq("statut", "ouverte"),
   ]);
 
+  const nom = (me?.nom as string | null) || user?.email || "Administrateur";
+  const initiales = nom.split(/[\s@.]+/).filter(Boolean).slice(0, 2).map((m) => m[0]?.toUpperCase()).join("") || "A";
+
   return (
-    <>
-      <Nav />
-      {maintenance.actif && (
-        <div className="bg-[#C2410C] text-white">
-          <div className="max-w-[1400px] mx-auto px-5 lg:px-8 py-2 flex flex-wrap items-center justify-between gap-2 text-sm">
+    <div className="adm min-h-screen lg:grid lg:grid-cols-[240px_minmax(0,1fr)]">
+      <AdminMenu
+        alertes={{
+          transporteurs: aValider ?? 0,
+          litiges: (dossiers ?? []).filter(aTraiter).length + (demandesAnnul ?? 0),
+          support: supportNonLus ?? 0,
+          maintenance: maintenance.actif ? 1 : 0,
+        }}
+        compteurs={{ clients: nbClients ?? 0, demandes: nbOuvertes ?? 0 }}
+        admin={{ nom, initiales }}
+      />
+      <div className="min-w-0">
+        {maintenance.actif && (
+          <div className="bg-[#C2410C] text-white px-6 py-2 flex flex-wrap items-center justify-between gap-2 text-[13px]">
             <span><strong>Site en travaux.</strong> Les visiteurs voient la page d&apos;attente ; vous voyez le site normalement.</span>
-            <Link href="/admin/parametres" className="font-mono text-[11px] uppercase tracking-wider underline underline-offset-2">Rouvrir le site</Link>
+            <Link href="/admin/parametres" className="underline underline-offset-2">Rouvrir le site</Link>
           </div>
-        </div>
-      )}
-      <div className="max-w-[1480px] mx-auto px-4 lg:px-6 pt-6 pb-16 lg:grid lg:grid-cols-[232px_minmax(0,1fr)] lg:gap-7">
-        <AdminMenu
-          alertes={{
-            transporteurs: aValider ?? 0,
-            litiges: (dossiers ?? []).filter(aTraiter).length + (demandesAnnul ?? 0),
-            support: supportNonLus ?? 0,
-            maintenance: maintenance.actif ? 1 : 0,
-          }}
-          compteurs={{ clients: nbClients ?? 0, demandes: nbOuvertes ?? 0 }}
-        />
-        <div className="min-w-0 admin-crm">{children}</div>
+        )}
+        <div className="admin-crm max-w-[1320px] px-5 lg:px-8 py-6 lg:py-7">{children}</div>
       </div>
-    </>
+    </div>
   );
 }

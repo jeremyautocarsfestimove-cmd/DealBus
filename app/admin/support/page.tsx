@@ -37,7 +37,7 @@ export default async function AdminSupportPage({ searchParams }: { searchParams:
           <h1 className="crm-titre mb-2">Support</h1>
           <p className="text-sm text-blanc-dim">Messages reçus par la bulle « Aide » et conversations ouvertes par DealBus. Chaque réponse part aussi par email.</p>
         </div>
-        <span className={`tag ${conversations.some((x) => x.nonLus) ? "bg-[#FCEBE4] text-[#C2410C]" : "bg-vert-dim text-vert"}`}>
+        <span className={`tag ${conversations.some((x) => x.nonLus) ? "bg-[#FDE8E4] text-[#C2410C]" : "bg-[#E6F6EE] text-[#1A7F52]"}`}>
           {conversations.reduce((s, x) => s + x.nonLus, 0)} message{conversations.reduce((s, x) => s + x.nonLus, 0) > 1 ? "s" : ""} non lu{conversations.reduce((s, x) => s + x.nonLus, 0) > 1 ? "s" : ""}
         </span>
       </div>

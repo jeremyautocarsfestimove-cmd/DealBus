@@ -38,7 +38,7 @@ export function TesterQonto() {
           </li>
           {points.map((p, i) => (
             <li key={i} className="flex gap-3 px-4 py-2.5 border-b border-ligne last:border-0 text-[13px]">
-              <span className={`pill ${p.ok ? "bg-vert-dim text-vert" : "bg-[#FCEBE4] text-[#C2410C]"}`}>{p.ok ? "OK" : "À corriger"}</span>
+              <span className={`pill ${p.ok ? "bg-[#E6F6EE] text-[#1A7F52]" : "bg-[#FDE8E4] text-[#C2410C]"}`}>{p.ok ? "OK" : "À corriger"}</span>
               <span><strong>{p.libelle}</strong> · <span className="text-blanc-dim">{p.detail}</span></span>
             </li>
           ))}

@@ -10,9 +10,9 @@ import { TesterQonto } from "./tester-qonto";
 export const metadata = { title: "Facturation — Administration" };
 
 const STATUT: Record<string, { label: string; classe: string }> = {
-  emise: { label: "À payer", classe: "bg-ambre-dim text-ambre-fort" },
-  payee: { label: "Payée", classe: "bg-vert-dim text-vert" },
-  annulee: { label: "Annulée", classe: "bg-asphalte-3 text-blanc-faint" },
+  emise: { label: "À payer", classe: "bg-[#FFF4E0] text-[#B26A00]" },
+  payee: { label: "Payée", classe: "bg-[#E6F6EE] text-[#1A7F52]" },
+  annulee: { label: "Annulée", classe: "bg-[#F1F0ED] text-[#8A8882]" },
 };
 
 const euro2 = (n: number) => n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
@@ -91,7 +91,7 @@ export default async function FacturationPage() {
                   return (
                     <tr key={m.id}>
                       <td><span className="font-mono text-blanc-faint">{m.numero ? `#${m.numero}` : "retour"}</span>{m.erreur && <p className="font-mono text-[11px] text-[#C2410C] max-w-[320px]">Échec : {m.erreur}</p>}</td>
-                      <td className="font-semibold"><Link href={`/admin/transporteurs/${m.transporteurId}`} className="hover:text-ambre-fort">{m.transporteur}</Link></td>
+                      <td className="font-semibold"><Link href={`/admin/transporteurs/${m.transporteurId}`} className="hover:underline">{m.transporteur}</Link></td>
                       <td className="font-mono text-[12px]">{jour(m.dateTransport)}</td>
                       <td className="text-right font-mono">{eur(m.prixTtc)} <span className="text-blanc-faint">× {m.taux} %</span></td>
                       <td className="text-right font-mono">{euro2(mht)}</td>
@@ -119,7 +119,7 @@ export default async function FacturationPage() {
               {F.map((f) => (
                 <tr key={f.id}>
                   <td className="font-mono text-[12px]">{f.numero ?? "—"}</td>
-                  <td><Link href={`/admin/transporteurs/${f.transporteur_id}`} className="hover:text-ambre-fort">{f.transporteur?.raison_sociale ?? "—"}</Link></td>
+                  <td><Link href={`/admin/transporteurs/${f.transporteur_id}`} className="hover:underline">{f.transporteur?.raison_sociale ?? "—"}</Link></td>
                   <td className="font-mono text-[12px] whitespace-nowrap">{f.mission?.demande?.numero ? `#${f.mission.demande.numero}` : "retour"} · {jour(f.date_transport)}</td>
                   <td className="text-right font-mono">{euro2(Number(f.montant_ht))}</td>
                   <td className="text-right font-mono font-semibold">{euro2(Number(f.montant_ttc))}</td>

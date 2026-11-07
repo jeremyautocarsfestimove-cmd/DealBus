@@ -107,7 +107,7 @@ export function SupportAdmin({ conversations, initiale }: { conversations: ConvA
               <div>
                 <p className="font-semibold">{conv.nom ?? "Utilisateur"} <span className="font-normal text-blanc-faint">· {conv.email} · {conv.role}</span></p>
                 <p className="font-mono text-[11px] text-blanc-faint">
-                  {conv.demande_id && conv.numero_demande ? <Link href={`/admin/demandes/${conv.demande_id}`} className="text-ambre-fort hover:underline">Demande #{conv.numero_demande}</Link> : "Sans demande liée"}
+                  {conv.demande_id && conv.numero_demande ? <Link href={`/admin/demandes/${conv.demande_id}`} className="font-semibold hover:underline">Demande #{conv.numero_demande}</Link> : "Sans demande liée"}
                   {" · "}{conv.role === "transporteur" ? <Link href={`/admin/transporteurs/${conv.user_id}`} className="hover:underline">Fiche transporteur</Link> : "Client"}
                   {" · ouverte par "}{conv.ouverte_par === "admin" ? "DealBus" : "l'utilisateur"}
                 </p>

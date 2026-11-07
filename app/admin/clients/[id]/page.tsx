@@ -131,11 +131,11 @@ export default async function FicheClientPage({ params }: { params: Promise<{ id
                         </td>
                         <td className="font-mono text-[12px] whitespace-nowrap">{jour(d.date_aller)}</td>
                         <td className="text-right font-mono">{d.passagers}</td>
-                        <td><span className={`pill ${demandeActive(d) ? "bg-ambre-dim text-ambre-fort" : d.statut === "confirmee" ? "bg-vert-dim text-vert" : "bg-asphalte-3 text-blanc-faint"}`}>{libelleStatut(d)}</span></td>
+                        <td><span className={`pill ${demandeActive(d) ? "bg-[#FFF4E0] text-[#B26A00]" : d.statut === "confirmee" ? "bg-[#E6F6EE] text-[#1A7F52]" : "bg-[#F1F0ED] text-[#8A8882]"}`}>{libelleStatut(d)}</span></td>
                         <td className="text-right font-mono whitespace-nowrap">
                           {p.length ? <>{p.length} · <span className="text-vert">{eur(Math.min(...p))}</span></> : <span className="text-blanc-faint">aucune</span>}
                         </td>
-                        <td className="text-right"><Link href={`/admin/demandes/${d.id}`} className="font-mono text-[11px] uppercase tracking-wider text-ambre-fort hover:underline">Ouvrir →</Link></td>
+                        <td className="text-right"><Link href={`/admin/demandes/${d.id}`} className="font-mono text-[11px] uppercase tracking-wider font-semibold hover:underline">Ouvrir →</Link></td>
                       </tr>
                     );
                   })}
@@ -157,11 +157,11 @@ export default async function FicheClientPage({ params }: { params: Promise<{ id
                       const d = D.find((x) => x.id === m.demande_id);
                       return (
                         <tr key={m.id}>
-                          <td><Link href={`/admin/transporteurs/${m.transporteur_id}`} className="font-semibold hover:text-ambre-fort">{m.transporteur?.raison_sociale ?? "—"}</Link></td>
+                          <td><Link href={`/admin/transporteurs/${m.transporteur_id}`} className="font-semibold hover:underline">{m.transporteur?.raison_sociale ?? "—"}</Link></td>
                           <td className="font-mono text-[12px]">{d ? <Link href={`/admin/demandes/${d.id}`} className="hover:underline">#{d.numero} · {jour(d.date_aller)}</Link> : "—"}</td>
                           <td className="text-right font-mono">{eur(Number(m.prix_final))}</td>
                           <td className="text-right font-mono">{eur(Number(m.commission_montant))}</td>
-                          <td><span className={`pill ${m.statut === "annulee" || m.statut === "litige" ? "bg-[#FCEBE4] text-[#C2410C]" : "bg-vert-dim text-vert"}`}>{m.statut}</span></td>
+                          <td><span className={`pill ${m.statut === "annulee" || m.statut === "litige" ? "bg-[#FDE8E4] text-[#C2410C]" : "bg-[#E6F6EE] text-[#1A7F52]"}`}>{m.statut}</span></td>
                           <td className="font-mono text-[12px] text-blanc-dim">{m.facturation ?? "—"}</td>
                         </tr>
                       );
@@ -175,7 +175,7 @@ export default async function FicheClientPage({ params }: { params: Promise<{ id
           {/* Support */}
           {C.length > 0 && (
             <section className="crm-panel">
-              <div className="crm-panel-h"><p className="crm-panel-t">Échanges avec DealBus</p><Link href="/admin/support" className="font-mono text-[11px] uppercase tracking-wider text-ambre-fort hover:underline">Support →</Link></div>
+              <div className="crm-panel-h"><p className="crm-panel-t">Échanges avec DealBus</p><Link href="/admin/support" className="font-mono text-[11px] uppercase tracking-wider font-semibold hover:underline">Support →</Link></div>
               <ul>
                 {C.map((c) => {
                   const dernier = [...(c.messages ?? [])].sort((a: any, b: any) => (a.created_at < b.created_at ? 1 : -1))[0];
@@ -183,7 +183,7 @@ export default async function FicheClientPage({ params }: { params: Promise<{ id
                     <li key={c.id} className="px-4 py-3 border-b border-ligne last:border-0 text-[13px]">
                       <div className="flex justify-between gap-3">
                         <p className="font-semibold">{c.sujet ?? (c.ouverte_par === "admin" ? "Message de DealBus" : "Demande d'aide")}</p>
-                        <span className={`pill ${c.statut === "ouverte" ? "bg-ambre-dim text-ambre-fort" : "bg-asphalte-3 text-blanc-faint"}`}>{c.statut}</span>
+                        <span className={`pill ${c.statut === "ouverte" ? "bg-[#FFF4E0] text-[#B26A00]" : "bg-[#F1F0ED] text-[#8A8882]"}`}>{c.statut}</span>
                       </div>
                       {dernier && <p className="text-blanc-dim mt-1 line-clamp-2">{dernier.auteur === "admin" ? "Vous : " : "Client : "}{dernier.contenu}</p>}
                       <p className="font-mono text-[11px] text-blanc-faint mt-1">{c.messages?.length ?? 0} message{(c.messages?.length ?? 0) > 1 ? "s" : ""} · {depuis(c.updated_at)}</p>
