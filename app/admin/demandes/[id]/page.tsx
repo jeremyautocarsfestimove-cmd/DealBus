@@ -87,7 +87,7 @@ export default async function DetailDemandePage({ params }: { params: Promise<{ 
         <span className={`tag ${MODE_TAG[demande.mode]}`}>{demande.mode === "enchere" ? "Enchère" : "Devis"}</span>
         <span className={`tag ${demande.statut === "annulee" ? TAG_ALERTE : "bg-asphalte-3 text-blanc-dim"}`}>{demande.statut}</span>
         <span className="font-mono text-xs text-blanc-faint">
-          {demande.client?.nom ?? "Client sans nom"}
+          <Link href={`/admin/clients/${demande.client_id}`} className="text-ambre-fort hover:underline">{demande.client?.nom ?? "Client sans nom"}</Link>
           {demande.client?.telephone ? ` · ${demande.client.telephone}` : ""}
         </span>
         <EcrireMessage userId={demande.client_id} demandeId={id} label="Écrire au client"

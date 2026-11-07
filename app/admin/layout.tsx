@@ -26,12 +26,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     );
   }
 
-  const [{ count: aValider }, { data: dossiers }, { count: supportNonLus }, { count: demandesAnnul }, maintenance] = await Promise.all([
+  const [{ count: aValider }, { data: dossiers }, { count: supportNonLus }, { count: demandesAnnul }, maintenance, { count: nbClients }, { count: nbOuvertes }] = await Promise.all([
     supabase.from("transporteurs").select("id", { count: "exact", head: true }).eq("statut", "en_attente"),
     supabase.from("missions").select("statut, client_confirmation, annulation_demandee_at, annulation_decision").or("statut.in.(annulee,litige),and(annulation_demandee_at.not.is.null,annulation_decision.is.null)"),
     supabase.from("support_messages").select("id", { count: "exact", head: true }).eq("auteur", "user").is("lu_le", null),
     supabase.from("demandes").select("id", { count: "exact", head: true }).not("annulation_demandee_at", "is", null).is("annulation_decision", null),
     lireMaintenance(true),
+    supabase.from("profiles").select("id", { count: "exact", head: true }).eq("role", "client"),
+    supabase.from("demandes").select("id", { count: "exact", head: true }).eq("statut", "ouverte"),
   ]);
 
   return (
@@ -45,7 +47,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           </div>
         </div>
       )}
-      <div className="max-w-[1400px] mx-auto px-5 lg:px-8 pt-8 pb-16 lg:grid lg:grid-cols-[230px_minmax(0,1fr)] lg:gap-8">
+      <div className="max-w-[1480px] mx-auto px-4 lg:px-6 pt-6 pb-16 lg:grid lg:grid-cols-[232px_minmax(0,1fr)] lg:gap-7">
         <AdminMenu
           alertes={{
             transporteurs: aValider ?? 0,
@@ -53,6 +55,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             support: supportNonLus ?? 0,
             maintenance: maintenance.actif ? 1 : 0,
           }}
+          compteurs={{ clients: nbClients ?? 0, demandes: nbOuvertes ?? 0 }}
         />
         <div className="min-w-0">{children}</div>
       </div>

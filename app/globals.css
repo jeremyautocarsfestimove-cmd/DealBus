@@ -59,3 +59,22 @@ select option { color: #12151B; background-color: #FFFFFF; }
 .tag { @apply font-mono text-[10.5px] uppercase tracking-wide font-semibold px-2 py-1 rounded-sm; }
 .tag-devis { @apply tag bg-bleunuit text-bleunuit-fort; }
 .tag-enchere { @apply tag bg-vert-dim text-vert; }
+
+/* ---------- CRM admin ---------- */
+.crm-titre { @apply font-condensed font-bold uppercase text-[32px] tracking-tight leading-none; }
+.crm-sous { @apply text-[13px] text-blanc-dim mt-1.5; }
+.crm-kpi { @apply bg-asphalte-2 border border-ligne rounded px-4 py-3.5; }
+.crm-kpi-num { @apply font-mono text-[22px] font-semibold leading-tight; }
+.crm-kpi-lbl { @apply font-mono text-[10px] uppercase tracking-wider text-blanc-faint mt-1; }
+.crm-panel { @apply bg-asphalte-2 border border-ligne rounded overflow-hidden; }
+.crm-panel-h { @apply flex items-center justify-between gap-3 px-4 py-3 border-b border-ligne; }
+.crm-panel-t { @apply font-mono text-[11px] uppercase tracking-wider font-semibold; }
+.crm-table { @apply w-full text-[13px] border-collapse; }
+.crm-table th { @apply text-left font-mono text-[10px] uppercase tracking-wider text-blanc-faint font-medium px-3 py-2.5 border-b border-ligne whitespace-nowrap; }
+.crm-table td { @apply px-3 py-3 border-b border-ligne align-middle; }
+.crm-table tbody tr:last-child td { @apply border-b-0; }
+.crm-table tbody tr:hover td { @apply bg-asphalte-3/60; }
+.pill { @apply inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-wide font-semibold px-1.5 py-0.5 rounded-sm whitespace-nowrap; }
+.crm-onglet { @apply font-mono text-[11px] uppercase tracking-wider px-3 py-1.5 rounded-sm border border-ligne text-blanc-dim hover:text-blanc hover:border-ligne-strong transition; }
+.crm-onglet-on { @apply bg-blanc text-asphalte border-blanc hover:text-asphalte; }
+.crm-deal { @apply block bg-asphalte border border-ligne rounded px-3 py-2.5 text-[12.5px] hover:border-ligne-strong transition; }
