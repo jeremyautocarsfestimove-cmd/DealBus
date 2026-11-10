@@ -40,11 +40,25 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
 
   // Mission conclue avec moi ? (identités révélées → messagerie sans filtre)
   const { data: maMission } = await supabase
-    .from("missions").select("id").eq("demande_id", id).eq("transporteur_id", user!.id).maybeSingle();
+    .from("missions").select("id, statut").eq("demande_id", id).eq("transporteur_id", user!.id).maybeSingle();
 
   // Devis déjà envoyé ? (tir unique)
   const { data: monOffre } = await supabase
-    .from("offres").select("prix_ttc").eq("demande_id", id).eq("transporteur_id", user!.id).maybeSingle();
+    .from("offres").select("prix_ttc, statut").eq("demande_id", id).eq("transporteur_id", user!.id).maybeSingle();
+
+  // État réel de l'offre : la mission prime, puis le statut de l'offre, puis celui de la demande
+  const etatOffre: { titre: string; texte: string; cls: string } =
+    maMission?.statut === "annulee"
+      ? { titre: "Mission annulée", texte: "Cette mission a été annulée. Aucune commission n'est due.", cls: "text-[#C2410C]" }
+      : maMission
+        ? { titre: "Mission confirmée", texte: "Le client a retenu votre offre. Ses coordonnées sont dans votre mission.", cls: "text-[#1A7F52]" }
+        : monOffre?.statut === "non_retenue"
+          ? { titre: "Offre non retenue", texte: "Le client a retenu une autre offre.", cls: "text-[#C2410C]" }
+          : d.statut === "annulee"
+            ? { titre: "Demande annulée", texte: "Le client a annulé sa demande.", cls: "text-[#C2410C]" }
+            : d.statut === "expiree"
+              ? { titre: "Demande expirée", texte: "La date de départ est dépassée.", cls: "text-[#77756F]" }
+              : { titre: "Votre offre est envoyée", texte: "En attente de la décision du client. Vous serez prévenu par email.", cls: "" };
 
   // Meilleure enchère actuelle (module en suspens, conservé)
   const { data: bestBid } = await supabase
@@ -92,7 +106,7 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
     <>
       <div className="flex items-start justify-between gap-4 flex-wrap mb-6">
         <div className="min-w-0">
-          <p className="text-[12.5px] text-[#77756F] mb-2"><Link href="/pro" className="hover:underline">← Demandes</Link> · Demande #{d.numero} · {maMission ? "mission confirmée avec vous" : "client anonyme jusqu'à l'acceptation"}</p>
+          <p className="text-[12.5px] text-[#77756F] mb-2"><Link href="/pro" className="hover:underline">← Demandes</Link> · Demande #{d.numero} · {maMission?.statut === "annulee" ? "mission annulée" : maMission ? "mission confirmée avec vous" : "client anonyme jusqu'à l'acceptation"}</p>
           <h1 className="h-display text-4xl truncate" title={`${d.depart_adresse} → ${d.arrivee_adresse}`}>{ville(d.depart_adresse)} → {ville(d.arrivee_adresse)}</h1>
           <p className="text-blanc-dim mt-1.5">
             {jourCourt(String(d.date_aller))}{d.heure_aller ? ` ${hFr(d.heure_aller)}` : ""}{d.date_retour && d.date_retour !== d.date_aller ? ` → ${jourCourt(String(d.date_retour))}${d.heure_retour ? ` ${hFr(d.heure_retour)}` : ""}` : ""}
@@ -168,9 +182,10 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
           {d.mode === "devis" ? (
             monOffre ? (
               <div className="card">
-                <h2 className="text-[15px] font-semibold">Votre offre est envoyée</h2>
+                <h2 className={`text-[15px] font-semibold ${etatOffre.cls}`}>{etatOffre.titre}</h2>
                 <p className="text-[28px] font-semibold tracking-tight mt-2">{Number(monOffre.prix_ttc).toLocaleString("fr-FR")} €</p>
-                <p className="text-[12.5px] text-blanc-dim mt-1">En attente de la décision du client. Vous serez prévenu par email.</p>
+                <p className="text-[12.5px] text-blanc-dim mt-1">{etatOffre.texte}</p>
+                {maMission && <Link href={`/pro/missions/${maMission.id}`} className="inline-block mt-3 text-[13px] font-semibold underline">Voir la mission →</Link>}
                 {fourchette && <p className="text-[12px] text-[#9A9893] mt-3 pt-3 border-t border-ligne">Repère observé : {eur(fourchette.min)} à {eur(fourchette.max)}</p>}
               </div>
             ) : (
