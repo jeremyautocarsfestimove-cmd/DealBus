@@ -1,7 +1,5 @@
-import Link from "next/link";
 import { Nav } from "@/components/Nav";
-import { contexteTransporteur, initiales } from "@/lib/pro";
-import { ProTabs } from "./ProTabs";
+import { contexteTransporteur } from "@/lib/pro";
 import { AccepterCgu } from "./AccepterCgu";
 import { CGU_VERSION } from "@/lib/cgu";
 import "./pro.css";
@@ -34,19 +32,10 @@ export default async function ProLayout({ children }: { children: React.ReactNod
 
   return (
     <>
-      <Nav />
-    <div className="pro">
-      <div className="pro-bar">
-        <div className="max-w-[1240px] mx-auto px-5 lg:px-7 h-[52px] flex items-center justify-between gap-4">
-          <ProTabs compteurs={ctx.compteurs!} />
-          <Link href="/pro/profil" className="hidden md:flex items-center gap-2.5 text-[13px] font-medium whitespace-nowrap">
-            <span className="w-[30px] h-[30px] rounded-full bg-[#111] text-[#F5A524] grid place-items-center text-[11px] font-bold">{initiales(ctx.transporteur!.raison_sociale)}</span>
-            {ctx.transporteur!.raison_sociale}
-          </Link>
-        </div>
+      <Nav pro={ctx.compteurs!} />
+      <div className="pro">
+        <main className="max-w-[1240px] mx-auto px-5 lg:px-7 py-7 lg:py-8">{children}</main>
       </div>
-      <main className="max-w-[1240px] mx-auto px-5 lg:px-7 py-7 lg:py-8">{children}</main>
-    </div>
     </>
   );
 }

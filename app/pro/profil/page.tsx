@@ -26,6 +26,10 @@ export default async function ProfilProPage() {
       <div className="mb-6">
         <h1 className="h-display text-4xl">Mon entreprise</h1>
         <p className="text-blanc-dim mt-1.5">Coordonnées, zones d&apos;intervention, dépôt et tarifs de référence, flotte, conditions de vente.</p>
+        <p className="flex flex-wrap gap-2 mt-4">
+          <a href="#zones" className="btn btn-ghost py-2 px-3.5">Mes zones</a>
+          <a href="#vehicules" className="btn btn-ghost py-2 px-3.5">Véhicules</a>
+        </p>
       </div>
       <div className="max-w-3xl space-y-5">
         <ModifierProfilTransporteur transporteurId={user.id} initial={{
@@ -33,12 +37,12 @@ export default async function ProfilProPage() {
           departement_siege: transporteur.departement_siege, secteur: transporteur.secteur,
           nom: profil?.nom ?? null, telephone: profil?.telephone ?? null, email: profil?.email ?? null,
         }} />
-        <GererZones transporteurId={user.id} zones={(zones ?? []) as any[]} />
+        <div id="zones" className="scroll-mt-28"><GererZones transporteurId={user.id} zones={(zones ?? []) as any[]} /></div>
         <ParametresDevis transporteurId={user.id} initial={{
           depot_adresse: transporteur.depot_adresse ?? null, cout_km: transporteur.cout_km ?? null, cout_heure: transporteur.cout_heure ?? null,
           cout_nuit: transporteur.cout_nuit ?? null, cout_immobilisation: transporteur.cout_immobilisation ?? null, marge_pct: transporteur.marge_pct ?? null,
         }} />
-        <GererVehicules transporteurId={user.id} vehicules={(vehicules ?? []) as any[]} />
+        <div id="vehicules" className="scroll-mt-28"><GererVehicules transporteurId={user.id} vehicules={(vehicules ?? []) as any[]} /></div>
         <CgvForm transporteurId={user.id} initial={transporteur.cgv ?? null} />
 
         {FEATURES.retours && (

@@ -86,3 +86,26 @@ select option { color: #12151B; background-color: #FFFFFF; }
 /* À poser sur le premier bloc d'une page pour qu'il passe sous la capsule */
 .sous-capsule { margin-top: calc(var(--nav-h) * -1); padding-top: var(--nav-h); }
 .nav-ruban { position: absolute; left: 30px; top: 31px; transform: rotate(-5deg); background: #12151B; color: #F7B84B; font-family: var(--font-inter), -apple-system, sans-serif; font-size: 10.5px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; line-height: 1.5; padding: 4px 10px; border-radius: 7px; white-space: nowrap; box-shadow: 0 0 0 2px rgba(255, 255, 255, .85), 0 8px 16px -8px rgba(0, 0, 0, .8); pointer-events: none; }
+
+/* Onglets de l'espace transporteur dans la capsule du menu */
+.nav-capsule .pro-tabs { align-items: center; }
+.nav-capsule .pro-item { position: relative; display: inline-flex; }
+.nav-capsule .pro-tabs a { display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 999px; color: #4a5060; font-weight: 500; font-size: 14px; white-space: nowrap; background: transparent; }
+.nav-capsule .pro-tabs a:hover { background: #fff; color: #12151B; }
+.nav-capsule .pro-tabs a[aria-current="page"] { background: #12151B; color: #fff; font-weight: 600; }
+.nav-capsule .pro-tabs em { font-style: normal; background: #F5A524; color: #12151B; font-size: 11px; font-weight: 700; border-radius: 999px; padding: 1px 7px; }
+.nav-capsule .pro-tabs em.muted { background: rgba(18, 21, 27, .08); color: #4a5060; }
+.nav-capsule .pro-tabs a[aria-current="page"] em.muted { background: rgba(255, 255, 255, .18); color: #fff; }
+.nav-capsule .pro-chevron { font-size: 10px; opacity: .6; }
+.nav-capsule .pro-sous { display: none; position: absolute; left: 0; top: 100%; padding-top: 12px; min-width: 190px; z-index: 5; }
+.nav-capsule .pro-sous a { display: block; border-radius: 0; background: #fff; padding: 11px 16px; font-size: 14px; color: #12151B; box-shadow: 0 18px 40px -18px rgba(18, 21, 27, .45); }
+.nav-capsule .pro-sous a:first-child { border-radius: 18px 18px 0 0; padding-top: 14px; }
+.nav-capsule .pro-sous a:last-child { border-radius: 0 0 18px 18px; padding-bottom: 14px; }
+.nav-capsule .pro-sous a:hover { background: #f6f6f9; }
+.nav-capsule .pro-avec-sous:hover .pro-sous, .nav-capsule .pro-avec-sous:focus-within .pro-sous { display: block; }
+/* En liste dans le panneau du menu, sur téléphone */
+.nav-capsule .pro-tabs-liste { display: grid; gap: 2px; }
+.nav-capsule .pro-tabs-liste .pro-item { display: block; }
+.nav-capsule .pro-tabs-liste a { display: flex; justify-content: space-between; border-radius: 16px; padding: 13px 16px; font-size: 16px; }
+.nav-capsule .pro-tabs-liste .pro-sous { display: grid; position: static; padding: 0 0 4px 14px; min-width: 0; }
+.nav-capsule .pro-tabs-liste .pro-sous a { box-shadow: none; background: transparent; border-radius: 14px; padding: 9px 16px; font-size: 15px; color: #4a5060; }

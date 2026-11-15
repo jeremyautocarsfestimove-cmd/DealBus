@@ -5,6 +5,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Logo } from "./Logo";
 import { FEATURES } from "@/lib/features";
+import { ProTabs, type Compteurs } from "@/app/pro/ProTabs";
 import type { createClient as CreateClientType } from "@/lib/supabase/client";
 
 // Chargement différé de Supabase : la librairie (~40 Ko) sort du bundle
@@ -18,7 +19,9 @@ function getSupabase() {
 type NavState = { checked: boolean; name: string | null; role: string | null };
 const CACHE_KEY = "dealbus_nav";
 
-export function Nav() {
+// `pro` : compteurs des onglets de l'espace transporteur. Fourni par app/pro/layout.tsx,
+// il fait apparaître ces onglets dans la capsule à la place des liens de l'accueil.
+export function Nav({ pro }: { pro?: Compteurs } = {}) {
   const router = useRouter();
   const chemin = usePathname();
   const espacePro = chemin === "/pro" || chemin.startsWith("/pro/");
@@ -97,7 +100,7 @@ export function Nav() {
     ];
 
   const [panneau, setPanneau] = useState(false);
-  const client = checked && role !== "transporteur" && role !== "admin";
+  const client = checked && !pro && role !== "transporteur" && role !== "admin";
   const LIENS = [
     { href: "/#comment", label: "Comment ça marche" },
     { href: "/#pour-qui", label: "Pour qui" },
@@ -123,6 +126,8 @@ export function Nav() {
             {FEATURES.retours && <Link href="/retours" className="hover:text-encre transition">Retours à vide</Link>}
           </div>
         )}
+
+        {pro && <div className="hidden lg:block"><ProTabs compteurs={pro} /></div>}
 
         <div className="ml-auto flex items-center gap-1.5 md:gap-2">
         {!checked ? (
@@ -177,7 +182,7 @@ export function Nav() {
             <Link href="/pro" className="hidden sm:inline-flex text-[14.5px] font-semibold px-4 py-2.5 rounded-full bg-[#12151B] text-white hover:bg-[#2a2f3a] transition whitespace-nowrap">Espace pro</Link>
           </>
         )}
-        {client && (
+        {(client || pro) && (
           <button type="button" onClick={() => setPanneau((o) => !o)} aria-expanded={panneau} aria-label="Menu"
             className="lg:hidden w-10 h-10 rounded-full grid place-items-center hover:bg-white transition">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
@@ -186,6 +191,13 @@ export function Nav() {
           </button>
         )}
         </div>
+
+        {/* Panneau des onglets de l'espace transporteur sur téléphone et tablette */}
+        {panneau && pro && (
+          <div className="lg:hidden absolute left-0 right-0 top-full mt-2 bg-white rounded-[26px] shadow-2xl ring-1 ring-black/5 p-3">
+            <ProTabs compteurs={pro} liste onNavigate={() => setPanneau(false)} />
+          </div>
+        )}
 
         {/* Panneau du menu sur téléphone et tablette */}
         {panneau && client && (
