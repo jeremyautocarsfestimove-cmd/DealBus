@@ -224,3 +224,13 @@
 }
 .pro .pf-contenu .label { font-family: var(--font-inter), -apple-system, sans-serif; text-transform: none; letter-spacing: 0; font-size: 12.5px; font-weight: 600; color: #3A3936; }
 .pro .pf-contenu .btn-primary, .pro .pf-contenu .btn-ghost { border-radius: 999px; padding-left: 18px; padding-right: 18px; }
+
+/* Mon entreprise : sommaire en rangée sur tous les écrans, cartes sur toute la largeur de l'en-tête */
+@media (min-width: 1024px) {
+  .pf-grille { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+  .pf-sommaire { flex-direction: row; gap: 6px; overflow-x: auto; margin: 0; padding: 8px 0; background: #F7F7F5; top: calc(var(--nav-h) - 6px); }
+  .pf-sommaire a { background: #fff; box-shadow: 0 0 0 1px #ECEBE8; border-radius: 999px; padding: 8px 14px 8px 8px; }
+  .pf-contenu { max-width: none; }
+  .pf-contenu section { scroll-margin-top: calc(var(--nav-h) + 62px); }
+}
+@media (max-width: 1023px) { .pf-sommaire { margin: 0 -12px; padding: 8px 12px; } }

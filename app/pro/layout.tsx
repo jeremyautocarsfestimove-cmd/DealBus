@@ -34,7 +34,8 @@ export default async function ProLayout({ children }: { children: React.ReactNod
     <>
       <Nav pro={ctx.compteurs!} />
       <div className="pro">
-        <main className="max-w-[1240px] mx-auto px-5 lg:px-7 py-7 lg:py-8">{children}</main>
+        {/* Même largeur que la capsule du menu : marge de 12 px, 1152 px au plus */}
+        <main className="px-3 py-7 lg:py-8"><div className="max-w-6xl mx-auto">{children}</div></main>
       </div>
     </>
   );
