@@ -127,9 +127,9 @@ export function Nav({ pro }: { pro?: Compteurs } = {}) {
           </div>
         )}
 
-        {pro && <div className="hidden lg:block"><ProTabs compteurs={pro} /></div>}
+        {pro && <div className="hidden lg:flex flex-1 justify-center min-w-0"><ProTabs compteurs={pro} /></div>}
 
-        <div className="ml-auto flex items-center gap-1.5 md:gap-2">
+        <div className={`${pro ? "ml-auto lg:ml-0" : "ml-auto"} flex items-center gap-1.5 md:gap-2`}>
         {!checked ? (
           <span className="w-28" />
         ) : name ? (

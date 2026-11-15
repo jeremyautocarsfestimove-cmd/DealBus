@@ -7,6 +7,7 @@ import { pointsMarche } from "@/lib/calibration-serveur";
 import { fourchetteDepuisDevis } from "@/lib/calibration-prix";
 import { LandingPro } from "./Landing";
 import { DemanderSuppression } from "./pro-actions";
+import { ListeLeads, type Lead } from "./ListeLeads";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export default async function ProPage() {
@@ -86,7 +87,6 @@ export default async function ProPage() {
             {compteurs!.messages > 0 && <> <Link href="/pro/offres" className="font-semibold text-[#B26A00] hover:underline">{compteurs!.messages} message{compteurs!.messages > 1 ? "s" : ""} client non lu{compteurs!.messages > 1 ? "s" : ""}</Link>.</>}
           </p>
         </div>
-        <Link href="/pro/profil" className="btn btn-ghost py-2 px-3.5">Mes zones et véhicules</Link>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
@@ -96,47 +96,23 @@ export default async function ProPage() {
         <div className="pro-kpi"><p>CA signé via DealBus</p><b>{eur(ca)}</b><small>commissions dues : {eur(dues)}</small></div>
       </div>
 
-      <div className="card p-0 overflow-hidden">
-        {liste.map(({ d, km, a, rep, nature, invitation, nb }) => {
-          const j = joursAvant(d.date_aller);
-          const msgs = nonLusPar.get(d.id) ?? 0;
-          const badges: { t: string; c: string }[] = [];
-          if (nature !== "simple" && d.sur_place_repondu) badges.push({ t: d.vehicule_utilise_sur_place ? "Car sur place" : "Dépose puis reprise", c: "bg-[#F1F0ED] text-[#55534E]" });
-          if (d.equipements?.includes("soute")) badges.push({ t: "Bagages en soute", c: "bg-[#F1F0ED] text-[#55534E]" });
-          if (d.equipements?.includes("toilettes")) badges.push({ t: "Toilettes", c: "bg-[#F1F0ED] text-[#55534E]" });
-          if (a.deuxConducteurs) badges.push({ t: "2 conducteurs probables", c: "bg-[#FDE8E4] text-[#C2410C]" });
-          if ((a.gabarit?.nbVehicules ?? 1) > 1) badges.push({ t: `${a.gabarit!.nbVehicules} cars`, c: "bg-[#FDE8E4] text-[#C2410C]" });
-          return (
-            <div key={d.id} className={`pro-lead ${invitation ? "bg-[#FFFCF5]" : ""}`}>
-              <div className="min-w-0">
-                <p className="pro-route">
-                  <Link href={`/pro/leads/${d.id}`} className="hover:underline">{ville(d.depart_adresse)}<i>→</i>{ville(d.arrivee_adresse)}</Link>
-                  {invitation && <span className="tag bg-[#FFF4E0] text-[#B26A00] ml-2 align-middle">Sur invitation</span>}
-                  {d.mode === "enchere" && <span className="tag-enchere ml-2 align-middle">Enchère</span>}
-                  {msgs > 0 && <span className="tag bg-[#F5A524] text-[#111] ml-2 align-middle">{msgs} message{msgs > 1 ? "s" : ""}</span>}
-                </p>
-                <div className="pro-meta">
-                  <span><b>{jourCourt(d.date_aller)}</b>{d.heure_aller ? ` ${heureFr(d.heure_aller)}` : ""}{nature === "sejour" ? ` → ${jourCourt(d.date_retour)} · ${a.nuits} nuit${a.nuits > 1 ? "s" : ""}` : nature === "journee" ? " · journée" : " · aller simple"}</span>
-                  <span><b>{d.passagers}</b> passagers</span>
-                  {km && <span>{km} km{a.routeMin ? ` · ${fmtDuree(a.routeMin)}` : ""}</span>}
-                  {d.organisme && <span>{ORGANISMES.find((o) => o.id === d.organisme)?.label}</span>}
-                </div>
-                {badges.length > 0 && <div className="flex gap-1.5 flex-wrap mt-2">{badges.map((b) => <span key={b.t} className={`tag ${b.c}`}>{b.t}</span>)}</div>}
-              </div>
-              <div className="text-[12px] text-[#77756F]">
-                Repère marché
-                <b className="block text-[14px] text-[#111] font-semibold">{rep ? `${eur(rep.min)} – ${eur(rep.max)}` : "—"}</b>
-                {nb > 0 ? `${nb} transporteur${nb > 1 ? "s ont" : " a"} répondu` : "aucune offre pour l'instant"}
-              </div>
-              <div className="md:text-right">
-                <Link href={`/pro/leads/${d.id}`} className={`btn ${j <= 7 || invitation || nb === 0 ? "btn-primary" : "btn-ghost"} py-2 px-3.5`}>Faire une offre</Link>
-                <small className="block text-[11.5px] text-[#9A9893] mt-1.5">{j <= 0 ? "Départ aujourd'hui" : j === 1 ? "Départ demain" : `Départ dans ${j} jours`}{nb === 0 ? " · vous seriez le premier" : ""}</small>
-              </div>
-            </div>
-          );
-        })}
-        {liste.length === 0 && <p className="px-5 py-10 text-center text-blanc-dim">Aucune demande ouverte pour l&apos;instant.</p>}
-      </div>
+      <ListeLeads leads={liste.map(({ d, km, a, rep, nature, invitation, nb }): Lead => {
+        const badges: Lead["badges"] = [];
+        if (nature !== "simple" && d.sur_place_repondu) badges.push({ t: d.vehicule_utilise_sur_place ? "Car sur place" : "Dépose puis reprise" });
+        if (d.equipements?.includes("soute")) badges.push({ t: "Bagages en soute" });
+        if (d.equipements?.includes("toilettes")) badges.push({ t: "Toilettes" });
+        if (a.deuxConducteurs) badges.push({ t: "2 conducteurs probables", alerte: true });
+        if ((a.gabarit?.nbVehicules ?? 1) > 1) badges.push({ t: `${a.gabarit!.nbVehicules} cars`, alerte: true });
+        return {
+          id: d.id, depart: ville(d.depart_adresse), arrivee: ville(d.arrivee_adresse), date: d.date_aller,
+          heure: d.heure_aller ? heureFr(d.heure_aller) : "",
+          nature: nature === "sejour" ? `jusqu'au ${jourCourt(d.date_retour)} · ${a.nuits} nuit${a.nuits > 1 ? "s" : ""}` : nature === "journee" ? "journée" : "aller simple",
+          passagers: d.passagers, km, duree: a.routeMin ? fmtDuree(a.routeMin) : null,
+          organisme: d.organisme ? ORGANISMES.find((o) => o.id === d.organisme)?.label ?? null : null,
+          badges, repere: rep ? `${eur(rep.min)} – ${eur(rep.max)}` : null, nb,
+          invitation, enchere: d.mode === "enchere", messages: nonLusPar.get(d.id) ?? 0, jours: joursAvant(d.date_aller),
+        };
+      })} />
     </>
   );
 }
