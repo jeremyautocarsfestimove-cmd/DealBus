@@ -174,7 +174,6 @@ export function InscriptionTransporteur() {
             <p className="font-mono text-[11px] uppercase tracking-widest text-blanc-faint mb-3">Commission</p>
             <ul className="text-sm text-blanc-dim space-y-1.5">
               <li>— <strong className="text-blanc">9 %</strong> jusqu&apos;à 2 000 € TTC · <strong className="text-blanc">7 %</strong> jusqu&apos;à 5 000 € · <strong className="text-blanc">5 %</strong> au-delà</li>
-              <li>— Taux <strong className="text-blanc">réduit en enchère</strong>, encore réduit sur vos trajets retour à vide</li>
               <li>— Même taux partout en France, <strong className="text-blanc">sans majoration géographique</strong></li>
               <li>— Uniquement sur les missions gagnées, facturée après la prestation</li>
             </ul>
@@ -184,9 +183,8 @@ export function InscriptionTransporteur() {
             <p className="font-mono text-[11px] uppercase tracking-widest text-blanc-faint mb-3">Vos avantages</p>
             <ul className="text-sm text-blanc-dim space-y-1.5">
               <li>— Des leads filtrés par les zones que vous choisissez</li>
-              <li>— Vous fixez vos prix librement, en devis comme en enchère</li>
+              <li>— Vous fixez vos prix librement</li>
               <li>— Vous facturez le client 100 % en direct, aucun paiement ne passe par DealBus</li>
-              <li>— Publiez vos retours à vide et rentabilisez vos kilomètres perdus</li>
             </ul>
           </div>
 
