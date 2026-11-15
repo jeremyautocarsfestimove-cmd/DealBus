@@ -78,3 +78,10 @@ select option { color: #12151B; background-color: #FFFFFF; }
 .crm-onglet { @apply font-mono text-[11px] uppercase tracking-wider px-3 py-1.5 rounded-sm border border-ligne text-blanc-dim hover:text-blanc hover:border-ligne-strong transition; }
 .crm-onglet-on { @apply bg-blanc text-asphalte border-blanc hover:text-asphalte; }
 .crm-deal { @apply block bg-asphalte border border-ligne rounded px-3 py-2.5 text-[12.5px] hover:border-ligne-strong transition; }
+
+/* ---------- Menu en capsule flottante ---------- */
+:root { --nav-h: 74px; }
+@media (min-width: 768px) { :root { --nav-h: 84px; } }
+.nav-devis { background: linear-gradient(120deg, #F2B544 0%, #EE9B33 55%, #E8842B 100%); box-shadow: 0 12px 26px -12px rgba(224, 123, 26, .75); }
+/* À poser sur le premier bloc d'une page pour qu'il passe sous la capsule */
+.sous-capsule { margin-top: calc(var(--nav-h) * -1); padding-top: var(--nav-h); }

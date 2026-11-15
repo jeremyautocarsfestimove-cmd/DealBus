@@ -94,21 +94,31 @@ export function Nav() {
       { href: "/compte", label: "Mon compte", aide: "Email, mot de passe" },
     ];
 
+  const [panneau, setPanneau] = useState(false);
+  const client = checked && role !== "transporteur" && role !== "admin";
+  const LIENS = [
+    { href: "/#comment", label: "Comment ça marche" },
+    { href: "/#pour-qui", label: "Pour qui" },
+    { href: "/#vehicule", label: "Autocars" },
+    { href: "/#prix", label: "Tarifs" },
+    { href: "/#destinations", label: "Destinations" },
+    { href: "/#questions", label: "Questions" },
+  ];
+
   return (
-    <header className="sombre sticky top-0 z-[100] bg-asphalte/95 backdrop-blur border-b border-ligne">
-      <nav className="max-w-6xl mx-auto px-7 py-4 flex items-center justify-between">
-        <Link href="/" className="text-ambre"><Logo /></Link>
+    <header className="nav-capsule sticky top-0 z-[100] px-3 pt-2.5 pb-2.5 md:pt-3 md:pb-3 pointer-events-none">
+      <nav className="pointer-events-auto relative max-w-6xl mx-auto h-[54px] md:h-[60px] pl-5 pr-2 md:pr-2.5 flex items-center gap-5 rounded-full bg-white/80 backdrop-blur-xl text-encre shadow-[0_10px_30px_-12px_rgba(18,21,27,.35)] ring-1 ring-black/5">
+        <Link href="/" className="text-encre [&_svg]:text-[#E07B1A] flex-none"><Logo /></Link>
 
         {/* Menu central : jamais rendu tant que l'état est inconnu, jamais pour un transporteur */}
-        {checked && role !== "transporteur" && role !== "admin" && (
-          <div className="hidden md:flex items-center gap-8 text-sm text-blanc-dim">
-            <Link href="/demande" className="hover:text-blanc transition">Faire une demande</Link>
-            <Link href="/#comment-ca-marche" className="hover:text-blanc transition">Comment ça marche</Link>
-            {FEATURES.retours && <Link href="/retours" className="hover:text-blanc transition">Retours à vide</Link>}
-            {!name && <Link href="/pro" className="text-vert hover:opacity-80 transition">Inscription transporteur</Link>}
+        {client && (
+          <div className="hidden lg:flex items-center gap-6 text-[14.5px] text-[#4a5060]">
+            {LIENS.map((l) => <Link key={l.href} href={l.href} className="hover:text-encre transition whitespace-nowrap">{l.label}</Link>)}
+            {FEATURES.retours && <Link href="/retours" className="hover:text-encre transition">Retours à vide</Link>}
           </div>
         )}
 
+        <div className="ml-auto flex items-center gap-1.5 md:gap-2">
         {!checked ? (
           <span className="w-28" />
         ) : name ? (
@@ -117,10 +127,10 @@ export function Nav() {
               onClick={() => setMenuOuvert((o) => !o)}
               aria-expanded={menuOuvert}
               aria-haspopup="menu"
-              className={`flex items-center gap-2.5 text-sm font-semibold rounded-sm pl-1 pr-2.5 py-1 transition border
-                ${menuOuvert ? "bg-asphalte-2 border-ligne-strong" : "border-transparent hover:bg-asphalte-2"}`}
+              className={`flex items-center gap-2.5 text-sm font-semibold rounded-full pl-1 pr-3 py-1 transition border
+                ${menuOuvert ? "bg-white border-black/10" : "border-transparent hover:bg-white"}`}
             >
-              <span className="w-7 h-7 rounded-full bg-ambre text-encre flex items-center justify-center font-mono text-xs font-bold uppercase">
+              <span className="w-8 h-8 rounded-full bg-ambre text-encre flex items-center justify-center text-xs font-bold uppercase">
                 {name.charAt(0)}
               </span>
               <span className="hidden sm:block max-w-[140px] truncate">{name}</span>
@@ -128,10 +138,10 @@ export function Nav() {
             </button>
 
             {menuOuvert && (
-              <div role="menu" className="absolute right-0 mt-2 w-64 bg-asphalte border border-ligne-strong rounded shadow-2xl overflow-hidden">
+              <div role="menu" className="absolute right-0 mt-3 w-64 bg-white rounded-[22px] shadow-2xl ring-1 ring-black/5 overflow-hidden">
                 <div className="px-4 py-3 border-b border-ligne">
                   <p className="font-semibold text-sm truncate">{name}</p>
-                  <p className="font-mono text-[10.5px] uppercase tracking-wider text-blanc-faint">
+                  <p className="text-[12px] text-blanc-faint">
                     {role === "transporteur" ? "Transporteur" : role === "admin" ? "Administration" : "Client"}
                   </p>
                 </div>
@@ -148,7 +158,7 @@ export function Nav() {
                 </ul>
                 <div className="border-t border-ligne py-1.5">
                   <button role="menuitem" onClick={() => { setMenuOuvert(false); logout(); }}
-                    className="w-full text-left px-4 py-2.5 text-sm text-[#E8735D] hover:bg-asphalte-2 transition">
+                    className="w-full text-left px-4 py-2.5 text-sm text-[#C2410C] hover:bg-asphalte-2 transition">
                     Déconnexion
                   </button>
                 </div>
@@ -156,7 +166,37 @@ export function Nav() {
             )}
           </div>
         ) : (
-          <Link href="/login" className="btn-ghost text-xs px-4 py-2">Connexion →</Link>
+          <>
+            <Link href="/login" className="text-[14.5px] font-medium px-3 py-2 rounded-full hover:bg-white transition whitespace-nowrap">Connexion</Link>
+            <Link href="/pro" className="hidden sm:inline-flex text-[14.5px] font-semibold px-4 py-2.5 rounded-full bg-[#12151B] text-white hover:bg-[#2a2f3a] transition whitespace-nowrap">Espace pro</Link>
+          </>
+        )}
+        {client && (
+          <Link href="/demande" className="hidden md:inline-flex nav-devis text-[14.5px] font-semibold px-5 py-2.5 rounded-full text-encre whitespace-nowrap">Demander un devis</Link>
+        )}
+        {client && (
+          <button type="button" onClick={() => setPanneau((o) => !o)} aria-expanded={panneau} aria-label="Menu"
+            className="lg:hidden w-10 h-10 rounded-full grid place-items-center hover:bg-white transition">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+              {panneau ? <path d="M6 6l12 12M18 6L6 18" /> : <path d="M4 7h16M4 12h16M4 17h16" />}
+            </svg>
+          </button>
+        )}
+        </div>
+
+        {/* Panneau du menu sur téléphone et tablette */}
+        {panneau && client && (
+          <div className="lg:hidden absolute left-0 right-0 top-full mt-2 bg-white rounded-[26px] shadow-2xl ring-1 ring-black/5 p-3">
+            <ul>
+              {LIENS.map((l) => (
+                <li key={l.href}><Link href={l.href} onClick={() => setPanneau(false)} className="block px-4 py-3 rounded-2xl text-[16px] hover:bg-asphalte-2">{l.label}</Link></li>
+              ))}
+            </ul>
+            <div className="grid grid-cols-2 gap-2 mt-2 pt-3 border-t border-ligne">
+              <Link href="/pro" onClick={() => setPanneau(false)} className="text-center text-[15px] font-semibold px-4 py-3 rounded-full bg-[#12151B] text-white">Espace pro</Link>
+              <Link href="/demande" onClick={() => setPanneau(false)} className="nav-devis text-center text-[15px] font-semibold px-4 py-3 rounded-full text-encre">Demander un devis</Link>
+            </div>
+          </div>
         )}
       </nav>
     </header>

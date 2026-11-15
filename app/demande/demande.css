@@ -52,3 +52,5 @@
   .dem .dem-etapes > div { border-radius: 16px; }
   .dem .btn-primary, .dem .btn-ghost { flex: 1; }
 }
+/* Le fond gris remonte sous le menu en capsule */
+.dem { margin-top: calc(var(--nav-h) * -1); padding-top: var(--nav-h); }

@@ -212,3 +212,6 @@
 .acc .a-haut .a-devis .a-prog,.acc .a-haut .a-devis .a-route{color:#22262f}
 .acc .a-haut .a-devis input::placeholder{color:#565b6a}
 .acc .a-haut .a-devis .a-seg label{color:#22262f}
+/* Le haut de page remonte sous le menu en capsule */
+.acc .a-haut{margin-top:calc(var(--nav-h) * -1);padding-top:calc(var(--nav-h) + 26px)}
+@media (min-width:900px){.acc .a-haut{padding-top:calc(var(--nav-h) + 70px)}}
