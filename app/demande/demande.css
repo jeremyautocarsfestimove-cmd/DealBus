@@ -1,0 +1,54 @@
+/* Page de demande de devis, dans le style de la page d'accueil.
+   Tout est limité à .dem : on réhabille les classes du site sans toucher au parcours. */
+.dem { background: #f6f6f9; min-height: 100vh; --trait: #e7e8ee; --muet: #8b90a0; --texte: #4a5060;
+  --grad: linear-gradient(120deg, #F2B544 0%, #EE9B33 55%, #E8842B 100%); --lueur: 0 12px 26px -12px rgba(224, 123, 26, .75); }
+
+/* Typographie : plus de capitales condensées ni de police à chasse fixe */
+.dem .font-mono, .dem .font-condensed { font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important; }
+.dem .font-mono { font-variant-numeric: tabular-nums; }
+.dem .uppercase { text-transform: none !important; }
+.dem [class*="tracking-"] { letter-spacing: normal !important; }
+.dem .h-display { font-family: var(--font-inter), -apple-system, sans-serif; text-transform: none; font-weight: 650; letter-spacing: -0.04em !important; line-height: 1.05; }
+.dem h1.h-display { font-size: 38px; text-wrap: balance; }
+.dem .eyebrow { background: none; padding: 0; border-radius: 0; text-transform: none; letter-spacing: 0 !important;
+  font-family: var(--font-caveat), "Segoe Script", cursive !important; font-size: 25px; font-weight: 600; color: #3b4050; line-height: 1; }
+
+/* Cartes */
+.dem .card { background: #fff; border: 0; border-radius: 26px; padding: 22px 20px; box-shadow: 0 20px 50px -30px rgba(18, 21, 27, .25); }
+.dem .dem-assistant { border-radius: 26px; padding: 22px 20px; }
+.dem .dem-assistant > p:first-child { font-family: var(--font-caveat), "Segoe Script", cursive !important; font-size: 23px; font-weight: 600; color: #f6e2b8; line-height: 1; }
+.dem .dem-assistant .rounded-r-sm { border-radius: 0 14px 14px 0; }
+.dem .dem-assistant .h-display { letter-spacing: -0.03em !important; color: #F7B84B; }
+
+/* Étapes */
+.dem .dem-etapes { border: 0; border-radius: 999px; background: #fff; padding: 5px; gap: 4px; overflow: visible; box-shadow: 0 0 0 1px var(--trait); }
+.dem .dem-etapes > div { border: 0; border-radius: 999px; padding: 9px 14px; }
+.dem .dem-etapes > div.bg-ambre-dim { background: #12151B; color: #fff; }
+
+/* Champs */
+.dem .label { font-family: var(--font-inter), -apple-system, sans-serif; text-transform: none; font-size: 13.5px; font-weight: 650; color: #12151B; margin-bottom: 6px; letter-spacing: 0 !important; }
+.dem .input { font-size: 16px; padding: 13px 14px; border: 1px solid var(--trait); border-radius: 14px; background: #fff; }
+.dem .input:focus { border-color: #E8842B; box-shadow: 0 0 0 3px rgba(232, 132, 43, .15); }
+.dem input[type="date"].input, .dem input[type="time"].input { min-height: 50px; }
+.dem .dem-check { border-radius: 16px; padding: 12px 14px; }
+.dem .dem-check > span:first-child { border-radius: 6px; }
+.dem .card button.rounded-full { padding: 9px 16px; font-size: 14px; }
+.dem .card .text-xs { font-size: 13px; }
+.dem .card .rounded-sm { border-radius: 14px; }
+
+/* Boutons en pilule */
+.dem .btn, .dem .btn-primary, .dem .btn-ghost { border-radius: 999px; font-weight: 650; font-size: 15.5px; padding: 13px 24px; }
+.dem .btn-primary { background: var(--grad); color: #12151B; box-shadow: var(--lueur); }
+.dem .btn-ghost { background: #ebebf0; border-color: transparent; color: #12151B; }
+.dem .btn-ghost:hover { border-color: transparent; background: #e2e2e9; }
+
+@media (min-width: 900px) {
+  .dem h1.h-display { font-size: 60px; }
+  .dem .card { padding: 30px; }
+  .dem .dem-assistant { padding: 26px; }
+}
+@media (max-width: 639px) {
+  .dem .dem-etapes { border-radius: 22px; }
+  .dem .dem-etapes > div { border-radius: 16px; }
+  .dem .btn-primary, .dem .btn-ghost { flex: 1; }
+}
