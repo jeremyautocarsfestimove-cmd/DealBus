@@ -19,6 +19,7 @@ export const ONGLETS_PRO: Onglet[] = [
       { href: "/pro/profil", label: "Coordonnées" },
       { href: "/pro/profil#zones", label: "Mes zones" },
       { href: "/pro/profil#vehicules", label: "Véhicules" },
+      { href: "/pro/badge", label: "Badge partenaire" },
     ],
   },
 ];
