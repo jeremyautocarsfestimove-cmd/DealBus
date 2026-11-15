@@ -1,6 +1,10 @@
 import { Nav } from "@/components/Nav";
 
-export const metadata = { title: "Conditions Générales d'Utilisation — DealBus" };
+export const metadata = {
+  title: "Conditions Générales d'Utilisation",
+  description: "Les conditions générales d'utilisation de la plateforme DealBus, pour les clients et les transporteurs.",
+  alternates: { canonical: "/cgu" },
+};
 
 function Article({ n, titre, children }: { n: number; titre: string; children: React.ReactNode }) {
   return (

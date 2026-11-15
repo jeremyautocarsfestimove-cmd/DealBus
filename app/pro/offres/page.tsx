@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { contexteTransporteur, eur, jourCourt, ville, dateFuture } from "@/lib/pro";
 import { FEATURES } from "@/lib/features";
 
-export const metadata = { title: "Mes offres — DealBus" };
+export const metadata = { title: "Mes offres — DealBus", robots: { index: false, follow: false } };
 
 const STATUT: Record<string, { label: string; cls: string }> = {
   envoyee: { label: "En attente", cls: "bg-[#F1F0ED] text-[#55534E]" },

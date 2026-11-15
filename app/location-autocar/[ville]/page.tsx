@@ -82,7 +82,7 @@ export async function generateMetadata(
     const court = [...v.destinations].sort((a, b) => a.km - b.km)[0];
     const f = court ? estimerTrajet(court.km) : null;
     return {
-      title: `Location d'autocar avec chauffeur ${v.dans} — devis comparés | DealBus`,
+      title: `Location d'autocar avec chauffeur ${v.dans}`,
       description: f
         ? `Louez un autocar avec chauffeur ${v.dans} (${v.dept}). ${v.nom} → ${court.vers} : ${formatEuros(f.bas)} à ${formatEuros(f.haut)} l'aller-retour à titre indicatif. Devis fermes de transporteurs vérifiés, comparés en une demande. Gratuit, sans engagement.`
         : `Louez un autocar avec chauffeur ${v.dans} (${v.dept}) : devis fermes de transporteurs vérifiés, comparés en une seule demande. Gratuit, sans engagement.`,
@@ -94,7 +94,7 @@ export async function generateMetadata(
   if (r) {
     const depts = departementsDeRegion(r.nom);
     return {
-      title: `Location d'autocar ${r.dans} — bus avec chauffeur, devis comparés | DealBus`,
+      title: `Location d'autocar avec chauffeur ${r.dans}`,
       description: `Location d'autocar avec chauffeur ${r.dans} : ${depts.length} départements couverts, transporteurs vérifiés, devis fermes comparés. Gratuit côté client, sans engagement.`,
       alternates: { canonical: `https://dealbus.fr/location-autocar/${r.slug}` },
     };
@@ -106,7 +106,7 @@ export async function generateMetadata(
     const f = court ? estimerTrajet(court.km) : null;
     const art = d.code === "75" ? "" : "le département ";
     return {
-      title: `Location d'autocar ${d.nom} (${d.code}) — bus avec chauffeur, devis comparés | DealBus`,
+      title: `Location d'autocar ${d.nom} (${d.code}) avec chauffeur`,
       description: f
         ? `Location d'autocar avec chauffeur dans ${art}${d.nom} : ${d.villes.length} villes desservies, ordres de prix dès ${formatEuros(f.bas)} l'aller-retour, devis fermes de transporteurs vérifiés. Gratuit côté client.`
         : `Location d'autocar avec chauffeur dans ${art}${d.nom} : transporteurs vérifiés, devis fermes comparés. Gratuit côté client.`,

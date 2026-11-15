@@ -10,6 +10,12 @@ import { DemanderSuppression } from "./pro-actions";
 import { ListeLeads, type Lead } from "./ListeLeads";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
+export const metadata = {
+  title: "Espace transporteur : recevez des demandes d'autocar — DealBus",
+  description: "Autocaristes : recevez les demandes de transport de groupe de votre secteur et répondez avec votre prix. Inscription gratuite, commission uniquement sur les missions réalisées.",
+  alternates: { canonical: "/pro" },
+};
+
 export default async function ProPage() {
   const ctx = await contexteTransporteur();
 

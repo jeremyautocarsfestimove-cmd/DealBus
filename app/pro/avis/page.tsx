@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { contexteTransporteur, jourCourt, ville } from "@/lib/pro";
 
-export const metadata = { title: "Avis — DealBus" };
+export const metadata = { title: "Avis — DealBus", robots: { index: false, follow: false } };
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export default async function AvisProPage() {

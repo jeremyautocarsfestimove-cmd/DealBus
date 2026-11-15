@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { SeoPage } from "../_seo/SeoPage";
 
 export const metadata: Metadata = {
-  title: "Réglementation du transport de voyageurs en autocar — le guide de l'organisateur | DealBus",
+  title: "Réglementation du transport en autocar : le guide",
   description:
     "Temps de conduite, pauses, amplitude, double équipage, liste des passagers : la réglementation autocar expliquée simplement aux organisateurs de voyages de groupe. Ce qu'elle change pour votre trajet.",
   alternates: { canonical: "https://dealbus.fr/reglementation" },

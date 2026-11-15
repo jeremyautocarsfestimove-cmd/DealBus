@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { contexteTransporteur } from "@/lib/pro";
 import { Copier } from "./copier";
 
-export const metadata = { title: "Badge partenaire — DealBus" };
+export const metadata = { title: "Badge partenaire — DealBus", robots: { index: false, follow: false } };
 
 const CODE_BADGE = `<a href="https://dealbus.fr" title="DealBus, devis d'autocar avec chauffeur"><img src="https://dealbus.fr/badge-partenaire.svg" alt="Partenaire DealBus, devis d'autocar avec chauffeur" width="200" height="60"></a>`;
 const CODE_TEXTE = `Partenaire <a href="https://dealbus.fr">DealBus</a>, la plateforme de devis d'autocar avec chauffeur.`;

@@ -13,6 +13,10 @@ import "./accueil.css";
 const caveat = Caveat({ weight: ["600"], subsets: ["latin"], variable: "--font-caveat" });
 
 /* eslint-disable @next/next/no-img-element */
+// La canonique est posée ici et non dans le layout racine : sinon toutes les
+// pages sans réglage propre se déclarent copies de l'accueil.
+export const metadata = { alternates: { canonical: "/" } };
+
 export default function Home() {
   return (
     <>

@@ -17,7 +17,7 @@ export async function generateMetadata(
   if (!t) return {};
   const f = estimerTrajet(t.km);
   return {
-    title: `Location d'autocar ${t.depart} → ${t.arrivee} — devis comparés | DealBus`,
+    title: `Autocar ${t.depart} → ${t.arrivee} : prix et devis comparés`,
     description: `Louer un bus avec chauffeur de ${t.depart} à ${t.arrivee} (≈ ${t.km} km, ${t.duree}) : comptez ${formatEuros(f.bas)} à ${formatEuros(f.haut)} l'aller-retour à titre indicatif. Recevez plusieurs devis fermes de transporteurs vérifiés. Gratuit, sans engagement.`,
     alternates: { canonical: `https://dealbus.fr/location-autocar/trajet/${t.slug}` },
   };

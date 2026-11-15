@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { Demande } from "@/lib/types";
 import { ListeDemandes, type MissionResume, type OffresResume } from "./Liste";
 
-export const metadata = { title: "Mes demandes" };
+export const metadata = { title: "Mes demandes", robots: { index: false, follow: false } };
 
 export default async function MesDemandesPage() {
   const supabase = await createClient();

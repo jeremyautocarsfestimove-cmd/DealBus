@@ -5,6 +5,9 @@ import { ReserverRetourButton } from "./reserver-button";
 import { FEATURES } from "@/lib/features";
 import Link from "next/link";
 
+// Module en pause : la page reste accessible mais sort de l'index de Google.
+export const metadata = { title: "Retours à vide", robots: { index: FEATURES.retours, follow: true }, alternates: { canonical: "/retours" } };
+
 export default async function RetoursPage() {
   if (!FEATURES.retours) {
     return (

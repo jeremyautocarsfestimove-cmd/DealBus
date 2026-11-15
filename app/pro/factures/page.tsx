@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { contexteTransporteur, jourCourt, ville } from "@/lib/pro";
 
-export const metadata = { title: "Factures — DealBus" };
+export const metadata = { title: "Factures — DealBus", robots: { index: false, follow: false } };
 
 const euro2 = (n: number) => Number(n).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
 const STATUT: Record<string, { label: string; cls: string }> = {

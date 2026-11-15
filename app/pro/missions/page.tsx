@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { contexteTransporteur, eur, jourCourt, ville, dateFuture } from "@/lib/pro";
 import { DeclarerTerminee, AnnulerMission } from "../pro-actions";
 
-export const metadata = { title: "Missions — DealBus" };
+export const metadata = { title: "Missions — DealBus", robots: { index: false, follow: false } };
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export default async function MissionsPage() {

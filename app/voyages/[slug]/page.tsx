@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const v = voyageParSlug((await params).slug);
   if (!v) return {};
   return {
-    title: `${v.titre} — devis de transporteurs vérifiés | DealBus`,
+    title: v.titre,
     description: `${v.accroche} Gratuit pour le client, sans engagement.`,
     alternates: { canonical: `https://dealbus.fr/voyages/${v.slug}` },
   };

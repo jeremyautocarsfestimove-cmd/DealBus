@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import "../demande/demande.css";
 import "./compte.css";
 
-export const metadata = { title: "Mon compte" };
+export const metadata = { title: "Mon compte", robots: { index: false, follow: false } };
 
 const caveat = Caveat({ weight: ["600"], subsets: ["latin"], variable: "--font-caveat" });
 

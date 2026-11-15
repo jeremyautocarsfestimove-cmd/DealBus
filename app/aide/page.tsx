@@ -2,7 +2,11 @@ import { Suspense } from "react";
 import { Nav } from "@/components/Nav";
 import { AideWidget } from "@/components/AideWidget";
 
-export const metadata = { title: "Aide — DealBus" };
+export const metadata = {
+  title: "Aide et questions fréquentes",
+  description: "Les réponses aux questions sur DealBus : demander un devis d'autocar, comparer les offres, choisir un transporteur, gérer son compte.",
+  alternates: { canonical: "/aide" },
+};
 
 // Version pleine page de la bulle « Aide » : cible des liens dans les emails.
 export default function AidePage() {

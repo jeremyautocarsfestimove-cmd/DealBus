@@ -5,7 +5,7 @@ import { FEATURES } from "@/lib/features";
 import { ParametresDevis } from "../parametres-devis";
 import { PublierRetour, ReservationActions, GererVehicules, CgvForm, GererZones, DemanderSuppression, ModifierProfilTransporteur } from "../pro-actions";
 
-export const metadata = { title: "Mon entreprise — DealBus" };
+export const metadata = { title: "Mon entreprise — DealBus", robots: { index: false, follow: false } };
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export default async function ProfilProPage() {

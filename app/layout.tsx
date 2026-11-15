@@ -25,7 +25,6 @@ export const metadata: Metadata = {
   description:
     "Réservez un autocar avec chauffeur pour votre groupe : une seule demande, des devis fermes de transporteurs vérifiés à comparer. Gratuit pour le client.",
   keywords: ["location autocar", "réserver un bus", "devis autocar", "location bus avec chauffeur", "transport de groupe", "comparateur autocar"],
-  alternates: { canonical: "/" },
   openGraph: {
     type: "website",
     locale: "fr_FR",
