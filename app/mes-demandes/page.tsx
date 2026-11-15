@@ -1,9 +1,9 @@
-import Link from "next/link";
 import { Nav } from "@/components/Nav";
-import { StatusChip } from "@/components/StatusChip";
 import { createClient } from "@/lib/supabase/server";
 import type { Demande } from "@/lib/types";
-import { demandeActive, dateDepassee } from "@/lib/demandes";
+import { ListeDemandes, type MissionResume, type OffresResume } from "./Liste";
+
+export const metadata = { title: "Mes demandes" };
 
 export default async function MesDemandesPage() {
   const supabase = await createClient();
@@ -14,166 +14,36 @@ export default async function MesDemandesPage() {
     .select("*")
     .eq("client_id", user!.id)
     .order("created_at", { ascending: false });
+  const D = (demandes ?? []) as Demande[];
 
-  const { data: missions } = await supabase
-    .from("missions")
-    .select("demande_id, statut, annulation_motif, annulation_demandee_at, annulation_decision")
-    .eq("client_id", user!.id);
+  const [{ data: missions }, { data: nonLus }, { data: offres }] = await Promise.all([
+    supabase.from("missions")
+      .select("demande_id, statut, annulation_motif, annulation_demandee_at, annulation_decision")
+      .eq("client_id", user!.id),
+    // Messages non lus (écrits par les transporteurs) par demande
+    supabase.from("messages").select("demande_id").neq("auteur_id", user!.id).is("lu_le", null),
+    D.length
+      ? supabase.from("offres").select("demande_id, prix_ttc, statut").in("demande_id", D.map((d) => d.id))
+      : Promise.resolve({ data: [] as { demande_id: string; prix_ttc: number; statut: string }[] }),
+  ]);
 
-  // Messages non lus (écrits par les transporteurs) par demande
-  const { data: nonLus } = await supabase
-    .from("messages").select("demande_id")
-    .neq("auteur_id", user!.id).is("lu_le", null);
-  const nonLusParDemande = new Map<string, number>();
-  for (const m of nonLus ?? []) nonLusParDemande.set(m.demande_id, (nonLusParDemande.get(m.demande_id) ?? 0) + 1);
+  const nonLusParDemande: Record<string, number> = {};
+  for (const m of nonLus ?? []) nonLusParDemande[m.demande_id] = (nonLusParDemande[m.demande_id] ?? 0) + 1;
 
-  const missionParDemande = new Map(
-    (missions ?? [])
-      .filter((m) => m.demande_id)
-      .map((m) => [m.demande_id as string, m])
-  );
+  // Nombre d'offres encore valables et prix le plus bas, par demande
+  const offresParDemande: Record<string, OffresResume> = {};
+  for (const o of offres ?? []) {
+    if (o.statut === "non_retenue") continue;
+    const r = (offresParDemande[o.demande_id] ??= { nb: 0, min: null });
+    r.nb += 1;
+    const prix = Number(o.prix_ttc);
+    if (prix > 0 && (r.min === null || prix < r.min)) r.min = prix;
+  }
 
   return (
     <>
       <Nav />
-      <main className="max-w-4xl mx-auto px-7 py-14">
-        <p className="eyebrow mb-4">Espace client</p>
-        <h1 className="h-display text-4xl mb-10">Vos demandes.</h1>
-
-        <div className="space-y-3.5">
-          {(demandes as Demande[] | null)?.filter(demandeActive).map((d) => {
-            const mission = missionParDemande.get(d.id);
-
-            const annulationSignalee =
-              !!mission?.annulation_motif &&
-              (mission.statut === "annulee" || mission.statut === "litige");
-
-            const annulationConfirmee = mission?.statut === "annulee";
-            const annulationEnAttente =
-              (!!mission?.annulation_demandee_at && !mission?.annulation_decision && mission?.statut === "a_venir") ||
-              (!!d.annulation_demandee_at && !d.annulation_decision);
-
-            const enchereTerminee =
-              d.mode === "enchere" &&
-              d.statut === "ouverte" &&
-              !!d.enchere_fin &&
-              new Date(d.enchere_fin).getTime() <= Date.now();
-
-            return (
-              <Link
-                key={d.id}
-                href={`/mes-demandes/${d.id}`}
-                className={`card group block transition ${
-                  annulationSignalee
-                    ? "border-[#E8735D]/35 hover:border-[#E8735D]/60"
-                    : "hover:border-ligne-strong"
-                }`}
-              >
-                <div className="flex items-center justify-between flex-wrap gap-3 mb-2">
-                  <span className="flex items-center gap-3 font-condensed font-semibold text-xl uppercase">
-                    <span className={d.mode === "enchere" ? "tag-enchere" : "tag-devis"}>
-                      {d.mode === "enchere" ? "Enchère" : "Devis"}
-                    </span>
-                    {d.depart_adresse}
-                    <span className="text-blanc-faint font-sans normal-case font-normal">→</span>
-                    {d.arrivee_adresse}
-                    {nonLusParDemande.get(d.id) && (
-                      <span className="tag bg-ambre text-encre normal-case">💬 {nonLusParDemande.get(d.id)} nouveau{(nonLusParDemande.get(d.id) ?? 0) > 1 ? "x" : ""} message{(nonLusParDemande.get(d.id) ?? 0) > 1 ? "s" : ""}</span>
-                    )}
-                  </span>
-
-                  {annulationEnAttente ? (
-                    <span className="inline-flex items-center gap-2 rounded-lg border border-ambre/45 bg-ambre/10 px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-ambre-fort">
-                      <span className="inline-flex h-2 w-2 rounded-full bg-ambre" />
-                      Annulation en attente de DealBus
-                    </span>
-                  ) : annulationSignalee ? (
-                    <span className="inline-flex items-center gap-2 rounded-lg border border-[#E8735D]/40 bg-[#E8735D]/10 px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-[#E8735D]">
-                      <span className="inline-flex h-2 w-2 rounded-full bg-[#E8735D]" />
-                      {annulationConfirmee ? "Mission annulée" : "Annulation signalée"}
-                    </span>
-                  ) : d.statut === "ouverte" && d.mode === "enchere" ? (
-                    enchereTerminee ? (
-                      <span className="inline-flex items-center justify-center rounded-lg border border-ambre/45 bg-ambre/10 px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-ambre transition group-hover:bg-ambre group-hover:text-asphalte">
-                        Voir l&apos;enchère
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-2 rounded-lg border border-vert/30 bg-vert/10 px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-vert">
-                        <span className="relative flex h-2 w-2">
-                          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-vert opacity-60" />
-                          <span className="relative inline-flex h-2 w-2 rounded-full bg-vert" />
-                        </span>
-                        En direct
-                      </span>
-                    )
-                  ) : (
-                    <StatusChip kind={d.statut === "confirmee" ? "confirmee" : "ouverte"}>
-                      {d.statut === "ouverte"
-                        ? (dateDepassee(d) ? "Expirée (date passée)" : "En attente d'offres")
-                        : d.statut === "confirmee"
-                          ? "Transporteur sélectionné"
-                          : d.statut === "expiree" ? "Close" : d.statut === "annulee" ? "Annulée" : d.statut}
-                    </StatusChip>
-                  )}
-                </div>
-
-                <p className="font-mono text-xs text-blanc-faint">
-                  {new Date(d.date_aller).toLocaleDateString("fr-FR")} · {d.passagers} passagers · Demande #{d.numero}
-                </p>
-
-                {annulationSignalee && (
-                  <div className="mt-3 border-t border-[#E8735D]/20 pt-3">
-                    <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-[#E8735D]">
-                      {annulationConfirmee
-                        ? "Annulation confirmée"
-                        : "En attente de traitement DealBus"}
-                    </p>
-                    <p className="mt-1 text-xs text-blanc-dim">
-                      Motif : {mission?.annulation_motif}
-                    </p>
-                  </div>
-                )}
-              </Link>
-            );
-          })}
-
-          {!demandes?.length && (
-            <div className="card text-center py-12">
-              <p className="text-blanc-dim mb-5">Aucune demande pour le moment.</p>
-              <Link href="/demande" className="btn-primary">
-                Faire ma première demande →
-              </Link>
-            </div>
-          )}
-          {!!demandes?.length && !demandes.some(demandeActive) && (
-            <div className="card text-center py-10">
-              <p className="text-blanc-dim mb-5">Aucune demande en cours. Vos demandes passées sont dans les archives ci-dessous.</p>
-              <Link href="/demande" className="btn-primary">Nouvelle demande →</Link>
-            </div>
-          )}
-        </div>
-
-        {!!demandes?.some((d) => !demandeActive(d)) && (
-          <details className="mt-10 group">
-            <summary className="cursor-pointer font-mono text-[11px] uppercase tracking-wider text-blanc-faint hover:text-blanc-dim">
-              Archives · {demandes.filter((d) => !demandeActive(d)).length} demande{demandes.filter((d) => !demandeActive(d)).length > 1 ? "s" : ""} passée{demandes.filter((d) => !demandeActive(d)).length > 1 ? "s" : ""} ▾
-            </summary>
-            <div className="space-y-3 mt-4 opacity-80">
-              {(demandes as Demande[]).filter((d) => !demandeActive(d)).map((d) => (
-                <Link key={d.id} href={`/mes-demandes/${d.id}`} className="card block hover:border-ligne-strong transition">
-                  <div className="flex items-center justify-between flex-wrap gap-3">
-                    <span className="font-condensed font-semibold text-lg uppercase">{d.depart_adresse} <span className="text-blanc-faint font-sans normal-case font-normal">→</span> {d.arrivee_adresse}</span>
-                    <span className="tag bg-asphalte-3 text-blanc-dim">
-                      {d.statut === "confirmee" ? "Réalisée / passée" : d.statut === "annulee" ? "Annulée" : d.statut === "expiree" ? "Close" : "Expirée"}
-                    </span>
-                  </div>
-                  <p className="font-mono text-xs text-blanc-faint mt-1.5">{new Date(d.date_aller).toLocaleDateString("fr-FR")} · {d.passagers} passagers · Demande #{d.numero}</p>
-                </Link>
-              ))}
-            </div>
-          </details>
-        )}
-      </main>
+      <ListeDemandes demandes={D} missions={(missions ?? []) as MissionResume[]} offres={offresParDemande} nonLus={nonLusParDemande} />
     </>
   );
 }

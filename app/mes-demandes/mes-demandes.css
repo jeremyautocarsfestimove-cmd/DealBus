@@ -1,0 +1,77 @@
+/* Espace client « Mes demandes » : des billets de voyage sur fond crème.
+   Volontairement différent de l'espace transporteur (bandeau sombre, compteurs, onglets). */
+.mesd { --encre: #12151B; --muet: #8b90a0; --texte: #4a5060; --trait: #ecdcbb; --orange: #E07B1A;
+  --grad: linear-gradient(120deg, #F2B544 0%, #EE9B33 55%, #E8842B 100%); --lueur: 0 12px 26px -12px rgba(224, 123, 26, .75);
+  background: linear-gradient(180deg, #fdf4e3 0%, #fdf4e3 320px, #fff 760px); min-height: 100vh; color: var(--encre);
+  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 16px; line-height: 1.5; }
+.mesd-page { max-width: 1000px; margin: 0 auto; padding: 34px 18px 80px; }
+.mesd-main { display: block; font-family: var(--font-caveat), "Segoe Script", cursive; font-size: 25px; font-weight: 600; color: #6b4a12; line-height: 1; margin-bottom: 10px; }
+.mesd h1 { font-size: 36px; font-weight: 650; letter-spacing: -.04em; line-height: 1.04; text-wrap: balance; }
+.mesd h1 em { font-style: normal; color: #b08f55; }
+.mesd-tete { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 26px; }
+.mesd-btn { display: inline-block; text-align: center; font-weight: 650; font-size: 15px; border-radius: 999px; padding: 12px 22px; background: var(--grad); color: var(--encre); box-shadow: var(--lueur); white-space: nowrap; transition: transform .15s ease; }
+.mesd-btn.mesd-gris { background: #f1f1f5; box-shadow: none; }
+a:hover > .mesd-action .mesd-btn, a.mesd-btn:hover { transform: translateY(-1px); }
+.mesd-liste { display: grid; gap: 16px; }
+
+/* Le billet */
+.mesd-billet { display: grid; grid-template-columns: 1fr; background: #fff; border-radius: 26px; box-shadow: 0 24px 50px -34px rgba(107, 74, 18, .45), 0 0 0 1px rgba(236, 220, 187, .7); transition: transform .2s ease, box-shadow .2s ease; position: relative; }
+.mesd-billet:hover { transform: translateY(-3px); box-shadow: 0 30px 60px -32px rgba(107, 74, 18, .55), 0 0 0 1px rgba(236, 220, 187, .9); }
+.mesd-billet.mesd-alerte { box-shadow: 0 0 0 2px rgba(194, 65, 12, .35), 0 24px 50px -34px rgba(194, 65, 12, .35); }
+.mesd-date { display: flex; align-items: baseline; gap: 8px; padding: 16px 20px 14px; border-bottom: 2px dashed var(--trait); color: #6b4a12; font-size: 14px; font-weight: 600; text-transform: capitalize; }
+.mesd-date b { font-size: 30px; font-weight: 650; letter-spacing: -.04em; line-height: 1; color: var(--encre); }
+.mesd-corps { padding: 18px 20px 4px; min-width: 0; }
+.mesd-trajet { display: grid; gap: 12px; }
+.mesd-trajet strong { font-size: 19px; font-weight: 650; letter-spacing: -.02em; line-height: 1.2; overflow-wrap: anywhere; }
+.mesd-trajet i { display: block; position: relative; height: 18px; border-bottom: 2px dotted #d9c9a6; margin: 0 2px 4px; }
+.mesd-trajet i span { position: absolute; bottom: -3px; transform: translateX(-50%); transition: left .6s ease; }
+.mesd-car { width: 30px; height: 17px; display: block; }
+.mesd-car .c { fill: #E8842B; } .mesd-car .v { fill: #fff; opacity: .9; } .mesd-car circle { fill: #12151B; stroke: #fff; stroke-width: 1; }
+.mesd-meta { font-size: 13.5px; color: var(--texte); margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; }
+.mesd-msg { background: #12151B; color: #fff; border-radius: 999px; padding: 3px 10px; font-size: 12.5px; font-weight: 600; }
+.mesd-etapes { list-style: none; margin: 16px 0 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 8px 10px; font-size: 13px; color: var(--muet); }
+.mesd-etapes li { display: flex; align-items: center; gap: 7px; min-width: 0; }
+.mesd-etapes span { flex: none; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 11.5px; font-weight: 700; border: 1.5px solid #dcdde5; color: var(--muet); background: #fff; }
+.mesd-etapes .fait { color: var(--encre); }
+.mesd-etapes .fait span { background: #0E7A4C; border-color: #0E7A4C; color: #fff; }
+.mesd-etapes .encours { color: var(--encre); font-weight: 650; }
+.mesd-etapes .encours span { background: var(--grad); border-color: transparent; color: var(--encre); box-shadow: var(--lueur); }
+.mesd-action { padding: 16px 20px 20px; display: grid; gap: 4px; }
+.mesd-etat { font-size: 18px; font-weight: 650; letter-spacing: -.02em; }
+.mesd-detail { font-size: 14px; color: var(--texte); margin-bottom: 10px; }
+.mesd-alerte .mesd-etat { color: #C2410C; }
+
+/* États vides */
+.mesd-vide { background: #fff; border-radius: 26px; padding: 34px 24px; text-align: center; box-shadow: 0 0 0 1px rgba(236, 220, 187, .7); }
+.mesd-vide h2 { font-size: 26px; font-weight: 650; letter-spacing: -.03em; line-height: 1.1; }
+.mesd-vide p { color: var(--texte); margin: 8px auto 18px; max-width: 42ch; }
+
+/* Archives */
+.mesd-archives { margin-top: 34px; }
+.mesd-archives summary { cursor: pointer; font-weight: 650; font-size: 15px; color: var(--texte); list-style: none; display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 999px; background: #f1f1f5; }
+.mesd-archives summary::-webkit-details-marker { display: none; }
+.mesd-archives summary::after { content: "+"; color: var(--orange); font-size: 18px; line-height: 1; }
+.mesd-archives[open] summary::after { content: "–"; }
+.mesd-archives ul { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 8px; }
+.mesd-archives a { display: grid; gap: 2px; background: #f6f6f9; border-radius: 18px; padding: 14px 18px; }
+.mesd-archives a:hover { background: #efeff4; }
+.mesd-archives .t { font-weight: 650; letter-spacing: -.01em; overflow-wrap: anywhere; }
+.mesd-archives .m, .mesd-archives .e { font-size: 13px; color: var(--texte); }
+
+@media (min-width: 860px) {
+  .mesd-page { padding: 56px 28px 110px; }
+  .mesd h1 { font-size: 56px; }
+  .mesd-billet { grid-template-columns: 132px minmax(0, 1fr) 250px; }
+  .mesd-date { flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 20px 10px; border-bottom: 0; border-right: 2px dashed var(--trait); position: relative; }
+  .mesd-date b { font-size: 52px; }
+  /* Encoches du billet, en haut et en bas de la ligne de découpe */
+  .mesd-date::before, .mesd-date::after { content: ""; position: absolute; right: -11px; width: 20px; height: 20px; border-radius: 50%; background: #fdf4e3; box-shadow: inset 0 0 0 1px rgba(236, 220, 187, .9); }
+  .mesd-date::before { top: -10px; } .mesd-date::after { bottom: -10px; }
+  .mesd-corps { padding: 24px 26px; }
+  .mesd-trajet { grid-template-columns: minmax(0, 1fr) minmax(90px, 1fr) minmax(0, 1fr); align-items: center; gap: 14px; }
+  .mesd-trajet strong:last-child { text-align: right; }
+  .mesd-trajet i { margin: 0; }
+  .mesd-etapes { grid-template-columns: repeat(4, auto); justify-content: space-between; }
+  .mesd-action { padding: 24px 24px 24px 0; align-content: center; }
+  .mesd-archives a { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) auto; align-items: center; gap: 16px; }
+}
