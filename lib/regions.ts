@@ -39,7 +39,7 @@ export const REGIONS: Region[] = [
   },
   {
     slug: "auvergne-rhone-alpes", nom: "Auvergne-Rhône-Alpes", dans: "en Auvergne-Rhône-Alpes",
-    contexte: "Deuxième région économique de France et porte des Alpes, elle vit au rythme des congrès lyonnais et surtout des transferts neige : de décembre à avril, des centaines d'autocars montent et descendent des stations chaque semaine — une saisonnalité qui crée les meilleures opportunités de retours à vide du pays.",
+    contexte: "Deuxième région économique de France et porte des Alpes, elle vit au rythme des congrès lyonnais et surtout des transferts neige : de décembre à avril, des centaines d'autocars montent et descendent des stations chaque semaine.",
     saison: "La saisonnalité est la plus marquée de France : de décembre à avril, les rotations neige mobilisent des flottes entières le samedi, et les prix suivent. Hors saison de ski, la région redevient très abordable pour les congrès et les sorties scolaires.",
     axesRetours: "Les rotations vers les stations alpines produisent chaque hiver des centaines de trajets retour à prix cassé, dans les deux sens.",
   },

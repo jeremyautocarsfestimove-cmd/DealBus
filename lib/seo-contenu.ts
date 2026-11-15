@@ -95,20 +95,16 @@ const POOL: ((z: ContexteZone) => QuestionFAQ)[] = [
   (z) => ({
     q: `Combien coûte la location d'un autocar ${z.dans} ?`,
     r: z.trajetCourt
-      ? `Pour donner un ordre de grandeur : ${z.nom} → ${z.trajetCourt.vers} (environ ${z.trajetCourt.km} km), en aller-retour dans la journée avec un autocar de 50 places, se situe généralement entre ${formatEuros(estimerTrajet(z.trajetCourt.km).bas)} et ${formatEuros(estimerTrajet(z.trajetCourt.km).haut)} tout compris. La fourchette est large parce que le prix dépend de l'amplitude horaire du conducteur, de la saison et du planning du transporteur ce jour-là. C'est précisément ce que la mise en concurrence permet de trancher : sur DealBus, les écarts entre deux offres pour un même trajet atteignent couramment 20 à 30 %.`
+      ? `Pour donner un ordre de grandeur : ${z.nom} → ${z.trajetCourt.vers} (environ ${z.trajetCourt.km} km), en aller-retour dans la journée avec un autocar de 50 places, se situe généralement entre ${formatEuros(estimerTrajet(z.trajetCourt.km).bas)} et ${formatEuros(estimerTrajet(z.trajetCourt.km).haut)} tout compris. La fourchette est large parce que le prix dépend de l'amplitude horaire du conducteur, de la saison et du planning du transporteur ce jour-là. C'est ce que la mise en concurrence permet de trancher : vous comparez des prix fermes, établis pour votre trajet.`
       : `Le prix dépend de la distance, de la durée de mise à disposition, de la taille du véhicule et de la saison. Publier votre demande gratuitement reste le moyen le plus rapide d'obtenir des prix fermes et comparables ${dansToDe(z.dans)}.`,
   }),
   (z) => ({
     q: `Combien de temps à l'avance faut-il réserver un bus ${z.dans} ?`,
-    r: `Deux à quatre semaines suffisent en période normale. Comptez six à huit semaines pour les samedis de mai et juin, où sorties scolaires de fin d'année et mariages se disputent les mêmes véhicules. En dernière minute, regardez d'abord les retours à vide ${z.depuis} : ce sont des trajets déjà planifiés, proposés à prix réduit.`,
+    r: `Deux à quatre semaines suffisent en période normale. Comptez six à huit semaines pour les samedis de mai et juin, où sorties scolaires de fin d'année et mariages se disputent les mêmes véhicules.`,
   }),
   (z) => ({
     q: `Quels types de véhicules peut-on réserver ${z.dans} ?`,
     r: `Du minibus 8 places au grand tourisme 63 places, en passant par les midicars 30 places et les autocars 49 à 55 places, les plus courants. Indiquez simplement l'effectif de votre groupe dans la demande : seuls les transporteurs disposant du véhicule adapté répondront, et ils intègrent la soute, la climatisation et les équipements dans leur offre.`,
-  }),
-  (z) => ({
-    q: `Qu'est-ce qu'un retour à vide, et comment en profiter ${z.dans} ?`,
-    r: `C'est un trajet qu'un autocar effectue de toute façon sans passagers, après avoir déposé un groupe. Plutôt que de rouler pour rien, le transporteur le publie sur DealBus à prix fixe réduit, et votre groupe réserve le véhicule complet. La contrepartie : la date et l'itinéraire sont imposés. Si vos dates sont souples, c'est de loin le meilleur rapport qualité-prix disponible ${z.depuis}.`,
   }),
   (z) => ({
     q: `Le chauffeur et le carburant sont-ils inclus dans le prix ?`,
@@ -128,7 +124,7 @@ const POOL: ((z: ContexteZone) => QuestionFAQ)[] = [
   }),
   (z) => ({
     q: `Comment obtenir le meilleur prix pour un car ${z.dans} ?`,
-    r: `Trois leviers, dans l'ordre d'efficacité. Publier tôt, d'abord : un transporteur qui a du planning libre chiffre plus bas qu'un transporteur qui doit sortir un véhicule en extra. Comparer plusieurs offres fermes ensuite, plutôt que d'accepter le premier devis reçu. Surveiller les retours à vide enfin, si vos dates peuvent bouger de quelques jours.`,
+    r: `Deux leviers. Publier tôt, d'abord : un transporteur qui a du planning libre chiffre plus bas qu'un transporteur qui doit sortir un véhicule en extra. Comparer plusieurs offres fermes ensuite, plutôt que d'accepter le premier devis reçu.`,
   }),
   (z) => ({
     q: `Faut-il prévoir quelque chose de particulier pour un groupe scolaire ?`,

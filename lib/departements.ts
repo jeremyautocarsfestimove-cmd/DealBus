@@ -223,7 +223,7 @@ export const DEPARTEMENTS: Departement[] = [
   },
   {
     slug: "rhone", nom: "Rhône", code: "69", region: "Auvergne-Rhône-Alpes",
-    contexte: "Deuxième bassin économique de France et porte des Alpes, le Rhône vit des congrès lyonnais et des transferts neige — une saisonnalité marquée qui fait de l'hiver la meilleure période pour capter des retours à vide vers ou depuis les stations.",
+    contexte: "Deuxième bassin économique de France et porte des Alpes, le Rhône vit des congrès lyonnais et des transferts neige.",
     villes: [
       { nom: "Lyon", slug: "lyon" }, { nom: "Villeurbanne" }, { nom: "Vénissieux" },
       { nom: "Caluire-et-Cuire" }, { nom: "Bron" },

@@ -4,7 +4,7 @@ import { SeoPage } from "../_seo/SeoPage";
 export const metadata: Metadata = {
   title: "Réserver un bus pour un groupe : simple, rapide, au juste prix",
   description:
-    "Réservez un bus ou un autocar pour votre groupe en quelques clics : demande gratuite, offres fermes de transporteurs vérifiés, enchères en direct et retours à vide à prix cassé.",
+    "Réservez un bus ou un autocar pour votre groupe en quelques clics : demande gratuite, offres fermes de transporteurs vérifiés, à comparer avant de choisir.",
   alternates: { canonical: "/reserver-un-bus" },
 };
 
@@ -22,12 +22,9 @@ export default function Page() {
           ),
         },
         {
-          titre: "Étape 2 — Recevez des offres fermes ou lancez une enchère",
+          titre: "Étape 2 — Recevez des offres fermes",
           corps: (
-            <>
-              <p>En mode devis, chaque transporteur intéressé envoie un prix unique et définitif, accompagné du véhicule proposé et de sa réputation. En mode enchère, vous fixez l&apos;heure de clôture et les professionnels se relaient à la baisse — chaque nouveau prix doit battre le précédent d&apos;au moins 1 %. Vous suivez tout en direct, et rien ne vous engage avant validation.</p>
-              <p>Troisième voie, unique à DealBus : les retours à vide. Un autocar qui rentre d&apos;une mission dans votre direction est proposé à prix fixe réduit — le transporteur rentabilise son retour, vous voyagez pour une fraction du tarif normal.</p>
-            </>
+            <p>Chaque transporteur intéressé envoie un prix unique et définitif, accompagné du véhicule proposé et de sa réputation. Vous êtes prévenu par e-mail à chaque nouvelle offre, et rien ne vous engage avant votre choix.</p>
           ),
         },
         {
@@ -38,7 +35,7 @@ export default function Page() {
         },
       ]}
       faq={[
-        { q: "Combien de temps à l'avance faut-il réserver un bus ?", r: "L'idéal est 2 à 6 semaines avant le départ, et davantage pour les samedis de mai, juin et septembre (mariages, tournois, sorties de fin d'année). Pour les demandes urgentes, le mode enchère avec une clôture courte accélère les réponses." },
+        { q: "Combien de temps à l'avance faut-il réserver un bus ?", r: "L'idéal est 2 à 6 semaines avant le départ, et davantage pour les samedis de mai, juin et septembre (mariages, tournois, sorties de fin d'année). Pour une demande urgente, indiquez-le dans les précisions de votre demande." },
         { q: "Peut-on réserver un bus pour un petit groupe (moins de 15 personnes) ?", r: "Oui. DealBus est ouvert aux minibus, VTC et taxis en plus des autocaristes : votre demande atteint le bon type de véhicule quel que soit votre effectif." },
         { q: "Le paiement passe-t-il par la plateforme ?", r: "Non — c'est un choix assumé. Vous payez le transporteur directement, selon les modalités convenues avec lui (acompte, solde). DealBus n'ajoute aucun frais côté client et n'immobilise jamais votre argent." },
         { q: "Que se passe-t-il si aucun transporteur ne répond ?", r: "Votre demande reste visible jusqu'à sa date, et vous êtes notifié à chaque nouvelle offre. Si votre zone est peu couverte, notre équipe le détecte et recrute activement des transporteurs locaux." },

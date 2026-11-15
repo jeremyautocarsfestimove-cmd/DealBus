@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SeoPage, type Fil } from "../../../_seo/SeoPage";
 import { TRAJETS, getTrajet, trajetsDeVille } from "@/lib/trajets";
@@ -102,11 +101,9 @@ export default async function TrajetPage(
           titre: "Payer moins cher sur cette liaison",
           corps: (
             <p>
-              Trois leviers, dans l&apos;ordre d&apos;efficacité. Publier tôt : un transporteur qui a du planning
+              Deux leviers. Publier tôt : un transporteur qui a du planning
               libre chiffre plus bas que celui qui doit sortir un véhicule en extra. Comparer plusieurs offres
-              fermes plutôt que d&apos;accepter le premier devis. Et si vos dates peuvent bouger de quelques jours,{" "}
-              <Link href="/retours" className="text-ambre hover:underline">regarder les retours à vide</Link>{" "}
-              publiés sur cet axe : un autocar complet à une fraction du tarif normal.
+              fermes plutôt que d&apos;accepter le premier devis.
             </p>
           ),
         },

@@ -27,7 +27,7 @@ export const TRAJETS: Trajet[] = [
     slug: "paris-deauville", depart: "Paris", arrivee: "Deauville", departSlug: "paris",
     km: 205, duree: "2 h 30 à 3 h",
     contexte: "La liaison des séminaires et des sorties de comités d'entreprise par excellence. Le trafic se concentre sur les vendredis et les samedis d'avril à septembre, avec un pic autour des festivals et des week-ends prolongés. Le retour du dimanche soir est le créneau le plus disputé de la liaison.",
-    conseil: "Beaucoup de cars remontent à vide vers l'Île-de-France le dimanche en fin de journée après avoir déposé un groupe sur la côte. Si votre trajet correspond à ce créneau, regardez les retours à vide avant de publier une demande classique.",
+    conseil: "Beaucoup de cars remontent vers l'Île-de-France le dimanche en fin de journée après avoir déposé un groupe sur la côte. Si votre trajet correspond à ce créneau, précisez-le dans votre demande : un transporteur déjà sur place peut chiffrer plus bas.",
     usages: ["Séminaires et incentives d'entreprise", "Sorties d'associations et de clubs d'aînés", "Week-ends de groupes et enterrements de vie de célibataire"],
   },
   {
@@ -97,7 +97,7 @@ export const TRAJETS: Trajet[] = [
     slug: "rouen-lille", depart: "Rouen", arrivee: "Lille", departSlug: "rouen",
     km: 230, duree: "2 h 45 à 3 h 15",
     contexte: "Liaison interrégionale portée par le sport de haut niveau amateur et les déplacements universitaires. Elle échappe aux grands axes touristiques, ce qui limite le nombre de transporteurs positionnés — d'où l'intérêt d'ouvrir la demande aux départements limitrophes.",
-    conseil: "Peu de retours à vide existent sur cette transversale. En revanche, un aller-retour dans la journée reste largement dans l'amplitude conducteur : c'est la formule la plus économique si votre programme le permet.",
+    conseil: "Sur cette transversale, un aller-retour dans la journée reste largement dans l'amplitude conducteur : c'est la formule la plus économique si votre programme le permet.",
     usages: ["Déplacements de clubs et compétitions", "Groupes universitaires", "Sorties d'entreprise"],
   },
   {
@@ -118,7 +118,7 @@ export const TRAJETS: Trajet[] = [
     slug: "chartres-paris", depart: "Chartres", arrivee: "Paris", departSlug: "chartres",
     km: 90, duree: "1 h 15 à 1 h 45",
     contexte: "Trajet du quotidien pour les établissements scolaires, les clubs et les associations d'Eure-et-Loir, qui montent régulièrement à Paris pour des spectacles, des musées ou des compétitions. La proximité de l'A11 rend la liaison rapide et bien couverte par les transporteurs beaucerons.",
-    conseil: "Beaucoup de cars chartrains remontent à vide de Paris en fin de journée après une dépose matinale. C'est l'un des axes où la probabilité de trouver un retour à vide exploitable est la plus élevée.",
+    conseil: "Beaucoup de cars chartrains reviennent de Paris en fin de journée après une dépose matinale. Si vos horaires sont souples, indiquez-le dans votre demande : les transporteurs en tiennent compte dans leur prix.",
     usages: ["Sorties scolaires et culturelles", "Compétitions sportives", "Journées d'associations et de comités des fêtes"],
   },
   {

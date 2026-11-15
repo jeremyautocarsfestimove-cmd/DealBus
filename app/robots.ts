@@ -15,6 +15,8 @@ export default function robots(): MetadataRoute.Robots {
           "/pro/leads",
           "/pro/missions",
           "/login",
+          "/compte",
+          "/desinscription",
         ],
       },
     ],

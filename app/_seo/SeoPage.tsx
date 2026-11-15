@@ -71,7 +71,7 @@ export function SeoPage({
 
         <div className="flex flex-wrap gap-3 mb-14">
           <Link href="/demande" className="btn-primary">Publier ma demande — gratuit →</Link>
-          <Link href="/retours" className="btn-ghost">Voir les retours à vide</Link>
+          <Link href="/#comment" className="btn-ghost">Comment ça marche</Link>
         </div>
 
         {sections.map((s) => (

@@ -95,7 +95,7 @@ export async function generateMetadata(
     const depts = departementsDeRegion(r.nom);
     return {
       title: `Location d'autocar ${r.dans} — bus avec chauffeur, devis comparés | DealBus`,
-      description: `Location d'autocar avec chauffeur ${r.dans} : ${depts.length} départements couverts, transporteurs vérifiés, devis fermes comparés et retours à vide à prix réduit. Gratuit côté client, sans engagement.`,
+      description: `Location d'autocar avec chauffeur ${r.dans} : ${depts.length} départements couverts, transporteurs vérifiés, devis fermes comparés. Gratuit côté client, sans engagement.`,
       alternates: { canonical: `https://dealbus.fr/location-autocar/${r.slug}` },
     };
   }
@@ -109,7 +109,7 @@ export async function generateMetadata(
       title: `Location d'autocar ${d.nom} (${d.code}) — bus avec chauffeur, devis comparés | DealBus`,
       description: f
         ? `Location d'autocar avec chauffeur dans ${art}${d.nom} : ${d.villes.length} villes desservies, ordres de prix dès ${formatEuros(f.bas)} l'aller-retour, devis fermes de transporteurs vérifiés. Gratuit côté client.`
-        : `Location d'autocar avec chauffeur dans ${art}${d.nom} : transporteurs vérifiés, devis fermes comparés, retours à vide. Gratuit côté client.`,
+        : `Location d'autocar avec chauffeur dans ${art}${d.nom} : transporteurs vérifiés, devis fermes comparés. Gratuit côté client.`,
       alternates: { canonical: `https://dealbus.fr/location-autocar/${d.slug}` },
     };
   }
@@ -198,26 +198,12 @@ function PageVille({ v }: { v: NonNullable<ReturnType<typeof getVille>> }) {
           ),
         }] : []),
         {
-          titre: `Les retours à vide ${v.depuis} : le bon plan local`,
-          corps: (
-            <p>
-              {v.axesRetours}{" "}
-              Sur DealBus, les transporteurs publient ces trajets déjà planifiés à prix fixe réduit — votre groupe
-              réserve l&apos;autocar complet à une fraction du tarif normal.{" "}
-              <Link href="/retours" className="text-ambre hover:underline">Consultez les retours à vide disponibles</Link>{" "}
-              avant de publier une demande classique.
-            </p>
-          ),
-        },
-        {
           titre: "Des transporteurs vérifiés, des prix comparés",
           corps: (
             <p>
               Chaque autocariste inscrit sur DealBus est contrôlé (SIREN, licence de transport, assurance RC Pro)
               avant de pouvoir répondre à la moindre demande. Vous comparez leurs offres sur des critères objectifs
-              (prix ferme, note, ancienneté, véhicule) sous anonymat mutuel jusqu&apos;à votre sélection. Et si vous préférez
-              la mise en concurrence en direct, le <Link href="/#comment-ca-marche" className="text-ambre hover:underline">mode enchère</Link>{" "}
-              fait baisser les prix sous vos yeux, à la clôture que vous fixez.
+              (prix ferme, note, ancienneté, véhicule) sous anonymat mutuel jusqu&apos;à votre sélection.
             </p>
           ),
         },
@@ -265,7 +251,7 @@ function PageDepartement({ d }: { d: NonNullable<ReturnType<typeof getDepartemen
       fil={fil}
       eyebrow={`Département ${d.code} · ${d.region}`}
       h1={<>Location d&apos;autocar — {d.nom} ({d.code})<span className="text-ambre">.</span></>}
-      intro={`Besoin d'un autocar avec chauffeur dans ${artLong}${d.nom} ? Publiez votre trajet gratuitement : les transporteurs vérifiés qui couvrent le ${d.code} vous répondent avec des devis fermes, ou s'affrontent en enchère si vous préférez. Comparez, choisissez, partez.`}
+      intro={`Besoin d'un autocar avec chauffeur dans ${artLong}${d.nom} ? Publiez votre trajet gratuitement : les transporteurs vérifiés qui couvrent le ${d.code} vous répondent avec des devis fermes. Comparez, choisissez, partez.`}
       sections={[
         { titre: `Le transport de groupe dans ${art}${d.nom}`, corps: <p>{d.contexte}</p> },
         {
@@ -304,16 +290,6 @@ function PageDepartement({ d }: { d: NonNullable<ReturnType<typeof getDepartemen
                 entier — où que vous soyez dans le {d.code}, votre demande leur parvient.
               </p>
             </>
-          ),
-        },
-        {
-          titre: `Les retours à vide dans le ${d.code}`,
-          corps: (
-            <p>
-              {d.axesRetours}{" "}
-              <Link href="/retours" className="text-ambre hover:underline">Consultez le tableau des retours à vide</Link>{" "}
-              avant toute demande classique : un autocar complet à prix réduit passe peut-être par chez vous.
-            </p>
           ),
         },
         {
@@ -368,7 +344,7 @@ function PageRegion({ r }: { r: NonNullable<ReturnType<typeof getRegion>> }) {
       fil={fil}
       eyebrow={`Région · ${r.nom}`}
       h1={<>Location d&apos;autocar {r.dans}<span className="text-ambre">.</span></>}
-      intro={`Un autocar avec chauffeur ${r.dans} ? Publiez votre trajet gratuitement : les transporteurs vérifiés des ${depts.length} départements de la région — et des territoires limitrophes — vous répondent avec des devis fermes, ou s'affrontent en enchère si vous préférez. Comparez, choisissez, partez.`}
+      intro={`Un autocar avec chauffeur ${r.dans} ? Publiez votre trajet gratuitement : les transporteurs vérifiés des ${depts.length} départements de la région — et des territoires limitrophes — vous répondent avec des devis fermes. Comparez, choisissez, partez.`}
       sections={[
         { titre: `Le transport de groupe ${r.dans}`, corps: <p>{r.contexte}</p> },
         {
@@ -443,16 +419,6 @@ function PageRegion({ r }: { r: NonNullable<ReturnType<typeof getRegion>> }) {
             </div>
           ),
         }] : []),
-        {
-          titre: `Les retours à vide ${r.dans}`,
-          corps: (
-            <p>
-              {r.axesRetours}{" "}
-              <Link href="/retours" className="text-ambre hover:underline">Consultez le tableau des retours à vide</Link>{" "}
-              avant toute demande classique : un autocar complet à prix réduit passe peut-être par chez vous.
-            </p>
-          ),
-        },
       ]}
       faq={faqZone(ctx, 5)}
       related={[

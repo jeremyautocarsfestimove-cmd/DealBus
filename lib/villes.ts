@@ -77,7 +77,7 @@ export const VILLES: Ville[] = [
       { vers: "Caen", km: 120, usage: "compétitions régionales" },
       { vers: "Center Parcs Normandie", km: 60, usage: "séjours d'associations" },
     ],
-    saison: "La demande est régulière toute l'année, portée par les collèges et les clubs, avec un pic classique de fin d'année scolaire. Les retours à vide vers Paris et Rouen sont fréquents en semaine, souvent en fin de journée.",
+    saison: "La demande est régulière toute l'année, portée par les collèges et les clubs, avec un pic classique de fin d'année scolaire.",
     axesRetours: "Sa position centrale dans l'Eure en fait un point de départ malin pour profiter des retours à vide de tout le département.",
   },
   {
@@ -116,7 +116,7 @@ export const VILLES: Ville[] = [
       { vers: "Reims", km: 170, usage: "sorties œnotourisme de CSE" },
       { vers: "Rouen", km: 100, usage: "compétitions universitaires" },
     ],
-    saison: "Les week-ends d'intégration étudiants concentrent la demande en septembre et octobre, les transferts vers Roissy toute l'année. Les délais courts sont fréquents ici — les retours à vide sont souvent la meilleure réponse.",
+    saison: "Les week-ends d'intégration étudiants concentrent la demande en septembre et octobre, les transferts vers Roissy toute l'année. Les délais courts sont fréquents ici.",
     axesRetours: "Aux portes de l'A15, l'agglomération capte les retours à vide entre Paris et la Normandie dans les deux sens.",
   },
   {
@@ -161,7 +161,7 @@ export const VILLES: Ville[] = [
   {
     slug: "lyon", nom: "Lyon", dans: "à Lyon", depuis: "depuis Lyon",
     dept: "Rhône (69)", region: "Auvergne-Rhône-Alpes",
-    contexte: "Deuxième bassin économique français et porte des Alpes, Lyon vit au rythme des séminaires, des congrès de la Part-Dieu et des transferts neige l'hiver — un marché où la saisonnalité des stations crée d'excellentes opportunités de retours à vide pour les groupes flexibles.",
+    contexte: "Deuxième bassin économique français et porte des Alpes, Lyon vit au rythme des séminaires, des congrès de la Part-Dieu et des transferts neige l'hiver.",
     destinations: [
       { vers: "Stations des Alpes (Val d'Isère, Alpe d'Huez)", km: 180, usage: "transferts neige de décembre à avril" },
       { vers: "Paris", km: 465, usage: "liaisons d'affaires et événements" },
@@ -179,7 +179,7 @@ export const VILLES: Ville[] = [
       { vers: "Aix-en-Provence", km: 35, usage: "navettes événementielles" },
       { vers: "Nice", km: 200, usage: "liaisons côtières et festivals" },
       { vers: "Avignon", km: 105, usage: "festivals et tourisme provençal" },
-      { vers: "Paris", km: 775, usage: "la grande liaison — reine des retours à vide" },
+      { vers: "Paris", km: 775, usage: "la grande liaison vers la capitale" },
     ],
     saison: "Escales de croisière, matchs au Vélodrome et colonies estivales se cumulent de mai à septembre. Les mois de février et mars restent les plus abordables, à prestation identique.",
     axesRetours: "L'axe Marseille → Paris est emblématique des retours à vide : des autocars complets à une fraction du prix normal, chaque semaine.",

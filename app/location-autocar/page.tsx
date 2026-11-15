@@ -47,7 +47,7 @@ export default function Page() {
           corps: (
             <>
               <p>Le prix dépend de la distance, de la durée de mise à disposition, de la période (les samedis de mai à septembre sont les plus demandés) et de l&apos;amplitude horaire du conducteur, encadrée par la réglementation. C&apos;est précisément pourquoi les simulateurs en ligne donnent des chiffres peu fiables : seul un professionnel qui connaît ses coûts et son planning peut établir un vrai prix.</p>
-              <p>Nos pages liaison publient malgré tout des ordres de grandeur, trajet par trajet, pour que vous sachiez si une offre reçue est dans le marché. Mais la meilleure estimation reste plusieurs offres fermes qui se comparent. Pour les budgets serrés, deux leviers uniques à DealBus : l&apos;enchère en direct, où les transporteurs font baisser le prix entre eux, et les retours à vide — des trajets déjà programmés, proposés à une fraction du prix normal.</p>
+              <p>Nos pages liaison publient malgré tout des ordres de grandeur, trajet par trajet, pour que vous sachiez si une offre reçue est dans le marché. Mais la meilleure estimation reste plusieurs offres fermes qui se comparent. Pour les budgets serrés, publiez votre demande tôt : un transporteur qui a du planning libre chiffre plus bas.</p>
             </>
           ),
         },
@@ -117,7 +117,7 @@ export default function Page() {
       related={[
         { href: "/reserver-un-bus", label: "Réserver un bus : le guide" },
         { href: "/comparateur-devis-autocar", label: "Comparer les devis d'autocar" },
-        { href: "/retours", label: "Les retours à vide du moment" },
+        { href: "/demande", label: "Demander un devis gratuit" },
         { href: "/reglementation", label: "Temps de conduite & amplitude" },
       ]}
     />

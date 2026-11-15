@@ -11,7 +11,7 @@ import { VOYAGES } from "@/lib/voyages";
 // finit par considérer le lastmod du site comme non fiable et l'ignore.
 // On met à jour cette constante à la main quand le contenu des gabarits
 // ou des données géographiques change réellement.
-const MAJ_CONTENU = new Date("2026-09-07T00:00:00.000Z");
+const MAJ_CONTENU = new Date("2026-11-15T00:00:00.000Z");
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = "https://dealbus.fr";
@@ -29,6 +29,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/reglementation`, lastModified: MAJ_CONTENU, changeFrequency: "monthly", priority: 0.8 },
     { url: `${base}/demande`, lastModified: MAJ_CONTENU, changeFrequency: "monthly", priority: 0.7 },
     { url: `${base}/pro`, lastModified: MAJ_CONTENU, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${base}/pro/decouvrir`, lastModified: MAJ_CONTENU, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${base}/aide`, lastModified: MAJ_CONTENU, changeFrequency: "monthly", priority: 0.5 },
 
     ...VOYAGES.map((v) => ({
       url: `${base}/voyages/${v.slug}`,
