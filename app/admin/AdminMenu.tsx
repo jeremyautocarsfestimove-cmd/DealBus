@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -51,51 +52,58 @@ export function AdminMenu({ alertes, admin }: {
   admin: { nom: string; initiales: string };
 }) {
   const chemin = usePathname();
+  const [ouvert, setOuvert] = useState(false);
   const active = cleDe(chemin);
   const pastille = (c: Cle) => (c === "cpt" ? alertes.comptes : c === "plus" ? alertes.plus : 0);
+  const courante = ENTREES.find((e) => e.cle === active)?.label ?? "Administration";
 
   return (
     <>
-      {/* Barre du haut : logo, cinq entrées sur ordinateur, recherche, compte */}
-      <header className="adm-top">
-        <div className="max-w-[1320px] mx-auto px-4 lg:px-8 h-[54px] flex items-center gap-4">
-          <Link href="/admin" className="flex items-center gap-2.5 flex-none">
-            <span className="w-[26px] h-[26px] rounded-[7px] bg-[#111] text-[#F5A524] grid place-items-center text-[13px] font-extrabold">D</span>
-            <span className="font-semibold text-[14px] tracking-tight">DealBus</span>
-            <span className="text-[11px] text-[#9A9893]">Admin</span>
-          </Link>
-          <nav className="adm-tabs hidden lg:flex" aria-label="Navigation de l'administration">
-            {ENTREES.map((e) => (
-              <Link key={e.cle} href={e.href} aria-current={active === e.cle ? "page" : undefined}>
-                <Icone nom={e.cle} />
-                {e.label}
-                {pastille(e.cle) > 0 && <span className="adm-alert">{pastille(e.cle)}</span>}
-              </Link>
-            ))}
-          </nav>
-          <form action="/admin/clients" method="get" className="ml-auto hidden md:block w-[220px]">
-            <input name="q" placeholder="Rechercher un client…" aria-label="Rechercher un client"
-              className="w-full bg-[#F7F7F5] border border-[#E7E6E2] rounded-lg px-3 py-[7px] text-[12.5px] text-[#111] placeholder:text-[#9A9893] focus:outline-none focus:border-[#F5A524]" />
-          </form>
-          <Link href="/" className="ml-auto md:ml-0 flex items-center gap-2 flex-none" title={admin.nom}>
-            <span className="hidden sm:block text-[12px] text-[#77756F]">Voir le site</span>
-            <span className="w-7 h-7 rounded-full bg-[#111] text-white grid place-items-center text-[11px] font-semibold">{admin.initiales}</span>
-          </Link>
-        </div>
-      </header>
+      {/* Téléphone : une seule barre, le menu s'ouvre à gauche */}
+      <div className="lg:hidden sticky top-0 z-30 flex items-center gap-3 px-4 h-[52px] bg-white border-b border-[#ECEBE8]">
+        <button type="button" onClick={() => setOuvert(true)} aria-expanded={ouvert} aria-label="Ouvrir le menu" className="adm-burger">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+          {alertes.comptes + alertes.plus > 0 && <span className="adm-point" />}
+        </button>
+        <span className="font-semibold text-[14.5px] truncate">{courante}</span>
+        <span className="ml-auto w-7 h-7 rounded-full bg-[#111] text-white grid place-items-center text-[11px] font-semibold">{admin.initiales}</span>
+      </div>
+      {ouvert && <button type="button" aria-label="Fermer le menu" className="adm-voile lg:hidden" onClick={() => setOuvert(false)} />}
 
-      {/* Barre du bas sur téléphone */}
-      <nav className="adm-bas lg:hidden" aria-label="Navigation de l'administration">
-        {ENTREES.map((e) => (
-          <Link key={e.cle} href={e.href} aria-current={active === e.cle ? "page" : undefined}>
-            <span className="relative">
-              <Icone nom={e.cle} />
-              {pastille(e.cle) > 0 && <span className="adm-pastille">{pastille(e.cle)}</span>}
-            </span>
-            {e.label}
-          </Link>
-        ))}
-      </nav>
+      <aside className={`adm-sb adm-tiroir ${ouvert ? "adm-tiroir-on" : ""} lg:sticky lg:top-0 lg:h-screen flex flex-col overflow-y-auto px-3 py-4`}>
+        <Link href="/admin" onClick={() => setOuvert(false)} className="flex items-center gap-2.5 px-2 pb-4">
+          <span className="w-[26px] h-[26px] rounded-[7px] bg-[#111] text-[#F5A524] grid place-items-center text-[13px] font-extrabold">D</span>
+          <span className="font-semibold text-[14px] tracking-tight">DealBus</span>
+          <span className="ml-auto text-[11px] text-[#9A9893]">Admin</span>
+        </Link>
+
+        <form action="/admin/clients" method="get" className="mb-3">
+          <input name="q" placeholder="Rechercher un client…" aria-label="Rechercher un client"
+            className="w-full bg-white border border-[#E7E6E2] rounded-lg px-3 py-[8px] text-[13px] text-[#111] placeholder:text-[#9A9893] focus:outline-none focus:border-[#F5A524]" />
+        </form>
+
+        <nav className="adm-nav adm-nav5 flex-1" aria-label="Navigation de l'administration">
+          <ul className="space-y-0.5">
+            {ENTREES.map((e) => (
+              <li key={e.cle}>
+                <Link href={e.href} onClick={() => setOuvert(false)} aria-current={active === e.cle ? "page" : undefined}>
+                  <Icone nom={e.cle} />
+                  <span className="truncate">{e.label}</span>
+                  {pastille(e.cle) > 0 && <span className="adm-alert">{pastille(e.cle)}</span>}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        <div className="mt-4 pt-3 border-t border-[#ECEBE8] flex items-center gap-2.5 px-2">
+          <span className="w-7 h-7 rounded-full bg-[#111] text-white grid place-items-center text-[11px] font-semibold">{admin.initiales}</span>
+          <div className="min-w-0">
+            <p className="text-[12.5px] font-semibold truncate">{admin.nom}</p>
+            <Link href="/" className="text-[11.5px] text-[#9A9893] hover:text-[#111]">Voir le site →</Link>
+          </div>
+        </div>
+      </aside>
     </>
   );
 }

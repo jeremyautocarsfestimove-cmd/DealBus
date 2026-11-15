@@ -39,7 +39,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const initiales = nom.split(/[\s@.]+/).filter(Boolean).slice(0, 2).map((m) => m[0]?.toUpperCase()).join("") || "A";
 
   return (
-    <div className="adm min-h-screen pb-[84px] lg:pb-0">
+    <div className="adm min-h-screen lg:grid lg:grid-cols-[220px_minmax(0,1fr)]">
       <AdminMenu
         alertes={{
           comptes: aValider ?? 0,
@@ -47,15 +47,17 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         }}
         admin={{ nom, initiales }}
       />
-      {maintenance.actif && (
-        <div className="bg-[#C2410C] text-white px-4 lg:px-8 py-2 flex flex-wrap items-center justify-between gap-2 text-[13px]">
-          <span><strong>Site en travaux.</strong> Les visiteurs voient la page d&apos;attente ; vous voyez le site normalement.</span>
-          <Link href="/admin/parametres" className="underline underline-offset-2">Rouvrir le site</Link>
+      <div className="min-w-0">
+        {maintenance.actif && (
+          <div className="bg-[#C2410C] text-white px-4 lg:px-8 py-2 flex flex-wrap items-center justify-between gap-2 text-[13px]">
+            <span><strong>Site en travaux.</strong> Les visiteurs voient la page d&apos;attente ; vous voyez le site normalement.</span>
+            <Link href="/admin/parametres" className="underline underline-offset-2">Rouvrir le site</Link>
+          </div>
+        )}
+        <div className="admin-crm max-w-[1320px] px-4 lg:px-8 py-5 lg:py-7">
+          <AdminSousNav />
+          {children}
         </div>
-      )}
-      <div className="admin-crm max-w-[1320px] mx-auto px-4 lg:px-8 py-5 lg:py-7">
-        <AdminSousNav />
-        {children}
       </div>
     </div>
   );
