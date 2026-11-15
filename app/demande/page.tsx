@@ -12,6 +12,11 @@ import {
   analyser, completude, fmtDuree, fmtHeure, eur,
 } from "@/lib/assistant-demande";
 import { fourchetteBareme, libelleFourchette, type Fourchette } from "@/lib/calibration-prix";
+import { Caveat } from "next/font/google";
+import "./demande.css";
+
+// Même style que la page d'accueil : styles limités à .dem (voir demande.css).
+const caveat = Caveat({ weight: ["600"], subsets: ["latin"], variable: "--font-caveat" });
 
 const STEPS = ["Le trajet", "Votre groupe", "Vérification", "Envoi"];
 
@@ -29,7 +34,7 @@ function Chip({ on, children, onClick }: { on: boolean; children: React.ReactNod
 function Check({ on, label, aide, onClick }: { on: boolean; label: string; aide: string; onClick: () => void }) {
   return (
     <button type="button" onClick={onClick}
-      className={`flex gap-3 items-start text-left border rounded-sm px-3 py-2.5 transition
+      className={`dem-check flex gap-3 items-start text-left border rounded-sm px-3 py-2.5 transition
         ${on ? "border-ambre bg-ambre-dim" : "border-ligne hover:border-ligne-strong"}`}>
       <span className={`mt-0.5 w-4 h-4 rounded-sm border flex items-center justify-center text-[11px] flex-none
         ${on ? "bg-ambre border-ambre text-encre" : "border-ligne-strong"}`}>{on ? "✓" : ""}</span>
@@ -309,7 +314,7 @@ function DemandeWizard() {
 
   // ---------- Panneau assistant ----------
   const Assistant = (
-    <aside className="sombre rounded p-5 lg:sticky lg:top-24">
+    <aside className="dem-assistant sombre rounded p-5 lg:sticky lg:top-24">
       <p className="font-mono text-[10.5px] uppercase tracking-[.14em] text-ambre mb-3">L&apos;assistant DealBus</p>
       {step === 1 ? (
         <>
@@ -371,7 +376,8 @@ function DemandeWizard() {
   return (
     <>
       <Nav />
-      <main className="max-w-6xl mx-auto px-7 py-12">
+      <div className={`dem ${caveat.variable}`}>
+      <main className="max-w-6xl mx-auto px-5 sm:px-7 py-10 sm:py-14">
         <p className="eyebrow mb-3">{modifierId ? "Modification" : "Demande de devis"}</p>
         <h1 className="h-display text-4xl mb-8">{modifierId ? "Modifiez votre demande." : "Décrivez votre déplacement."}</h1>
         {modifierId && (
@@ -382,7 +388,7 @@ function DemandeWizard() {
         {chargement && <p className="text-sm text-blanc-faint mb-6">Chargement de votre demande…</p>}
 
         {/* Stepper */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 border border-ligne rounded-sm overflow-hidden mb-7 bg-asphalte-2">
+        <div className="dem-etapes grid grid-cols-2 sm:grid-cols-4 border border-ligne rounded-sm overflow-hidden mb-7 bg-asphalte-2">
           {STEPS.map((label, i) => (
             <div key={label} className={`flex items-center gap-2.5 px-4 py-2.5 text-[13px] border-r border-ligne last:border-r-0
               ${step === i + 1 ? "bg-ambre-dim text-blanc font-semibold" : step > i + 1 ? "text-vert" : "text-blanc-faint"}`}>
@@ -626,6 +632,7 @@ function DemandeWizard() {
           </div>
         )}
       </main>
+      </div>
     </>
   );
 }
