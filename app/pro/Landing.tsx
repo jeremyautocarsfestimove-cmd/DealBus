@@ -35,7 +35,15 @@ export function LandingPro() {
     <main className="overflow-x-clip">
       <div className={`acc acc-pro acc-simple ${caveat.variable}`}>
         <section className="a-haut" id="haut">
-          <Image className="a-fond" src="/img/pro.jpg" alt="" fill priority sizes="100vw" />
+          {/* Fond sans photo : quadrillage discret, lueur ambre et tracé d'un itinéraire */}
+          <div className="a-decor" aria-hidden="true">
+            <svg viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice">
+              <path d="M-40 560 C 220 520, 300 300, 520 320 S 820 470, 980 250 S 1180 90, 1260 110" />
+              <circle cx="520" cy="320" r="7" />
+              <circle cx="980" cy="250" r="7" />
+              <circle className="a-arr" cx="1130" cy="118" r="9" />
+            </svg>
+          </div>
           <div>
             <span className="a-main"><svg className="a-fl" viewBox="0 0 34 14" aria-hidden="true"><path d="M1 9c6-6 14-7 22-3" /><path d="M19 2l5 4-6 3" /></svg>Espace transporteur</span>
             <h1>Les demandes de transport <span className="a-or">de votre zone.</span></h1>
