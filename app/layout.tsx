@@ -30,14 +30,14 @@ export const metadata: Metadata = {
     locale: "fr_FR",
     url: "https://dealbus.fr",
     siteName: "DealBus",
-    title: "DealBus — La place de marché du transport de groupe",
+    title: "DealBus : un autocar avec chauffeur pour votre groupe",
     description:
       "Une seule demande, des devis fermes à comparer : le transport de groupe en autocar, avec des transporteurs vérifiés.",
-    images: [{ url: "/og.png", width: 1200, height: 630, alt: "DealBus — la place de marché du transport de groupe" }],
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: "DealBus : un autocar avec chauffeur pour votre groupe" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "DealBus — La place de marché du transport de groupe",
+    title: "DealBus : un autocar avec chauffeur pour votre groupe",
     description: "Une seule demande, des devis fermes de transporteurs vérifiés à comparer.",
     images: ["/og.png"],
   },
