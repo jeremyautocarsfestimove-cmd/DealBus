@@ -49,7 +49,12 @@ export default async function ProPage() {
   for (const m of (nonLus ?? []) as any[]) nonLusPar.set(m.demande_id, (nonLusPar.get(m.demande_id) ?? 0) + 1);
 
   const now = Date.now();
-  const L = ((leads ?? []) as any[]).filter((d) => dateFuture(d.date_aller) && !(d.mode === "enchere" && d.enchere_fin && new Date(d.enchere_fin).getTime() <= now) && !dejaRepondu.has(d.id));
+  // Demandes masquées par ce transporteur (« ne m'intéresse pas »). Si la table n'existe pas encore, rien n'est masqué.
+  const { data: masquees } = await supabase.from("demandes_masquees").select("demande_id").eq("transporteur_id", user.id);
+  const masquee = new Set(((masquees ?? []) as any[]).map((m) => m.demande_id));
+  const ouvertes = ((leads ?? []) as any[]).filter((d) => dateFuture(d.date_aller) && !(d.mode === "enchere" && d.enchere_fin && new Date(d.enchere_fin).getTime() <= now) && !dejaRepondu.has(d.id));
+  const L = ouvertes.filter((d) => !masquee.has(d.id));
+  const nbMasquees = ouvertes.length - L.length;
 
   // Nombre de transporteurs ayant répondu (compte seulement, jamais les prix) + repère de marché
   const { data: offresToutes } = L.length ? await admin.from("offres").select("demande_id").in("demande_id", L.map((d) => d.id)) : { data: [] as any[] };
@@ -96,7 +101,7 @@ export default async function ProPage() {
         <div className="pro-kpi"><p>CA signé via DealBus</p><b>{eur(ca)}</b><small>commissions dues : {eur(dues)}</small></div>
       </div>
 
-      <ListeLeads leads={liste.map(({ d, km, a, rep, nature, invitation, nb }): Lead => {
+      <ListeLeads transporteurId={user.id} masquees={nbMasquees} leads={liste.map(({ d, km, a, rep, nature, invitation, nb }): Lead => {
         const badges: Lead["badges"] = [];
         if (nature !== "simple" && d.sur_place_repondu) badges.push({ t: d.vehicule_utilise_sur_place ? "Car sur place" : "Dépose puis reprise" });
         if (d.equipements?.includes("soute")) badges.push({ t: "Bagages en soute" });
@@ -111,6 +116,7 @@ export default async function ProPage() {
           organisme: d.organisme ? ORGANISMES.find((o) => o.id === d.organisme)?.label ?? null : null,
           badges, repere: rep ? `${eur(rep.min)} – ${eur(rep.max)}` : null, nb,
           invitation, enchere: d.mode === "enchere", messages: nonLusPar.get(d.id) ?? 0, jours: joursAvant(d.date_aller),
+          nouveau: now - new Date(d.created_at).getTime() < 24 * 3600 * 1000,
         };
       })} />
     </>

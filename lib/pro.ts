@@ -41,9 +41,12 @@ export async function contexteTransporteur() {
     supabase.from("avis").select("id", { count: "exact", head: true }).eq("transporteur_id", user.id),
     supabase.from("messages").select("id", { count: "exact", head: true }).eq("transporteur_id", user.id).neq("auteur_id", user.id).is("lu_le", null),
   ]);
+  // Demandes masquées par le transporteur : hors compteur (rien n'est masqué si la table n'existe pas encore)
+  const { data: masquees } = await supabase.from("demandes_masquees").select("demande_id").eq("transporteur_id", user.id);
+  const masquee = new Set(((masquees ?? []) as any[]).map((m) => m.demande_id));
   const now = Date.now();
   const compteurs: Compteurs = {
-    demandes: ((leads ?? []) as any[]).filter((d) => dateFuture(d.date_aller) && !(d.mode === "enchere" && d.enchere_fin && new Date(d.enchere_fin).getTime() <= now)).length,
+    demandes: ((leads ?? []) as any[]).filter((d) => !masquee.has(d.id) && dateFuture(d.date_aller) && !(d.mode === "enchere" && d.enchere_fin && new Date(d.enchere_fin).getTime() <= now)).length,
     offres: ((offres ?? []) as any[]).filter((o) => ["envoyee", "consultee"].includes(o.statut) && ["ouverte", "selection"].includes(o.demande?.statut ?? "ouverte") && dateFuture(o.demande?.date_aller)).length,
     missions: ((missions ?? []) as any[]).filter((m) => m.statut === "a_venir" && dateFuture(m.demande?.date_aller ?? m.retour?.date_dispo)).length,
     factures: factures ?? 0,
