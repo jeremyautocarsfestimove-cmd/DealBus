@@ -113,7 +113,7 @@ export function Nav({ pro }: { pro?: Compteurs } = {}) {
   return (
     <header className="nav-capsule sticky top-0 z-[100] px-3 pt-2.5 pb-2.5 md:pt-3 md:pb-3 pointer-events-none">
       <nav className="pointer-events-auto relative max-w-6xl mx-auto h-[54px] md:h-[60px] pl-5 pr-2 md:pr-2.5 flex items-center gap-5 rounded-full bg-white/80 backdrop-blur-xl text-encre shadow-[0_10px_30px_-12px_rgba(18,21,27,.35)] ring-1 ring-black/5">
-        <Link href="/" className="relative text-encre [&_svg]:text-[#E07B1A] flex-none">
+        <Link href={pro ? "/pro" : "/"} className="relative text-encre [&_svg]:text-[#E07B1A] flex-none">
           <Logo />
           {/* Ruban en travers : signale l'espace réservé aux transporteurs sur toutes les pages /pro */}
           {espacePro && <span className="nav-ruban" aria-label="Espace pro">Espace pro</span>}
