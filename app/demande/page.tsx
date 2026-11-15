@@ -12,6 +12,7 @@ import {
   analyser, completude, fmtDuree, fmtHeure, eur,
 } from "@/lib/assistant-demande";
 import { fourchetteBareme, libelleFourchette, type Fourchette } from "@/lib/calibration-prix";
+import { ENGAGEMENT_TEXTE } from "@/lib/engagement";
 import { Caveat } from "next/font/google";
 import "./demande.css";
 
@@ -59,6 +60,12 @@ function DemandeWizard() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [nomClient, setNomClient] = useState("");
+
+  // Code de validation reçu par e-mail : il engage le client avant la diffusion
+  const [codeUser, setCodeUser] = useState<string | null>(null);
+  const [code, setCode] = useState("");
+  const [codeEmail, setCodeEmail] = useState("");
+  const [codeInfo, setCodeInfo] = useState<string | null>(null);
 
   // Enchère (module en suspens, conservé derrière FEATURES.enchere)
   const [enchereFin, setEnchereFin] = useState("");
@@ -255,9 +262,33 @@ function DemandeWizard() {
       if (!km) {
         fetch("/api/itineraire", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ demande_id: nouvelle.id }) }).catch(() => {});
       }
+      // La preuve de validation est reliée à la demande avant la diffusion aux transporteurs
+      await fetch("/api/demandes/engagement", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "rattacher", demande_id: nouvelle.id }) }).catch(() => {});
       fetch("/api/notify-demande", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ demande_id: nouvelle.id }) }).catch(() => {});
     }
     router.push("/mes-demandes");
+  }
+
+  // ---------- Code de validation ----------
+  async function demanderCode(userId: string) {
+    setError(null); setCodeInfo(null);
+    const res = await fetch("/api/demandes/engagement", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "envoyer" }) });
+    const j = await res.json().catch(() => ({}));
+    setSaving(false);
+    setNeedAuth(false);
+    setCodeUser(userId);
+    if (!res.ok) { setError(j.error ?? "Le code n'a pas pu être envoyé."); return; }
+    setCodeEmail(j.email ?? "");
+    setCodeInfo(`Code envoyé. Il est valable ${j.minutes ?? 15} minutes.`);
+  }
+
+  async function validerCode() {
+    if (!codeUser) return;
+    setSaving(true); setError(null);
+    const res = await fetch("/api/demandes/engagement", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "valider", code }) });
+    const j = await res.json().catch(() => ({}));
+    if (!res.ok) { setError(j.error ?? "Code incorrect."); setSaving(false); return; }
+    await insertDemande(codeUser);
   }
 
   async function submit() {
@@ -283,7 +314,7 @@ function DemandeWizard() {
       return;
     }
     const { data: { user } } = await supabase.auth.getUser();
-    if (user) { await insertDemande(user.id); return; }
+    if (user) { await demanderCode(user.id); return; }
     setNeedAuth(true);
     setSaving(false);
   }
@@ -301,12 +332,12 @@ function DemandeWizard() {
         return;
       }
       if (!data.session) { setError("Confirmez votre email (lien envoyé), puis revenez envoyer votre demande."); setSaving(false); return; }
-      await insertDemande(data.session.user.id);
+      await demanderCode(data.session.user.id);
       return;
     }
     const { data, error: err } = await supabase.auth.signInWithPassword({ email, password });
     if (err) { setError("Identifiants incorrects."); setSaving(false); return; }
-    await insertDemande(data.user.id);
+    await demanderCode(data.user.id);
   }
 
   const dateFr = (d: string) => (d ? new Date(d).toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short", year: "numeric" }) : "—");
@@ -573,7 +604,7 @@ function DemandeWizard() {
                 </p>
                 <ul className="text-[13.5px] text-blanc-dim space-y-1.5">
                   <li>— Votre identité reste masquée jusqu&apos;à ce que vous retenez une offre</li>
-                  <li>— Gratuit, sans engagement : vous pouvez clore la demande à tout moment</li>
+                  <li>— Gratuit : vous pouvez clore la demande à tout moment</li>
                   <li>— Vous payez directement le transporteur retenu, selon ses conditions</li>
                 </ul>
                 {!needAuth && error && <p className="font-mono text-sm text-[#E8735D]">{error}</p>}
@@ -617,7 +648,29 @@ function DemandeWizard() {
           </div>
         )}
 
-        {!needAuth && (
+        {codeUser && (
+          <div className="card mt-5 max-w-2xl">
+            <p className="font-semibold text-[17px] mb-1.5">Validez votre demande avec le code reçu par e-mail</p>
+            <p className="text-[13.5px] text-blanc-dim mb-4">
+              {codeEmail ? `Un code à 6 chiffres vient d'être envoyé à ${codeEmail}.` : "Un code à 6 chiffres vous est envoyé par e-mail."} Pensez à regarder vos courriers indésirables.
+            </p>
+            <p className="text-[13.5px] leading-relaxed bg-ambre-dim rounded-sm px-4 py-3 mb-4">{ENGAGEMENT_TEXTE}</p>
+            <label className="label" htmlFor="code-validation">Code de validation</label>
+            <input id="code-validation" className="input dem-code" inputMode="numeric" autoComplete="one-time-code" maxLength={6} placeholder="000000"
+              value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))} />
+            {codeInfo && !error && <p className="text-[13px] text-vert mt-3">{codeInfo}</p>}
+            {error && <p className="text-sm text-[#C2410C] mt-3">{error}</p>}
+            <button className="btn-primary w-full mt-4 disabled:opacity-50" disabled={saving || code.length !== 6} onClick={validerCode}>
+              {saving ? "Envoi…" : "Valider et envoyer ma demande →"}
+            </button>
+            <button className="mt-3.5 text-[13px] text-blanc-faint hover:text-blanc-dim w-full text-center" disabled={saving}
+              onClick={() => { setCode(""); demanderCode(codeUser); }}>
+              Je n&apos;ai rien reçu, renvoyer un code
+            </button>
+          </div>
+        )}
+
+        {!needAuth && !codeUser && (
           <div className="flex justify-between mt-5 lg:max-w-[61.5%]">
             <button className="btn-ghost disabled:opacity-35" disabled={step === 1} onClick={() => { setError(null); setStep((s) => s - 1); }}>← Précédent</button>
             {step < 4 ? (

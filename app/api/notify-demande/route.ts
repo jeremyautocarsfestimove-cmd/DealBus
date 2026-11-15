@@ -13,6 +13,14 @@ export async function POST(req: Request) {
 
   const admin = createAdminClient();
 
+  // Pas de diffusion tant que le client n'a pas validé sa demande avec le code reçu par e-mail.
+  // Si la table n'existe pas encore (migration non appliquée), on laisse passer.
+  const { data: engagement, error: errEngagement } = await admin.from("demande_engagements")
+    .select("id").eq("demande_id", demande_id).not("valide_le", "is", null).limit(1);
+  if (!errEngagement && !engagement?.length) {
+    return NextResponse.json({ ok: true, sent: 0, note: "demande non validée par code" });
+  }
+
   // Verrou anti-doublon : on ne notifie qu'une fois par demande
   const { data: demande } = await admin
     .from("demandes")

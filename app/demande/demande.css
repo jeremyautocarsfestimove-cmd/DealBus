@@ -54,3 +54,5 @@
 }
 /* Le fond gris remonte sous le menu en capsule */
 .dem { margin-top: calc(var(--nav-h) * -1); padding-top: var(--nav-h); }
+/* Champ du code de validation */
+.dem .dem-code { font-size: 28px; font-weight: 650; letter-spacing: .35em !important; text-align: center; padding: 14px; font-variant-numeric: tabular-nums; }
