@@ -172,9 +172,6 @@ export function Nav() {
           </>
         )}
         {client && (
-          <Link href="/demande" className="hidden md:inline-flex nav-devis text-[14.5px] font-semibold px-5 py-2.5 rounded-full text-encre whitespace-nowrap">Demander un devis</Link>
-        )}
-        {client && (
           <button type="button" onClick={() => setPanneau((o) => !o)} aria-expanded={panneau} aria-label="Menu"
             className="lg:hidden w-10 h-10 rounded-full grid place-items-center hover:bg-white transition">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
@@ -192,9 +189,8 @@ export function Nav() {
                 <li key={l.href}><Link href={l.href} onClick={() => setPanneau(false)} className="block px-4 py-3 rounded-2xl text-[16px] hover:bg-asphalte-2">{l.label}</Link></li>
               ))}
             </ul>
-            <div className="grid grid-cols-2 gap-2 mt-2 pt-3 border-t border-ligne">
-              <Link href="/pro" onClick={() => setPanneau(false)} className="text-center text-[15px] font-semibold px-4 py-3 rounded-full bg-[#12151B] text-white">Espace pro</Link>
-              <Link href="/demande" onClick={() => setPanneau(false)} className="nav-devis text-center text-[15px] font-semibold px-4 py-3 rounded-full text-encre">Demander un devis</Link>
+            <div className="mt-2 pt-3 border-t border-ligne">
+              <Link href="/pro" onClick={() => setPanneau(false)} className="block text-center text-[15px] font-semibold px-4 py-3 rounded-full bg-[#12151B] text-white">Espace pro</Link>
             </div>
           </div>
         )}
