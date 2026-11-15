@@ -168,7 +168,7 @@ for (const c of file) {
   }
   try {
     const { error } = await resend.emails.send({
-      from: process.env.CAMPAGNE_FROM ?? "Jeremy de DealBus <contact@dealbus.fr>",
+      from: process.env.CAMPAGNE_FROM ?? "Jeremy de DealBus <contact@news.dealbus.fr>",
       to: c.email,
       replyTo: "contact@dealbus.fr",
       subject: s,

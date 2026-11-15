@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { CAMPAGNE_FROM } from "@/lib/expediteur";
 import { Resend } from "resend";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -38,7 +39,7 @@ export async function GET(req: Request) {
   const sujet = sujetProspectionClient(echantillon);
   const bandeau = `<div style="background:#12151B;color:#F5F2EA;font-family:Consolas,monospace;font-size:12px;padding:12px 20px;">
     APERÇU — Objet : <strong style="color:#E8A63D;">${sujet}</strong>
-    &nbsp;·&nbsp; Expéditeur : ${process.env.CAMPAGNE_FROM ?? process.env.RESEND_FROM ?? "Jeremy de DealBus <contact@dealbus.fr>"}
+    &nbsp;·&nbsp; Expéditeur : ${CAMPAGNE_FROM}
     &nbsp;·&nbsp; Exemple : ${echantillon.email}${echantillon.departement ? ` (dépt ${echantillon.departement})` : ""}
   </div>`;
   return new Response(bandeau + htmlProspectionClient(echantillon), {
@@ -104,7 +105,7 @@ export async function POST(req: Request) {
     if (!cibles?.length) return NextResponse.json({ ok: true, envoyes: 0, note: "aucun prospect à contacter" });
 
     const resend = new Resend(process.env.RESEND_API_KEY);
-    const from = process.env.CAMPAGNE_FROM ?? process.env.RESEND_FROM ?? "Jeremy de DealBus <contact@dealbus.fr>";
+    const from = CAMPAGNE_FROM;
     let envoyes = 0, erreurs = 0;
 
     // Envoi par lots de 20 via l'API batch (évite les timeouts serverless)
@@ -157,7 +158,7 @@ export async function POST(req: Request) {
       departement: premier?.departement ?? "76",
     };
     const resend = new Resend(process.env.RESEND_API_KEY);
-    const from = process.env.CAMPAGNE_FROM ?? process.env.RESEND_FROM ?? "Jeremy de DealBus <contact@dealbus.fr>";
+    const from = CAMPAGNE_FROM;
     const { error } = await resend.emails.send({
       from,
       to: email,
@@ -185,7 +186,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: `relance impossible (statut : ${p.statut})` }, { status: 400 });
     }
     const resend = new Resend(process.env.RESEND_API_KEY);
-    const from = process.env.CAMPAGNE_FROM ?? process.env.RESEND_FROM ?? "Jeremy de DealBus <contact@dealbus.fr>";
+    const from = CAMPAGNE_FROM;
     const { error } = await resend.emails.send({
       from,
       to: p.email,
