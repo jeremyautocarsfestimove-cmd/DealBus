@@ -50,3 +50,17 @@
   }
 }
 @media (max-width: 899px) { .acc-pro .a-haut h1 { font-size: 36px; } }
+
+/* Page /pro simple : connexion ou inscription */
+.acc-pro .a-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+.acc-pro .a-btn.a-contour { background: rgba(255,255,255,.12); color: #fff; box-shadow: inset 0 0 0 1px rgba(255,255,255,.45); }
+.acc-pro .a-btn.a-contour:hover { background: rgba(255,255,255,.2); }
+.acc-pro .a-or { color: #F7B84B; }
+.acc-pro .a-deja { color: #e6e8ee; font-size: 15px; text-align: center; margin-top: 14px; }
+.acc-pro .a-deja a { color: #fff; font-weight: 650; border-bottom: 1.5px solid currentColor; }
+.acc-simple .a-haut { min-height: 100vh; }
+.acc-decouvrir .a-haut { grid-template-columns: 1fr; }
+@media (min-width: 900px) {
+  .acc-decouvrir .a-haut > div:first-of-type { position: static; padding-top: 0; max-width: 760px; }
+  .acc-decouvrir .a-haut { padding-bottom: 96px; }
+}

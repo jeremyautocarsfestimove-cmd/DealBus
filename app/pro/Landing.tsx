@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { Caveat } from "next/font/google";
 import { InscriptionTransporteur } from "./InscriptionTransporteur";
 import "../accueil.css";
@@ -28,11 +29,40 @@ const FAQ = [
   { q: "Comment mon compte est-il validé ?", r: "Votre titre d'exercice et votre RC Pro sont vérifiés manuellement. Vous recevez un e-mail dès que l'accès aux demandes est ouvert." },
 ];
 
-/* eslint-disable @next/next/no-img-element */
+// Page /pro pour un visiteur : se connecter ou s'inscrire, rien d'autre.
 export function LandingPro() {
   return (
     <main className="overflow-x-clip">
-      <div className={`acc acc-pro ${caveat.variable}`}>
+      <div className={`acc acc-pro acc-simple ${caveat.variable}`}>
+        <section className="a-haut" id="haut">
+          <Image className="a-fond" src="/img/pro.jpg" alt="" fill priority sizes="100vw" />
+          <div>
+            <span className="a-main"><svg className="a-fl" viewBox="0 0 34 14" aria-hidden="true"><path d="M1 9c6-6 14-7 22-3" /><path d="M19 2l5 4-6 3" /></svg>Espace transporteur</span>
+            <h1>Les demandes de transport <span className="a-or">de votre zone.</span></h1>
+            <p className="a-in">Connectez-vous à votre espace, ou inscrivez votre entreprise pour recevoir les demandes.</p>
+            <div className="a-actions">
+              <Link className="a-btn a-bl" href="/login">Se connecter</Link>
+              <Link className="a-btn a-contour" href="/pro/decouvrir">En savoir plus</Link>
+            </div>
+          </div>
+          <div id="inscription">
+            <div className="a-devis">
+              <div className="a-tete"><h2>Inscription</h2><div className="a-prog">Gratuite, 3 étapes</div></div>
+              <div className="dem dem-nu"><InscriptionTransporteur /></div>
+            </div>
+            <p className="a-deja">Déjà inscrit ? <Link href="/login">Se connecter</Link></p>
+          </div>
+        </section>
+      </div>
+    </main>
+  );
+}
+
+// Page /pro/decouvrir : le fonctionnement expliqué, ouverte par « En savoir plus ».
+export function DecouvrirPro() {
+  return (
+    <main className="overflow-x-clip">
+      <div className={`acc acc-pro acc-decouvrir ${caveat.variable}`}>
         <section className="a-haut" id="haut">
           <Image className="a-fond" src="/img/pro.jpg" alt="" fill priority sizes="100vw" />
           <div>
@@ -44,11 +74,9 @@ export function LandingPro() {
               <li><svg className="a-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M8.5 12.5l2.5 2.5 4.5-5" /></svg>Commission au succès</li>
               <li><svg className="a-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M8.5 12.5l2.5 2.5 4.5-5" /></svg>Paiement direct</li>
             </ul>
-          </div>
-          <div id="inscription">
-            <div className="a-devis">
-              <div className="a-tete"><h2>Rejoindre DealBus</h2><div className="a-prog">Gratuit, 3 étapes</div></div>
-              <div className="dem dem-nu"><InscriptionTransporteur /></div>
+            <div className="a-actions">
+              <Link className="a-btn" href="/pro#inscription">Inscription gratuite</Link>
+              <Link className="a-btn a-contour" href="/login">Se connecter</Link>
             </div>
           </div>
         </section>
@@ -74,7 +102,7 @@ export function LandingPro() {
           </div>
           <div className="a-promo">
             <div><h3>Pas d&apos;abonnement. <i>Pas de frais d&apos;inscription.</i></h3><p>Vous ne payez que sur les missions réalisées, après le transport.</p></div>
-            <div className="a-ex">Exemple : une sortie à 920 € TTC<b>82,80 €</b>de commission, soit 9 %.<a className="a-btn a-bloc" href="#inscription" style={{ marginTop: 14 }}>Inscription gratuite</a></div>
+            <div className="a-ex">Exemple : une sortie à 920 € TTC<b>82,80 €</b>de commission, soit 9 %.<a className="a-btn a-bloc" href="/pro#inscription" style={{ marginTop: 14 }}>Inscription gratuite</a></div>
           </div>
         </section>
 
@@ -100,7 +128,7 @@ export function LandingPro() {
 
         <section className="a-fin">
           <div><span className="a-main"><svg className="a-fl" viewBox="0 0 34 14" aria-hidden="true"><path d="M1 9c6-6 14-7 22-3" /><path d="M19 2l5 4-6 3" /></svg>Votre planning a de la place ?</span><h2>Recevez les demandes de votre zone.</h2><p>L&apos;inscription prend quelques minutes. Elle est gratuite.</p></div>
-          <a className="a-btn a-bl" href="#inscription">Inscription gratuite</a>
+          <a className="a-btn a-bl" href="/pro#inscription">Inscription gratuite</a>
         </section>
       </div>
     </main>
