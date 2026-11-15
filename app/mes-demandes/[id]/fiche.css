@@ -1,0 +1,40 @@
+/* Fiche d'une demande côté client : même univers que la liste (fond crème, billet),
+   les classes du site sont réhabillées sous .mesd-fiche sans toucher au fonctionnement. */
+.mesd-retour { display: inline-block; font-size: 14.5px; font-weight: 600; color: #6b4a12; margin-bottom: 16px; }
+.mesd-retour:hover { text-decoration: underline; text-underline-offset: 3px; }
+.mesd-entete { margin-bottom: 22px; }
+.mesd-entete:hover { transform: none; }
+.mesd-entete .mesd-corps { padding-bottom: 20px; }
+
+.mesd-fiche .font-mono, .mesd-fiche .font-condensed { font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important; }
+.mesd-fiche .font-mono { font-variant-numeric: tabular-nums; }
+.mesd-fiche .uppercase { text-transform: none !important; }
+.mesd-fiche [class*="tracking-"] { letter-spacing: normal !important; }
+.mesd-fiche .h-display { font-family: var(--font-inter), -apple-system, sans-serif; text-transform: none; font-weight: 650; letter-spacing: -0.035em !important; line-height: 1.08; }
+.mesd-fiche h1.h-display { font-size: 30px; margin-top: 26px; }
+.mesd-fiche .card { background: #fff; border: 0; border-radius: 24px; padding: 22px 20px; box-shadow: 0 24px 50px -36px rgba(107, 74, 18, .45), 0 0 0 1px rgba(236, 220, 187, .7); }
+.mesd-fiche .card .card { box-shadow: 0 0 0 1px #ecdcbb; border-radius: 16px; }
+.mesd-fiche .label { font-family: var(--font-inter), -apple-system, sans-serif; text-transform: none; font-size: 13.5px; font-weight: 650; color: #12151B; margin-bottom: 6px; }
+.mesd-fiche .input { font-size: 16px; padding: 12px 14px; border: 1px solid #e7e8ee; border-radius: 14px; background: #fff; }
+.mesd-fiche .input:focus { border-color: #E8842B; box-shadow: 0 0 0 3px rgba(232, 132, 43, .15); }
+.mesd-fiche .btn, .mesd-fiche .btn-primary, .mesd-fiche .btn-ghost { border-radius: 999px; font-weight: 650; font-size: 15px; padding: 12px 22px; }
+.mesd-fiche .btn-primary { background: var(--grad); color: #12151B; box-shadow: var(--lueur); }
+.mesd-fiche .btn-ghost { background: #f1f1f5; border-color: transparent; color: #12151B; }
+.mesd-fiche .tag { font-family: var(--font-inter), -apple-system, sans-serif; text-transform: none; letter-spacing: 0; font-size: 12px; font-weight: 600; border-radius: 999px; padding: 3px 10px; }
+.mesd-fiche .rounded-sm, .mesd-fiche .rounded-md, .mesd-fiche .rounded-lg { border-radius: 16px; }
+.mesd-fiche details > summary { font-size: 13.5px; font-weight: 600; color: #4a5060; list-style: none; }
+.mesd-fiche details > summary::-webkit-details-marker { display: none; }
+
+/* Les offres à comparer */
+.mesd-offres .card { padding-top: 26px; transition: transform .2s ease, box-shadow .2s ease; }
+.mesd-offres .card:hover { transform: translateY(-3px); }
+.mesd-offres .mesd-meilleure { box-shadow: 0 0 0 2px #F2B544, 0 26px 54px -30px rgba(224, 123, 26, .6); }
+.mesd-offres .card > span.absolute { top: -11px; right: 18px; border-radius: 999px; padding: 4px 12px; font-size: 12px; background: var(--grad); color: #12151B; box-shadow: var(--lueur); }
+.mesd-offres .card > span.absolute.bg-vert { background: #0E7A4C; color: #fff; box-shadow: none; }
+.mesd-offres .text-3xl { font-size: 34px; font-weight: 650; letter-spacing: -0.035em !important; line-height: 1.1; }
+
+@media (min-width: 860px) {
+  .mesd-entete.mesd-billet { grid-template-columns: 132px minmax(0, 1fr); }
+  .mesd-fiche h1.h-display { font-size: 42px; }
+  .mesd-fiche .card { padding: 26px; }
+}

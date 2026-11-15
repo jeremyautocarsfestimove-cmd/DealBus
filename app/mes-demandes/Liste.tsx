@@ -7,17 +7,17 @@ import "./mes-demandes.css";
 // Espace client : chaque demande est présentée comme un billet de voyage,
 // avec sa date, son trajet, l'avancement en quatre étapes et l'action à faire.
 
-const caveat = Caveat({ weight: ["600"], subsets: ["latin"], variable: "--font-caveat" });
+export const caveat = Caveat({ weight: ["600"], subsets: ["latin"], variable: "--font-caveat" });
 
 export type MissionResume = { demande_id: string | null; statut: string; annulation_motif: string | null; annulation_demandee_at: string | null; annulation_decision: string | null };
 export type OffresResume = { nb: number; min: number | null };
 
-const ETAPES = ["Demande envoyée", "Offres reçues", "Transporteur choisi", "Voyage"];
+export const ETAPES = ["Demande envoyée", "Offres reçues", "Transporteur choisi", "Voyage"];
 const pluriel = (n: number, mot: string) => `${n} ${mot}${n > 1 ? "s" : ""}`;
 const eur = (n: number) => Math.round(n).toLocaleString("fr-FR") + " €";
 const jours = (date: string) => Math.ceil((new Date(`${date}T00:00:00`).getTime() - Date.now()) / 86400000);
 
-function Car() {
+export function Car() {
   return (
     <svg className="mesd-car" viewBox="0 0 30 17" aria-hidden="true">
       <path className="c" d="M2 5.5A3.5 3.5 0 0 1 5.5 2H21c3.8 0 7 3 7 6.8V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z" />
@@ -27,7 +27,7 @@ function Car() {
   );
 }
 
-function DateBillet({ date }: { date: string }) {
+export function DateBillet({ date }: { date: string }) {
   const d = new Date(`${date}T12:00:00`);
   return (
     <div className="mesd-date">

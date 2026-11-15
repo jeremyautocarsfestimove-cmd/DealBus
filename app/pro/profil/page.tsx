@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { contexteTransporteur } from "@/lib/pro";
+import { contexteTransporteur, initiales } from "@/lib/pro";
 import { FEATURES } from "@/lib/features";
 import { ParametresDevis } from "../parametres-devis";
 import { PublierRetour, ReservationActions, GererVehicules, CgvForm, GererZones, DemanderSuppression, ModifierProfilTransporteur } from "../pro-actions";
@@ -21,31 +21,58 @@ export default async function ProfilProPage() {
   ]);
   const eur = (n: number) => Number(n).toLocaleString("fr-FR") + " €";
 
-  return (
-    <>
-      <div className="mb-6">
-        <h1 className="h-display text-4xl">Mon entreprise</h1>
-        <p className="text-blanc-dim mt-1.5">Coordonnées, zones d&apos;intervention, dépôt et tarifs de référence, flotte, conditions de vente.</p>
-        <p className="flex flex-wrap gap-2 mt-4">
-          <a href="#zones" className="btn btn-ghost py-2 px-3.5">Mes zones</a>
-          <a href="#vehicules" className="btn btn-ghost py-2 px-3.5">Véhicules</a>
-        </p>
-      </div>
-      <div className="max-w-3xl space-y-5">
-        <ModifierProfilTransporteur transporteurId={user.id} initial={{
-          raison_sociale: transporteur.raison_sociale, siren: transporteur.siren, licence_transport: transporteur.licence_transport,
-          departement_siege: transporteur.departement_siege, secteur: transporteur.secteur,
-          nom: profil?.nom ?? null, telephone: profil?.telephone ?? null, email: profil?.email ?? null,
-        }} />
-        <div id="zones" className="scroll-mt-28"><GererZones transporteurId={user.id} zones={(zones ?? []) as any[]} /></div>
-        <ParametresDevis transporteurId={user.id} initial={{
-          depot_adresse: transporteur.depot_adresse ?? null, cout_km: transporteur.cout_km ?? null, cout_heure: transporteur.cout_heure ?? null,
-          cout_nuit: transporteur.cout_nuit ?? null, cout_immobilisation: transporteur.cout_immobilisation ?? null, marge_pct: transporteur.marge_pct ?? null,
-        }} />
-        <div id="vehicules" className="scroll-mt-28"><GererVehicules transporteurId={user.id} vehicules={(vehicules ?? []) as any[]} /></div>
-        <CgvForm transporteurId={user.id} initial={transporteur.cgv ?? null} />
+  const SECTIONS = [
+    { id: "coordonnees", label: "Coordonnées" },
+    { id: "zones", label: "Mes zones" },
+    { id: "depot", label: "Mon dépôt" },
+    { id: "vehicules", label: "Véhicules" },
+    { id: "conditions", label: "Conditions de vente" },
+    { id: "compte", label: "Mon compte" },
+  ];
+  const nbZones = (zones ?? []).length;
+  const nbVehicules = (vehicules ?? []).length;
 
-        {FEATURES.retours && (
+  return (
+    <div className="pf">
+      {/* En-tête : l'entreprise en un coup d'œil */}
+      <header className="pf-tete">
+        <span className="pf-avatar">{initiales(transporteur.raison_sociale)}</span>
+        <div className="min-w-0">
+          <h1>{transporteur.raison_sociale}</h1>
+          <p>
+            <span className="pf-ok">Compte vérifié</span>
+            <a href="#zones"><b>{nbZones}</b> zone{nbZones > 1 ? "s" : ""}</a>
+            <a href="#vehicules"><b>{nbVehicules}</b> véhicule{nbVehicules > 1 ? "s" : ""}</a>
+            <span><b>{transporteur.nb_missions ?? 0}</b> mission{(transporteur.nb_missions ?? 0) > 1 ? "s" : ""} réalisée{(transporteur.nb_missions ?? 0) > 1 ? "s" : ""}</span>
+          </p>
+        </div>
+      </header>
+
+      <div className="pf-grille">
+        {/* Sommaire : reste visible pendant le défilement sur ordinateur, défile à l'horizontale sur téléphone */}
+        <nav className="pf-sommaire" aria-label="Sections de la page">
+          {SECTIONS.map((x, i) => <a key={x.id} href={`#${x.id}`}><i>{i + 1}</i>{x.label}</a>)}
+        </nav>
+
+        <div className="pf-contenu">
+          <section id="coordonnees">
+            <ModifierProfilTransporteur transporteurId={user.id} initial={{
+              raison_sociale: transporteur.raison_sociale, siren: transporteur.siren, licence_transport: transporteur.licence_transport,
+              departement_siege: transporteur.departement_siege, secteur: transporteur.secteur,
+              nom: profil?.nom ?? null, telephone: profil?.telephone ?? null, email: profil?.email ?? null,
+            }} />
+          </section>
+          <section id="zones"><GererZones transporteurId={user.id} zones={(zones ?? []) as any[]} /></section>
+          <section id="depot">
+            <ParametresDevis transporteurId={user.id} initial={{
+              depot_adresse: transporteur.depot_adresse ?? null, cout_km: transporteur.cout_km ?? null, cout_heure: transporteur.cout_heure ?? null,
+              cout_nuit: transporteur.cout_nuit ?? null, cout_immobilisation: transporteur.cout_immobilisation ?? null, marge_pct: transporteur.marge_pct ?? null,
+            }} />
+          </section>
+          <section id="vehicules"><GererVehicules transporteurId={user.id} vehicules={(vehicules ?? []) as any[]} /></section>
+          <section id="conditions"><CgvForm transporteurId={user.id} initial={transporteur.cgv ?? null} /></section>
+
+          {FEATURES.retours && (
           <div className="card">
             <h2 className="h-display text-2xl mb-4">Mes retours à vide</h2>
             <PublierRetour transporteurId={user.id} />
@@ -63,8 +90,9 @@ export default async function ProfilProPage() {
           </div>
         )}
 
-        <div className="pt-2"><DemanderSuppression transporteurId={user.id} dejaDemandee={transporteur.suppression_demandee_at ?? null} /></div>
+          <section id="compte"><DemanderSuppression transporteurId={user.id} dejaDemandee={transporteur.suppression_demandee_at ?? null} /></section>
+        </div>
       </div>
-    </>
+    </div>
   );
 }

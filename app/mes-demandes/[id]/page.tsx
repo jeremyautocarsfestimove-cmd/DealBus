@@ -1,6 +1,8 @@
 import { INCLUS } from "@/lib/assistant-demande";
 import { Nav } from "@/components/Nav";
-import { BackButton } from "@/components/BackButton";
+import Link from "next/link";
+import { Car, DateBillet, ETAPES, caveat } from "../Liste";
+import "./fiche.css";
 import { createClient } from "@/lib/supabase/server";
 import type { Demande, Offre, TransporteurAnonyme } from "@/lib/types";
 import { RetenirOffre, EnchereCliente, AvisForm } from "./client-actions";
@@ -66,17 +68,36 @@ export default async function DemandeDetailPage({ params }: { params: Promise<{ 
 
   const annulationConfirmee = mission?.statut === "annulee";
 
+  // Avancement affiché sur le billet : 0 demande envoyée, 1 offres reçues, 3 transporteur choisi
+  const { count: nbOffres } = await supabase.from("offres").select("id", { count: "exact", head: true }).eq("demande_id", id);
+  const etape = mission ? 3 : (nbOffres ?? 0) > 0 ? 1 : 0;
+
   return (
     <>
       <Nav />
-      <main className="max-w-5xl mx-auto px-7 py-14">
-        <div className="mb-8">
-          <BackButton href="/mes-demandes" />
-        </div>
+      <div className={`mesd mesd-fiche sous-capsule ${caveat.variable}`}>
+      <main className="mesd-page">
+        <Link href="/mes-demandes" className="mesd-retour">‹ Mes demandes</Link>
 
-        <p className="eyebrow mb-4">
-          Demande #{d.numero} · {d.depart_adresse} → {d.arrivee_adresse}
-        </p>
+        {/* Le billet de la demande : date, trajet, avancement */}
+        <section className="mesd-billet mesd-entete">
+          <DateBillet date={d.date_aller} />
+          <div className="mesd-corps">
+            <div className="mesd-trajet">
+              <strong>{d.depart_adresse}</strong>
+              <i><span style={{ left: `${[8, 38, 68, 88][etape]}%` }}><Car /></span></i>
+              <strong>{d.arrivee_adresse}</strong>
+            </div>
+            <p className="mesd-meta">
+              {d.passagers} passager{d.passagers > 1 ? "s" : ""} · {d.type_trajet === "aller_simple" ? "Aller simple" : d.type_trajet === "circuit" ? "Circuit" : "Aller-retour"} · Demande n° {d.numero}
+            </p>
+            <ol className="mesd-etapes">
+              {ETAPES.map((e, i) => (
+                <li key={e} className={i < etape || i === 0 ? "fait" : i === etape ? "encours" : ""}><span>{i < etape || i === 0 ? "✓" : i + 1}</span>{e}</li>
+              ))}
+            </ol>
+          </div>
+        </section>
         <ItineraireMap
           depart={d.depart_adresse}
           arrivee={d.arrivee_adresse}
@@ -158,7 +179,7 @@ export default async function DemandeDetailPage({ params }: { params: Promise<{ 
 
               {!annulationSignalee && (
                 <p className="text-[13px] text-blanc-dim mt-4 bg-vert-dim border border-vert/30 rounded-sm px-4 py-3">
-                  Vous payez le transporteur directement — DealBus ne prélève rien côté client.
+                  Vous payez le transporteur directement. DealBus ne prélève rien côté client.
                 </p>
               )}
 
@@ -210,6 +231,7 @@ export default async function DemandeDetailPage({ params }: { params: Promise<{ 
           </>
         )}
       </main>
+      </div>
     </>
   );
 }
@@ -242,7 +264,7 @@ async function DevisView({ demandeId, demande }: { demandeId: string; demande: a
       <h1 className="h-display text-4xl mb-3">{list.length ? "Comparez vos offres." : "Votre demande est diffusée."}</h1>
       <p className="text-blanc-dim mb-5 max-w-xl">
         {list.length
-          ? "Profils anonymisés, un seul prix chacun — les transporteurs répondent en tir unique."
+          ? "Profils anonymisés, un seul prix chacun : chaque transporteur répond une seule fois."
           : "Les transporteurs vérifiés de votre zone ont été prévenus. Tant qu'aucune offre n'est reçue, vous pouvez encore modifier votre demande."}
       </p>
       <div className="mb-10 space-y-3">
@@ -257,9 +279,9 @@ async function DevisView({ demandeId, demande }: { demandeId: string; demande: a
         )}
       </div>
 
-      <div className="grid md:grid-cols-3 gap-4">
+      <div className="mesd-offres grid md:grid-cols-2 lg:grid-cols-3 gap-4">
         {list.map((o) => (
-          <div key={o.id} className="card relative">
+          <div key={o.id} className={`card relative ${o.prix_ttc === minPrix ? "mesd-meilleure" : ""}`}>
             {o.prix_ttc === minPrix && (
               <span className="absolute -top-px right-5 bg-ambre text-asphalte font-mono text-[10.5px] uppercase font-semibold px-2.5 py-1 rounded-b-sm">
                 Prix le plus bas
@@ -330,7 +352,7 @@ async function DevisView({ demandeId, demande }: { demandeId: string; demande: a
 
         {!list.length && (
           <p className="text-blanc-dim col-span-3">
-            Aucune offre reçue pour l&apos;instant — les transporteurs de votre zone ont été notifiés.
+            Aucune offre reçue pour l&apos;instant. Les transporteurs de votre zone ont été prévenus.
           </p>
         )}
       </div>
