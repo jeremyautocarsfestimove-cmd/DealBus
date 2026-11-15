@@ -85,3 +85,4 @@ select option { color: #12151B; background-color: #FFFFFF; }
 .nav-devis { background: linear-gradient(120deg, #F2B544 0%, #EE9B33 55%, #E8842B 100%); box-shadow: 0 12px 26px -12px rgba(224, 123, 26, .75); }
 /* À poser sur le premier bloc d'une page pour qu'il passe sous la capsule */
 .sous-capsule { margin-top: calc(var(--nav-h) * -1); padding-top: var(--nav-h); }
+.nav-ruban { position: absolute; left: 30px; top: 31px; transform: rotate(-5deg); background: #12151B; color: #F7B84B; font-family: var(--font-inter), -apple-system, sans-serif; font-size: 10.5px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; line-height: 1.5; padding: 4px 10px; border-radius: 7px; white-space: nowrap; box-shadow: 0 0 0 2px rgba(255, 255, 255, .85), 0 8px 16px -8px rgba(0, 0, 0, .8); pointer-events: none; }
