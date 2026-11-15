@@ -1,0 +1,52 @@
+/* Page publique de l'espace transporteur : compléments au style de l'accueil (.acc) */
+.acc-pro .a-haut { align-items: start; }
+.acc-pro .a-haut > div { min-width: 0; }
+.acc-pro .a-haut select { max-width: 100%; min-width: 0; text-overflow: ellipsis; }
+.acc-pro .a-haut::after { background: linear-gradient(180deg, rgba(18,21,27,.72) 0%, rgba(18,21,27,.55) 45%, rgba(18,21,27,.82) 100%); }
+.acc-pro .a-haut .a-devis { background: rgba(255,255,255,.90); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+.acc-pro .a-haut .a-devis input, .acc-pro .a-haut .a-devis select { background: #fff; }
+
+/* Formulaire d'inscription : habillé comme la page de demande, sans son fond ni sa carte */
+.acc-pro .dem.dem-nu { background: none; min-height: 0; margin-top: 0; padding-top: 0; }
+.acc-pro .dem-nu .card { background: transparent; box-shadow: none; padding: 0; border-radius: 0; }
+.acc-pro .dem-nu > div > p:first-child { margin: 6px 0 16px; font-size: 13px; color: #4a5060; }
+.acc-pro .dem-nu select.input { font-size: 16px; padding: 13px 14px; border: 1px solid #e7e8ee; border-radius: 14px; width: 100%; color: #12151B; }
+.acc-pro .dem-nu h2 { font-size: 18px; letter-spacing: -.02em; line-height: 1.2; }
+.acc-pro .dem-nu p, .acc-pro .dem-nu li { font-size: 14.5px; }
+
+/* Les trois taux de commission */
+.acc-pro .a-taux { grid-template-columns: 1fr; }
+.acc-pro .a-taux div:last-child { grid-column: auto; }
+.acc-pro .a-taux b { display: block; font-size: 46px; font-weight: 650; letter-spacing: -.04em; line-height: 1; color: #F7B84B; margin-bottom: 10px; }
+
+/* Les atouts */
+.acc-pro .a-atouts { display: grid; gap: 12px; margin-top: 30px; }
+.acc-pro .a-atouts > div { background: #fff; border-radius: 22px; padding: 22px 20px; transition: transform .2s ease, box-shadow .2s ease; }
+.acc-pro .a-atouts > div:hover { transform: translateY(-3px); box-shadow: 0 18px 40px -24px rgba(18,21,27,.35); }
+.acc-pro .a-num { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--grad); font-weight: 650; font-size: 15px; margin-bottom: 14px; box-shadow: var(--lueur); }
+.acc-pro .a-atouts h3 { font-size: 19px; line-height: 1.2; }
+.acc-pro .a-atouts p { color: var(--texte); font-size: 15.5px; margin-top: 6px; }
+.acc-pro .a-crit div { transition: transform .2s ease, background .2s ease; }
+.acc-pro .a-crit div:hover { transform: translateY(-3px); background: rgba(255,255,255,.12); }
+.acc-pro .a-btn { transition: transform .15s ease, box-shadow .15s ease; }
+.acc-pro .a-btn:hover { transform: translateY(-1px); }
+
+@media (min-width: 900px) {
+  .acc-pro .a-haut { grid-template-columns: 1fr 480px; }
+  .acc-pro .a-haut > div:first-of-type { padding-top: 40px; position: sticky; top: 120px; }
+  .acc-pro .a-taux { grid-template-columns: repeat(3, 1fr); }
+  .acc-pro .a-atouts { grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 50px; }
+  .acc-pro .a-atouts > div { padding: 28px 26px; }
+}
+
+/* Les blocs apparaissent en montant quand on fait défiler la page (navigateurs récents, sans script) */
+@keyframes acc-monte { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .acc-pro .a-zone > h2, .acc-pro .a-zone > .a-main, .acc-pro .a-frise > div, .acc-pro .a-crit > div,
+    .acc-pro .a-promo, .acc-pro .a-atouts > div, .acc-pro .a-faq > details, .acc-pro .a-fin {
+      animation: acc-monte linear both; animation-timeline: view(); animation-range: entry 0% entry 45%;
+    }
+  }
+}
+@media (max-width: 899px) { .acc-pro .a-haut h1 { font-size: 36px; } }

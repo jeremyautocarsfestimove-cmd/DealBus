@@ -5,7 +5,7 @@ import { contexteTransporteur, eur, jourCourt, heureFr, ville, dateFuture, jours
 import { analyser, ORGANISMES, fmtDuree, gabaritPour } from "@/lib/assistant-demande";
 import { pointsMarche } from "@/lib/calibration-serveur";
 import { fourchetteDepuisDevis } from "@/lib/calibration-prix";
-import { InscriptionTransporteur } from "./InscriptionTransporteur";
+import { LandingPro } from "./Landing";
 import { DemanderSuppression } from "./pro-actions";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -13,25 +13,11 @@ export default async function ProPage() {
   const ctx = await contexteTransporteur();
 
   if (!ctx) {
-    return (
-      <main className="max-w-2xl mx-auto px-7 py-14">
-        <p className="eyebrow mb-4">Espace transporteur</p>
-        <h1 className="h-display text-4xl mb-4">Devenir partenaire.</h1>
-        <p className="text-blanc-dim mb-8">Inscription gratuite. Votre titre d&apos;exercice et votre RC Pro sont vérifiés manuellement avant l&apos;accès aux demandes.</p>
-        <InscriptionTransporteur />
-      </main>
-    );
+    return <LandingPro />;
   }
   const { user, transporteur, compteurs } = ctx;
   if (!transporteur) {
-    return (
-      <main className="max-w-2xl mx-auto px-7 py-14">
-        <p className="eyebrow mb-4">Espace transporteur</p>
-        <h1 className="h-display text-4xl mb-4">Devenir partenaire.</h1>
-        <p className="text-blanc-dim mb-8">Inscription gratuite. Votre titre d&apos;exercice et votre RC Pro sont vérifiés manuellement avant l&apos;accès aux demandes.</p>
-        <InscriptionTransporteur />
-      </main>
-    );
+    return <LandingPro />;
   }
   if (transporteur.statut !== "valide") {
     return (
