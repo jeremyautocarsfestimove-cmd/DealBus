@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { emailHtml } from "@/lib/email";
 import { ENGAGEMENT_TEXTE, ENGAGEMENT_VERSION, CODE_MINUTES, CODE_ESSAIS_MAX } from "@/lib/engagement";
+import { NOTIF_FROM, REPLY_TO } from "@/lib/expediteur";
 
 // Code de validation à l'envoi d'une demande.
 //  - envoyer   : génère un code à 6 chiffres et l'envoie à l'e-mail du compte
@@ -45,7 +46,8 @@ export async function POST(req: Request) {
 
     const resend = new Resend(process.env.RESEND_API_KEY);
     const { error: errMail } = await resend.emails.send({
-      from: process.env.RESEND_FROM ?? "DealBus <onboarding@resend.dev>",
+      from: NOTIF_FROM,
+      replyTo: REPLY_TO,
       to: user.email,
       subject: `${code} : votre code pour envoyer votre demande DealBus`,
       html: emailHtml({

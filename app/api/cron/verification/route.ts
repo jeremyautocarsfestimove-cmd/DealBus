@@ -3,6 +3,7 @@ import { createHmac } from "crypto";
 import { Resend } from "resend";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { emailHtml } from "@/lib/email";
+import { NOTIF_FROM, REPLY_TO } from "@/lib/expediteur";
 
 // Cron quotidien (vercel.json) : pour chaque mission ANNULÉE dont la date de
 // trajet est passée, on demande au client si le trajet a réellement eu lieu.
@@ -59,7 +60,8 @@ export async function GET(req: Request) {
 
     try {
       await resend.emails.send({
-        from: process.env.RESEND_FROM ?? "DealBus <onboarding@resend.dev>",
+        from: NOTIF_FROM,
+        replyTo: REPLY_TO,
         to: email,
         subject: "Votre trajet a-t-il finalement eu lieu ?",
         text: `Votre trajet ${d.depart_adresse} → ${d.arrivee_adresse} du ${new Date(d.date_aller).toLocaleDateString("fr-FR")} a été déclaré annulé. Annulé : ${base}bien_annule — A eu lieu : ${base}a_eu_lieu`,

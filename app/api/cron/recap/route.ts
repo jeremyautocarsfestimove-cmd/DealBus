@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { emailHtml } from "@/lib/email";
+import { NOTIF_FROM, REPLY_TO } from "@/lib/expediteur";
 
 export const maxDuration = 60;
 
@@ -111,7 +112,8 @@ export async function GET(req: Request) {
 
   const resend = new Resend(process.env.RESEND_API_KEY);
   await resend.emails.send({
-    from: process.env.RESEND_FROM ?? "DealBus <onboarding@resend.dev>",
+    from: NOTIF_FROM,
+    replyTo: REPLY_TO,
     to: destinataires,
     subject: `📊 DealBus — récap du ${new Date().toLocaleDateString("fr-FR")} : ${demandes24} demande${demandes24 > 1 ? "s" : ""}, ${offres24 + bids24} réponse${offres24 + bids24 > 1 ? "s" : ""}, ${inscriptions24} inscription${inscriptions24 > 1 ? "s" : ""}`,
     text: `Récap DealBus — ${date}\n\nActivité 24h : ${demandes24} demandes · ${offres24} offres · ${bids24} bids · ${missions24} sélections · ${inscriptions24} inscriptions transporteur\nÉtat : ${demandesOuvertes} demandes ouvertes · ${transporteursActifs} transporteurs actifs · ${transporteursAttente} à valider · ${litiges} litiges\nProspection : ${prospEnvoyes24} envoyés (24h) · ${prospRestants} restants\n\n${process.env.NEXT_PUBLIC_SITE_URL}/admin`,

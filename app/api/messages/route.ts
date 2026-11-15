@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { emailHtml } from "@/lib/email";
 import { detecterContacts, detecterPrix, LIBELLES_INFRACTION } from "@/lib/messagerie";
+import { NOTIF_FROM, REPLY_TO } from "@/lib/expediteur";
 
 export const maxDuration = 30;
 
@@ -106,7 +107,8 @@ export async function POST(req: Request) {
         const extrait = contenu.length > 280 ? contenu.slice(0, 277) + "…" : contenu;
         const resend = new Resend(process.env.RESEND_API_KEY);
         await resend.emails.send({
-          from: process.env.RESEND_FROM ?? "DealBus <onboarding@resend.dev>",
+          from: NOTIF_FROM,
+          replyTo: REPLY_TO,
           to: email,
           subject: `💬 Nouveau message sur la demande #${demande.numero}`,
           text: `${expediteur} vous a écrit au sujet de ${demande.depart_adresse} → ${demande.arrivee_adresse} :\n\n${extrait}\n\nRépondre : ${url}`,

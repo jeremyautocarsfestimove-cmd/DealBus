@@ -3,6 +3,7 @@ import { Resend } from "resend";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { emailHtml } from "@/lib/email";
+import { NOTIF_FROM, REPLY_TO } from "@/lib/expediteur";
 
 // Barème DealBus — retour à vide : -2 points, plancher 3 %
 function commissionTaux(prix: number): number {
@@ -79,7 +80,8 @@ export async function POST(req: Request) {
       if (email) {
         const resend = new Resend(process.env.RESEND_API_KEY);
         await resend.emails.send({
-          from: process.env.RESEND_FROM ?? "DealBus <onboarding@resend.dev>",
+          from: NOTIF_FROM,
+          replyTo: REPLY_TO,
           to: email,
           subject: "✅ Votre trajet retour est confirmé",
           text: `Réservation validée : ${retour.depart_adresse} → ${retour.arrivee_adresse} le ${new Date(retour.date_dispo).toLocaleDateString("fr-FR")}, ${prix.toLocaleString("fr-FR")} € TTC.`,

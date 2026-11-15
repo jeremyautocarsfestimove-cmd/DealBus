@@ -3,6 +3,7 @@ import { Resend } from "resend";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { emailHtml } from "@/lib/email";
+import { NOTIF_FROM, REPLY_TO } from "@/lib/expediteur";
 
 // Barème DealBus (identique à la fonction SQL commission_taux)
 function commissionTaux(prix: number, source: "devis" | "enchere" | "retour_vide"): number {
@@ -29,7 +30,8 @@ async function notifierTransporteur(
     if (!email) return;
     const resend = new Resend(process.env.RESEND_API_KEY);
     await resend.emails.send({
-      from: process.env.RESEND_FROM ?? "DealBus <onboarding@resend.dev>",
+      from: NOTIF_FROM,
+      replyTo: REPLY_TO,
       to: email,
       subject: "🎉 Votre offre a été retenue !",
       text: `Votre offre sur ${trajet} est retenue pour ${prix.toLocaleString("fr-FR")} € TTC. Détails : ${process.env.NEXT_PUBLIC_SITE_URL}/pro`,

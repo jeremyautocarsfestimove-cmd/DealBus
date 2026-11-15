@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { emailHtml } from "@/lib/email";
+import { NOTIF_FROM, REPLY_TO } from "@/lib/expediteur";
 
 // Emails transactionnels du cycle de vie :
 // - "offre"            → au CLIENT : nouvelle offre de devis reçue (anonyme)
@@ -16,7 +17,7 @@ export async function POST(req: Request) {
   const admin = createAdminClient();
   const resend = new Resend(process.env.RESEND_API_KEY);
   const site = process.env.NEXT_PUBLIC_SITE_URL;
-  const from = process.env.RESEND_FROM ?? "DealBus <onboarding@resend.dev>";
+  const from = NOTIF_FROM;
   /* eslint-disable @typescript-eslint/no-explicit-any */
 
   try {
@@ -33,7 +34,7 @@ export async function POST(req: Request) {
       ]);
       if (!client?.email) return NextResponse.json({ ok: true, sent: 0 });
       await resend.emails.send({
-        from, to: client.email,
+        from, replyTo: REPLY_TO, to: client.email,
         subject: `💶 Nouvelle offre sur votre demande #${d.numero}`,
         text: `Transporteur #${anonyme?.numero_anonyme} propose ${Number(offre.prix_ttc).toLocaleString("fr-FR")} € TTC sur ${d.depart_adresse} → ${d.arrivee_adresse}. Comparer : ${site}/mes-demandes/${d.id}`,
         html: emailHtml({
@@ -60,7 +61,7 @@ export async function POST(req: Request) {
       const { data: client } = await admin.from("profiles").select("email").eq("id", d.client_id).single();
       if (!client?.email) return NextResponse.json({ ok: true, sent: 0 });
       await resend.emails.send({
-        from, to: client.email,
+        from, replyTo: REPLY_TO, to: client.email,
         subject: `🔨 Votre enchère a démarré (demande #${d.numero})`,
         text: `Premier prix positionné sur ${d.depart_adresse} → ${d.arrivee_adresse}. Suivre : ${site}/mes-demandes/${d.id}`,
         html: emailHtml({
@@ -88,7 +89,7 @@ export async function POST(req: Request) {
       const { data: transporteur } = await admin.from("profiles").select("email").eq("id", r.transporteur_id).single();
       if (!transporteur?.email) return NextResponse.json({ ok: true, sent: 0 });
       await resend.emails.send({
-        from, to: transporteur.email,
+        from, replyTo: REPLY_TO, to: transporteur.email,
         subject: `🚌 Demande de réservation sur votre retour à vide`,
         text: `Un client souhaite réserver ${r.depart_adresse} → ${r.arrivee_adresse} du ${new Date(r.date_dispo).toLocaleDateString("fr-FR")} (${Number(r.prix_fixe).toLocaleString("fr-FR")} €). Valider : ${site}/pro`,
         html: emailHtml({
@@ -124,7 +125,7 @@ export async function POST(req: Request) {
       const destinataires = (admins ?? []).map((a: any) => a.email).filter(Boolean);
       if (!destinataires.length) return NextResponse.json({ ok: true, sent: 0 });
       await resend.emails.send({
-        from, to: destinataires,
+        from, replyTo: REPLY_TO, to: destinataires,
         subject: `🆕 Transporteur à valider : ${t.raison_sociale}`,
         text: `${t.raison_sociale} (SIREN ${t.siren}, ${t.secteur}, dépt. ${t.departement_siege}) attend validation : ${site}/admin`,
         html: emailHtml({
@@ -152,7 +153,7 @@ export async function POST(req: Request) {
       if (!destinataires.length) return NextResponse.json({ ok: true, sent: 0 });
       const p = (t as any).profile;
       await resend.emails.send({
-        from, to: destinataires,
+        from, replyTo: REPLY_TO, to: destinataires,
         subject: `🗑️ Demande de suppression de compte : ${t.raison_sociale}`,
         text: `${t.raison_sociale} (SIREN ${t.siren}) demande la suppression de son compte. Traiter : ${site}/admin/transporteurs/${id}`,
         html: emailHtml({

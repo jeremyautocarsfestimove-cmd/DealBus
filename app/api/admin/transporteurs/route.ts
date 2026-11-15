@@ -3,6 +3,7 @@ import { Resend } from "resend";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { emailHtml } from "@/lib/email";
+import { NOTIF_FROM, REPLY_TO } from "@/lib/expediteur";
 
 const ACTIONS = {
   valider: "valide",
@@ -55,7 +56,7 @@ export async function POST(req: Request) {
 
     const resend = new Resend(process.env.RESEND_API_KEY);
     const { error: envoiErr } = await resend.emails.send({
-      from: process.env.RESEND_FROM ?? "DealBus <onboarding@resend.dev>",
+      from: NOTIF_FROM,
       to: email,
       replyTo: "contact@dealbus.fr",
       subject: sujet,
@@ -95,7 +96,8 @@ export async function POST(req: Request) {
       if (email) {
         const resend = new Resend(process.env.RESEND_API_KEY);
         await resend.emails.send({
-          from: process.env.RESEND_FROM ?? "DealBus <onboarding@resend.dev>",
+          from: NOTIF_FROM,
+          replyTo: REPLY_TO,
           to: email,
           subject: "Votre compte transporteur DealBus est activé",
           text: `Le compte de ${transporteur.raison_sociale} est vérifié et activé. Accédez aux demandes : ${process.env.NEXT_PUBLIC_SITE_URL}/pro`,

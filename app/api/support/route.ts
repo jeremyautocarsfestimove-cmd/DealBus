@@ -3,6 +3,7 @@ import { Resend } from "resend";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { emailHtml } from "@/lib/email";
+import { NOTIF_FROM, REPLY_TO } from "@/lib/expediteur";
 
 export const maxDuration = 30;
 
@@ -92,7 +93,8 @@ export async function POST(req: Request) {
           const resend = new Resend(process.env.RESEND_API_KEY);
           const qui = `${profil?.nom ?? user.email ?? "Un utilisateur"} (${profil?.role ?? "client"})`;
           await resend.emails.send({
-            from: process.env.RESEND_FROM ?? "DealBus <onboarding@resend.dev>",
+            from: NOTIF_FROM,
+            replyTo: REPLY_TO,
             to: dest,
             subject: `🛟 Support : message de ${profil?.nom ?? user.email}`,
             text: `${qui} :\n\n${contenu}\n\nRépondre : ${site}/admin/support?c=${convId}`,
@@ -138,7 +140,8 @@ export async function POST(req: Request) {
       if (email) {
         const resend = new Resend(process.env.RESEND_API_KEY);
         await resend.emails.send({
-          from: process.env.RESEND_FROM ?? "DealBus <onboarding@resend.dev>",
+          from: NOTIF_FROM,
+          replyTo: REPLY_TO,
           to: email,
           subject: "💬 DealBus vous a écrit",
           text: `Message de l'équipe DealBus :\n\n${contenu}\n\nRépondre : ${site}/aide?c=${convId}`,

@@ -3,6 +3,7 @@ import { Resend } from "resend";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { calcItineraire, dureeA80 } from "@/lib/itineraire";
 import { emailHtml } from "@/lib/email";
+import { NOTIF_FROM, REPLY_TO } from "@/lib/expediteur";
 
 // Notifie par email tous les transporteurs VALIDÉS dont une zone couvre
 // le département de départ. Contenu 100 % anonyme (aucune info client).
@@ -87,7 +88,8 @@ export async function POST(req: Request) {
   for (const email of emails) {
     try {
       await resend.emails.send({
-        from: process.env.RESEND_FROM ?? "DealBus <onboarding@resend.dev>",
+        from: NOTIF_FROM,
+        replyTo: REPLY_TO,
         to: email,
         subject: sujet,
         text: `${demande.depart_adresse} → ${demande.arrivee_adresse} · ${dateAller} · ${demande.passagers} pax · ${modeLabel}. Répondre : ${site}/pro`,
@@ -119,7 +121,8 @@ export async function POST(req: Request) {
     const destinataires = (admins ?? []).map((a: any) => a.email).filter(Boolean);
     if (destinataires.length) {
       await resend.emails.send({
-        from: process.env.RESEND_FROM ?? "DealBus <onboarding@resend.dev>",
+        from: NOTIF_FROM,
+        replyTo: REPLY_TO,
         to: destinataires,
         subject: `📥 Lead #${demande.numero} — ${demande.depart_adresse} → ${demande.arrivee_adresse}`,
         text: `${modeLabel} · ${dateAller} · ${demande.passagers} pax · dépt. ${demande.depart_departement} · ${sent} transporteur(s) notifié(s). ${site}/admin`,

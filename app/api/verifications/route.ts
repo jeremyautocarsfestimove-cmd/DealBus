@@ -2,6 +2,7 @@ import { createHmac } from "crypto";
 import { Resend } from "resend";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { emailHtml } from "@/lib/email";
+import { NOTIF_FROM, REPLY_TO } from "@/lib/expediteur";
 
 // Réponse du client au mail de vérification — lien signé, aucune connexion requise.
 // "a_eu_lieu" sur une mission annulée → passage en LITIGE (contournement suspecté).
@@ -53,7 +54,8 @@ export async function GET(req: Request) {
       if (mission && destinataires.length) {
         const resend = new Resend(process.env.RESEND_API_KEY);
         await resend.emails.send({
-          from: process.env.RESEND_FROM ?? "DealBus <onboarding@resend.dev>",
+          from: NOTIF_FROM,
+          replyTo: REPLY_TO,
           to: destinataires,
           subject: `⚠ LITIGE — trajet annulé mais réalisé (mission #${mission.demande?.numero ?? ""})`,
           text: `Le client confirme que le trajet ${mission.demande?.depart_adresse} → ${mission.demande?.arrivee_adresse} a eu lieu malgré l'annulation. ${process.env.NEXT_PUBLIC_SITE_URL}/admin`,
