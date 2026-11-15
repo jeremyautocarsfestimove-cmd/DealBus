@@ -215,3 +215,11 @@
 /* Le haut de page remonte sous le menu en capsule */
 .acc .a-haut{margin-top:calc(var(--nav-h) * -1);padding-top:calc(var(--nav-h) + 26px)}
 @media (min-width:900px){.acc .a-haut{padding-top:calc(var(--nav-h) + 70px)}}
+/* Petit autocar qui roule du départ à l'arrivée dans la carte de devis */
+.acc .a-route i{position:relative}
+.acc .a-car{position:absolute;top:-13px;left:0;width:30px;height:17px;animation:acc-car 7s cubic-bezier(.45,0,.3,1) infinite}
+.acc .a-car .a-caisse{fill:#E8842B}
+.acc .a-car .a-vitre{fill:#fff;opacity:.9}
+.acc .a-car circle{fill:#12151B;stroke:#fff;stroke-width:1}
+@keyframes acc-car{0%{left:0;opacity:0}7%{opacity:1}78%{left:calc(100% - 30px);opacity:1}90%{left:calc(100% - 30px);opacity:0}100%{left:0;opacity:0}}
+@media (prefers-reduced-motion:reduce){.acc .a-car{animation:none;left:calc(50% - 15px)}}

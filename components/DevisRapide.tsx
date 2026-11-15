@@ -35,7 +35,13 @@ export function DevisRapide() {
     <form className="a-devis" onSubmit={go}>
       <div className="a-et" style={{ display: "grid" }}>
         <div className="a-tete"><h2>Calculer mon devis</h2><div className="a-prog">Gratuit, 2 minutes</div></div>
-        <div className="a-route">Départ<i></i>Arrivée</div>
+        <div className="a-route">Départ<i>
+          <svg className="a-car" viewBox="0 0 30 17" aria-hidden="true">
+            <path className="a-caisse" d="M2 5.5A3.5 3.5 0 0 1 5.5 2H21c3.8 0 7 3 7 6.8V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z" />
+            <path className="a-vitre" d="M5 4.5h4.5v3.5H5zM11 4.5h4.5v3.5H11zM17 4.5h3.2c2.300 0 4 1.5 4.7 3.5H17z" />
+            <circle cx="8.5" cy="13" r="2.5" /><circle cx="21.5" cy="13" r="2.5" />
+          </svg>
+        </i>Arrivée</div>
         <div className="a-ch a-ad"><span>D&apos;où partez-vous ?</span>
           <AddressInput value={f.de} onChange={(v) => { set("de", v); set("dept", ""); }} onSelect={(s) => { set("de", s.label); set("dept", s.dept); }}
             placeholder="Ville ou adresse de départ" inputClassName="a-champ" />
