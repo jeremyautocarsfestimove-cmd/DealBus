@@ -206,8 +206,9 @@
 }
 @media (min-width:900px){.acc .a-promo{grid-template-columns:1.25fr 1fr}}
 /* Carte de devis en légère transparence : on devine la photo derrière */
-.acc .a-haut .a-devis{background:rgba(255,255,255,.80);-webkit-backdrop-filter:blur(6px) saturate(1.2);backdrop-filter:blur(6px) saturate(1.2);box-shadow:0 0 0 1px rgba(255,255,255,.45),0 30px 80px -20px rgba(0,0,0,.6)}
-.acc .a-haut .a-devis input{background:rgba(255,255,255,.72);border-color:rgba(18,21,27,.12)}
+.acc .a-haut .a-devis{background:rgba(255,255,255,.52);-webkit-backdrop-filter:blur(3px) saturate(1.15);backdrop-filter:blur(3px) saturate(1.15);box-shadow:0 0 0 1px rgba(255,255,255,.45),0 30px 80px -20px rgba(0,0,0,.6)}
+.acc .a-haut .a-devis input{background:rgba(255,255,255,.62);border-color:rgba(18,21,27,.12)}
 .acc .a-haut .a-devis .a-seg{background:rgba(18,21,27,.07)}
-.acc .a-haut .a-devis .a-prog,.acc .a-haut .a-devis .a-route{color:#3b4050}
-.acc .a-haut .a-devis input::placeholder{color:#7b8090}
+.acc .a-haut .a-devis .a-prog,.acc .a-haut .a-devis .a-route{color:#22262f}
+.acc .a-haut .a-devis input::placeholder{color:#565b6a}
+.acc .a-haut .a-devis .a-seg label{color:#22262f}
