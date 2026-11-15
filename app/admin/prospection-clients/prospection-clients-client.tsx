@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { EnvoiAuto } from "@/components/admin/EnvoiAuto";
 
 type Prospect = {
   id: string; email: string; nom: string | null; departement: string | null;
@@ -231,6 +232,8 @@ export function ProspectionClientsClient() {
         ))}
       </div>
 
+      <EnvoiAuto liste="clients" />
+
       {/* ---------- Actions ---------- */}
       <div className="card mb-8">
         <div className="flex flex-wrap items-end gap-5">
@@ -294,7 +297,7 @@ export function ProspectionClientsClient() {
         <p className="font-mono text-[10.5px] text-blanc-faint border-t border-ligne mt-4 pt-3">
           Cadence conseillée : 30/jour les 3 premiers jours, puis 40-50/jour maximum.
           Une adresse déjà contactée ne peut jamais recevoir deux fois l&apos;email.
-          Quand quelqu&apos;un répond « STOP » sur contact@dealbus.fr : bouton STOP sur sa ligne ci-dessous.
+          Chaque e-mail porte un lien de désinscription : un clic passe la ligne en STOP. Si quelqu&apos;un répond « STOP » sur contact@dealbus.fr : bouton STOP sur sa ligne ci-dessous.
         </p>
       </div>
 

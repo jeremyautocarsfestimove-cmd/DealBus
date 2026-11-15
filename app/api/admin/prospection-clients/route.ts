@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { CAMPAGNE_FROM } from "@/lib/expediteur";
+import { envoyerVague } from "@/lib/campagnes";
+import { enTetesDesinscription, lienDesinscription, ID_TEST } from "@/lib/desinscription";
 import { Resend } from "resend";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -9,6 +11,13 @@ import {
 } from "@/lib/prospection-clients";
 
 export const maxDuration = 60;
+
+// Chaque e-mail porte son lien de désinscription (factice pour les tests et l'aperçu).
+/* eslint-disable @typescript-eslint/no-explicit-any */
+const perso = (p: any) => ({ ...p, lien: lienDesinscription("clients", p.id ?? ID_TEST) });
+const entetes = (p: any) => enTetesDesinscription("clients", p.id ?? ID_TEST);
+/* eslint-enable @typescript-eslint/no-explicit-any */
+
 
 // Toutes les actions exigent un compte admin authentifié.
 async function verifierAdmin() {
@@ -36,13 +45,13 @@ export async function GET(req: Request) {
     .from("prospects_clients").select("email, nom, departement")
     .eq("statut", "a_contacter").limit(1).maybeSingle();
   const echantillon = premier ?? { email: "contact@exemple.fr", nom: "Association Exemple", departement: "76" };
-  const sujet = sujetProspectionClient(echantillon);
+  const sujet = sujetProspectionClient(perso(echantillon));
   const bandeau = `<div style="background:#12151B;color:#F5F2EA;font-family:Consolas,monospace;font-size:12px;padding:12px 20px;">
     APERÇU — Objet : <strong style="color:#E8A63D;">${sujet}</strong>
     &nbsp;·&nbsp; Expéditeur : ${CAMPAGNE_FROM}
     &nbsp;·&nbsp; Exemple : ${echantillon.email}${echantillon.departement ? ` (dépt ${echantillon.departement})` : ""}
   </div>`;
-  return new Response(bandeau + htmlProspectionClient(echantillon), {
+  return new Response(bandeau + htmlProspectionClient(perso(echantillon)), {
     headers: { "Content-Type": "text/html; charset=utf-8" },
   });
 }
@@ -95,49 +104,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "RESEND_API_KEY non configurée" }, { status: 500 });
     }
     const limite = Math.min(Math.max(Number(body.limite) || 40, 1), 1000);
-    const { data: cibles } = await admin
-      .from("prospects_clients")
-      .select("id, email, nom, departement")
-      .eq("statut", "a_contacter")
-      .order("created_at", { ascending: true })
-      .limit(limite);
-
-    if (!cibles?.length) return NextResponse.json({ ok: true, envoyes: 0, note: "aucun prospect à contacter" });
-
-    const resend = new Resend(process.env.RESEND_API_KEY);
-    const from = CAMPAGNE_FROM;
-    let envoyes = 0, erreurs = 0;
-
-    // Envoi par lots de 20 via l'API batch (évite les timeouts serverless)
-    for (let i = 0; i < cibles.length; i += 50) {
-      const lot = cibles.slice(i, i + 50);
-      try {
-        const { data, error } = await resend.batch.send(
-          lot.map((p: any) => ({
-            from,
-            to: p.email,
-            replyTo: "contact@dealbus.fr",
-            subject: sujetProspectionClient(p),
-            text: texteProspectionClient(p),
-            html: htmlProspectionClient(p),
-            headers: { "List-Unsubscribe": "<mailto:contact@dealbus.fr?subject=STOP>" },
-          }))
-        );
-        if (error) throw new Error(error.message);
-        const ids = lot.map((p: any) => p.id);
-        await admin.from("prospects_clients")
-          .update({ statut: "envoye", envoye_le: new Date().toISOString() })
-          .in("id", ids);
-        envoyes += data?.data?.length ?? lot.length;
-      } catch (e) {
-        const ids = lot.map((p: any) => p.id);
-        await admin.from("prospects_clients")
-          .update({ statut: "erreur", erreur: (e as Error).message })
-          .in("id", ids);
-        erreurs += lot.length;
-      }
-    }
-    return NextResponse.json({ ok: true, envoyes, erreurs });
+    const r = await envoyerVague(admin, "clients", limite);
+    return NextResponse.json({ ok: true, ...r });
   }
 
   // ---------- ENVOI DE TEST À UNE ADRESSE ----------
@@ -163,10 +131,10 @@ export async function POST(req: Request) {
       from,
       to: email,
       replyTo: "contact@dealbus.fr",
-      subject: `[TEST] ${sujetProspectionClient(echantillon)}`,
-      text: texteProspectionClient(echantillon),
-      html: htmlProspectionClient(echantillon),
-      headers: { "List-Unsubscribe": "<mailto:contact@dealbus.fr?subject=STOP>" },
+      subject: `[TEST] ${sujetProspectionClient(perso(echantillon))}`,
+      text: texteProspectionClient(perso(echantillon)),
+      html: htmlProspectionClient(perso(echantillon)),
+      headers: entetes(echantillon),
     });
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ ok: true, envoye_a: email });
@@ -191,10 +159,10 @@ export async function POST(req: Request) {
       from,
       to: p.email,
       replyTo: "contact@dealbus.fr",
-      subject: sujetRelanceClient(p),
-      text: texteRelanceClient(p),
-      html: htmlRelanceClient(p),
-      headers: { "List-Unsubscribe": "<mailto:contact@dealbus.fr?subject=STOP>" },
+      subject: sujetRelanceClient(perso(p)),
+      text: texteRelanceClient(perso(p)),
+      html: htmlRelanceClient(perso(p)),
+      headers: entetes(p),
     });
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     await admin.from("prospects_clients")

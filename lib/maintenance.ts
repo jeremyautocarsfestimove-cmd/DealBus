@@ -8,7 +8,7 @@ export const MAINTENANCE_DEFAUT: Maintenance = { actif: false, message: "", reto
 
 // Chemins toujours servis, même en travaux : administration, connexion,
 // parcours mot de passe (pour que l'admin puisse se connecter) et la page travaux.
-export const CHEMINS_LIBRES = ["/admin", "/login", "/mot-de-passe-oublie", "/nouveau-mot-de-passe", "/maintenance"];
+export const CHEMINS_LIBRES = ["/admin", "/login", "/mot-de-passe-oublie", "/nouveau-mot-de-passe", "/maintenance", "/desinscription"];
 
 export function cheminLibre(pathname: string) {
   return CHEMINS_LIBRES.some((p) => pathname === p || pathname.startsWith(p + "/"));

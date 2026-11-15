@@ -7,7 +7,7 @@ export const DEPTS: Record<string, string> = {
   "91": "l'Essonne", "95": "le Val-d'Oise",
 };
 
-export type Prospect = { email: string; societe?: string | null; departement?: string | null };
+export type Prospect = { email: string; lien?: string | null; societe?: string | null; departement?: string | null };
 
 export function sujetProspection(p: Prospect): string {
   const zone = p.departement ? DEPTS[p.departement] : undefined;
@@ -44,7 +44,7 @@ Bonne route,
 Jeremy, de DealBus™
 contact@dealbus.fr · https://dealbus.fr
 
-Pour ne plus recevoir nos messages : répondez « STOP » et votre adresse sera retirée immédiatement.`;
+${p.lien ? `Pour ne plus recevoir nos messages : ${p.lien}` : "Pour ne plus recevoir nos messages : répondez « STOP » et votre adresse sera retirée immédiatement."}`;
 }
 
 export function htmlProspection(p: Prospect): string {
@@ -82,7 +82,7 @@ export function htmlProspection(p: Prospect): string {
   <p style="margin:0;font-family:Consolas,Menlo,monospace;font-size:10px;letter-spacing:0.8px;color:#9AA0AB;">
     DEALBUS™ · LA PLACE DE MARCHÉ DU TRANSPORT DE GROUPE · MARQUE DÉPOSÉE (INPI)<br/>
     <a href="https://dealbus.fr" style="color:#A85D00;text-decoration:none;">dealbus.fr</a> &nbsp;·&nbsp; contact@dealbus.fr<br/><br/>
-    <span style="color:#B4B9C2;">Pour ne plus recevoir nos messages, répondez « STOP » et votre adresse sera retirée immédiatement.</span>
+    <span style="color:#B4B9C2;">${p.lien ? `Pour ne plus recevoir nos messages : <a href="${p.lien}" style="color:#8A909C;text-decoration:underline;">se désinscrire en un clic</a>.` : "Pour ne plus recevoir nos messages, répondez « STOP » et votre adresse sera retirée immédiatement."}</span>
   </p>
 </td></tr>
 </table></td></tr></table></body></html>`;
@@ -115,7 +115,7 @@ Bonne route,
 Jeremy, de DealBus™
 contact@dealbus.fr · https://dealbus.fr
 
-Pour ne plus recevoir nos messages : répondez « STOP » et votre adresse sera retirée immédiatement.`;
+${p.lien ? `Pour ne plus recevoir nos messages : ${p.lien}` : "Pour ne plus recevoir nos messages : répondez « STOP » et votre adresse sera retirée immédiatement."}`;
 }
 
 export function htmlRelance(p: Prospect): string {
@@ -145,7 +145,7 @@ export function htmlRelance(p: Prospect): string {
   <p style="margin:0;font-family:Consolas,Menlo,monospace;font-size:10px;letter-spacing:0.8px;color:#9AA0AB;">
     DEALBUS™ · LA PLACE DE MARCHÉ DU TRANSPORT DE GROUPE · MARQUE DÉPOSÉE (INPI)<br/>
     <a href="https://dealbus.fr" style="color:#A85D00;text-decoration:none;">dealbus.fr</a> &nbsp;·&nbsp; contact@dealbus.fr<br/><br/>
-    <span style="color:#B4B9C2;">Pour ne plus recevoir nos messages, répondez « STOP » et votre adresse sera retirée immédiatement.</span>
+    <span style="color:#B4B9C2;">${p.lien ? `Pour ne plus recevoir nos messages : <a href="${p.lien}" style="color:#8A909C;text-decoration:underline;">se désinscrire en un clic</a>.` : "Pour ne plus recevoir nos messages, répondez « STOP » et votre adresse sera retirée immédiatement."}</span>
   </p>
 </td></tr>
 </table></td></tr></table></body></html>`;
